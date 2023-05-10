@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Frampersand OBS Source - Randomizer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        background-color: transparent;
+      }
+      #container {
+        display: flex;
+        height: 100vh;
+        justify-content: center;
+        align-items: center;
+        gap: 1rem;
+      }
+
+      .card.attacker .front {
+        background-color: #f16c38;
+      }
+      .card.defender .front {
+        background-color: #aced5b;
+      }
+      .card.supporter .front {
+        background-color: #fecc51;
+      }
+      .card.allrounder .front {
+        background-color: #ce5fd3;
+      }
+      .card.speedster .front {
+        background-color: #29a5e3;
+      }
+
+      .card .card-content .front {
+        background-image: url("https://unite.pokemon.com/images/common/square-pattern-30.svg"),
+          linear-gradient(180deg, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0) 38%);
+      }
+
+      @keyframes spin {
+        from {
+          transform: rotateY(0);
+        }
+        to {
+          transform: rotateY(720deg);
+        }
+      }
+
+      .card {
+        background-color: transparent;
+        width: 200px;
+        height: 250px;
+        perspective: 1000px;
+        overflow: hidden;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        opacity: 100%;
+      }
+
+      .card-content {
+        position: relative;
+        width: 90%;
+        height: 90%;
+        text-align: center;
+        transition: transform 0.8s;
+        transform-style: preserve-3d;
+        animation: spin 4s ease-out;
+        animation-iteration-count: 1;
+        border-radius: 1rem;
+        border: 1px solid black;
+      }
+
+      .front,
+      .back {
+        overflow: hidden;
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        -webkit-backface-visibility: hidden; 
+        backface-visibility: hidden;
+      }
+
+      .front {
+        background-color: #bbb;
+        color: black;
+        border-radius: 1rem;
+      }
+
+      .back {
+        background-color: black;
+        color: white;
+        transform: rotateY(180deg);
+        border-radius: 1rem;
+        display: flex;
+      }
+
+      .card .card-content .front img {
+        width: 100%;
+        height: auto;
+        border-radius: 1rem;
+        transform: scale(1);
+      }
+      .card .card-content .front img.selected {
+        transform: scale(1.1);
+        transition: transform 5s;
+      }
+
+      .card .card-content .back img {
+        width: 70%;
+        height: auto;
+        margin: auto;
+      }
+
+      .card .card-content .front .pokemon-name {
+        height: 30px;
+        width: 100%;
+        position: absolute;
+        bottom: 0;
+        background-color: #000;
+      }
+      .card .card-content .front .pokemon-name p {
+        color: white;
+        font-family: "Open Sans", sans-serif;
+        margin: 0.2rem auto;
+        text-align: center;
+      }
+      .fade {
+        opacity: 0;
+        transition: opacity 3s;
+      }
+      
+      .player-name{
+        position: absolute;
+        top: 0;
+        width: 100%;
+        text-align: center;
+
+      }
+      .player-name p {
+        margin: auto;
+        background: white;
+        width: 70%;
+        border-bottom-left-radius: 1rem;
+        border-bottom-right-radius: 1rem;
+        padding-bottom: 0.2rem;
+        font-family: "Open Sans", sans-serif;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="container">
+      <!-- <div class="card supporter">
+        <div class="card-content">
+          <div class="front">
+            <div class="player-name">
+                <p> Frampersand</p>
+            </div>
+            <img
+              src="https://unite.pokemon.com/images/pokemon/wigglytuff/roster/roster-wigglytuff.png"
+            />
+            <div class="pokemon-name">
+              <p>Wigglytuff</p>
+            </div>
+          </div>
+          <div class="back">
+            <img
+                src="./assets/pokeball-logo.png"
+            />
+        </div>
+        </div>
+      </div> -->
+      
+    </div>
+    <script src="/socket.io/socket.io.js"></script>
+    <script type="module" src="randomizer.js"></script>
+  </body>
+</html>
