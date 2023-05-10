@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Frampersand OBS Source - Rain</title>
+  <style>
+    body{
+        background-color: transparent;
+    }
+    #rain-gif.active {
+        background: url('https://i.gifer.com/2ii5.gif');
+        background-repeat: repeat-x;
+        height: 200px;
+        width: 100%;
+        opacity: 100%;
+        transition: 10s;
+    }
+    #rain-gif.fade{
+        opacity: 0;
+        transition: 10s;
+    }
+  </style>
+</head>
+<body>
+    <div id="rain-gif"></div>
+  <audio id="rain-container" src="./assets/rain.mp4"></audio>
+  <script src="/socket.io/socket.io.js"></script>
+    <script>
+        let socket = io();
+        socket.on('rain', () => {
+            document.getElementById('rain-gif').classList.add('active');
+            document.getElementById('rain-container').play();
+            setTimeout(() => {
+                document.getElementById('rain-gif').classList.add('fade');
+            }, 2040000);
+        })
+    </script>
+</body>
+</html>

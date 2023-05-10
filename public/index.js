@@ -1,17 +1,10 @@
 import { genderCases, unownCases, burmyCases, deerlingCases, vivillonCases, flabebeCases, pumpkabooCases, oricorioCases } from './variation-cases.js';
 import { positions } from './positions.js';
-
+import getRandomArrayElement from './utils.js';
 let socket = io();
 let currentSprites = positions;
 
-function getRandomArrayElement(min, max) {
-    min = Math.ceil(min);
-    max = Math.floor(max);
-    return Math.floor(Math.random() * (max - min) + min);
-}
-
 socket.on('sprite-number', function (pokemonNumber) {
-    console.log('pokemonNumber: ', pokemonNumber);
     if (pokemonNumber > 0 && pokemonNumber < 807) {
         if (currentSprites.length) {
             const position = getRandomArrayElement(0, currentSprites.length);
@@ -30,7 +23,6 @@ socket.on('sprite-number', function (pokemonNumber) {
 });
 
 function getSprite(number) {
-    console.log('number: ', number);
     let urlNumber = getExceptions(number.toString().padStart(3, '0'));
     if (number >= 1 && number <= 649)
         return `https://www.pokencyclopedia.info/sprites/gen5/ani_black-white/ani_bw_${urlNumber}.gif`;
