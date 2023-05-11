@@ -20,6 +20,17 @@ const randomizerMessages = (username, pokemon) => {
     ];
 
     return messages[getRandomArrayElement(0, messages.length)];
+};
+
+const randomizerCooldownMessages = (username) => {
+    const messages = [
+        `Redeem the re-roll, @${username} you weenie`,
+        `@${username} How about YOU deal with the cooldown, bozo`,
+        `Stop being a weenie @${username}, and play the dang mon`,
+        `Maybe, just maybe, you should play the pokemon I asked you to @${username}`
+    ];
+
+    return messages[getRandomArrayElement(0, messages.length)];
 }
 
 export default randomizerMessages;

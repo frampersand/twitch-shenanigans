@@ -13,25 +13,26 @@ const socketIo = require('socket.io');
 // Initializing stuff
 const app = express();
 const server = http.createServer(app);
-const { channel } = require("tmi.js/lib/utils");
 var path = require('path');
+const env = require('dotenv').config({ path: path.resolve(__dirname, './.env') });
 const io = socketIo(server);
 let rainbearer;
 let issuedCommands = {};
 let timedChecks = {};
 let issuedWarnings = {};
-
 // Initializing stuff
 
 // Config options //
 const opts = {
   identity: {
-      username: process.env.BOT_USERNAME,
-      password: process.env.BOT_AUTH,
+      username: env.parsed.BOT_USERNAME,
+      password: env.parsed.BOT_AUTH,
   },
   channels: [
       'frampersand',
       'joesbeard',
+      'frampscodes',
+      'azurequality'
   ]
 };
 
@@ -42,6 +43,7 @@ const uniteNames = {
 const nicknames = {
   '#frampersand': 'Framps',
   '#joesbeard': 'Mr. Beard',
+  '#azurequality': 'Qualts',
 }
 // Config options //
 
@@ -76,30 +78,6 @@ io.on('connection', function(socket){
      console.log('A user disconnected');
   });
 
-  socket.on('sprite', (number) => {
-    console.log('Emitting sprite number', number);
-    io.emit('sprite-number', number);
-  });
-
-  socket.on('color', (color) => {
-    console.log('Emitting color code');
-    io.emit('color', color);
-  });
-
-  socket.on('pattern', (number) => {
-    console.log('Emitting pattern', number);
-    io.emit('pattern', number);
-  });
-
-  socket.on('randomize', (username, channel) => {
-    console.log('Emitting randomization', username, channel);
-    io.emit('randomize', username, channel);
-  });
-
-  socket.on('rain', (rain) => {
-    console.log('Emitting rain');
-    io.emit('rain');
-  });
 
   socket.on('randomized', (channel, message) => {
     client.say(channel, message);
@@ -173,7 +151,12 @@ function onMessageHandler(target, context, msg, self) {
             io.emit('randomize', username, target);
           } else {
             if(!checkWarning(username)){
-              client.say(target, `I'll kindly ask you to stop spamming please @${username}`);
+              if(target === '#frampersand' || target === '#frampscodes'){
+                // TODO - Implement randomized messages
+                client.say(target, `Redeem the re-roll, @${username} you weenie`);
+              } else {
+                client.say(target, `I'll kindly ask you to stop spamming please @${username}`);
+              }
               issuedWarnings[username] = true;
             }
           }
@@ -181,15 +164,15 @@ function onMessageHandler(target, context, msg, self) {
           break;
 
       case '!guesswhosback':
-          if (username == 'Frampersand') {
+          if (username === 'Frampersand' || username === 'FrampsCodes') {
               guessWhosBack(target);
           } else {
-              client.say(channel, `Certainly not Frampersand, that's for sure`);
+              client.say(target, `Certainly not Frampersand, that's for sure`);
           }
           break;
 
       default:
-          console.log(`[${target}] ${username}: ${commandName}`);
+          console.log(`[${target}] ${username}: ${msg}`);
   }
 }
 
