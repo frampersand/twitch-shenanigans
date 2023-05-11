@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon index"
   },
   "author": "",
   "license": "ISC",
@@ -17,6 +18,7 @@
     "path": "^0.12.7",
     "socket.io": "^4.5.3",
     "tmi.js": "^1.8.5",
-    "twitch": "^4.6.7"
+    "twitch": "^4.6.7",
+    "nodemon": "^2.0.22"
   }
 }

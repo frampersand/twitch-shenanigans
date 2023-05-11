@@ -67,7 +67,7 @@
           const number = numberTextbox.value
             ? numberTextbox.value
             : Math.floor(Math.random() * (800 - 0 + 1) + 0);
-          socket.emit("sprite", number);
+          socket.emit("sprite-number", number);
         });
 
       document

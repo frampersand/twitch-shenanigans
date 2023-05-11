@@ -249,6 +249,16 @@ const uniteRoster = [
         "image": "zoroark",
         "role": "speedster",
     },
+    {
+        "name": "Lapras",
+        "image": "lapras",
+        "role": "defender",
+    },
+    {
+        "name": "Chandelure",
+        "image": "chandelure",
+        "role": "attacker",
+    }
 ];
 
 export default uniteRoster;
