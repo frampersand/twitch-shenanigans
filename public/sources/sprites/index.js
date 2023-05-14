@@ -1,6 +1,7 @@
-import { genderCases, unownCases, burmyCases, deerlingCases, vivillonCases, flabebeCases, pumpkabooCases, oricorioCases } from './variation-cases.js';
-import { positions } from './positions.js';
-import getRandomArrayElement from './utils.js';
+import { genderCases, unownCases, burmyCases, deerlingCases, vivillonCases, flabebeCases, pumpkabooCases, oricorioCases } from '../../lists/variation-cases.js';
+import { positions } from '../../lists/positions.js';
+import getRandomArrayElement from '../../utils/utils.js';
+
 let socket = io();
 let currentSprites = positions;
 
