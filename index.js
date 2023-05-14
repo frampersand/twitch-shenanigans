@@ -1,7 +1,5 @@
 //Framperbot stuff
-const fetch = require("node-fetch");
 const tmi = require('tmi.js');
-const fs = require('fs');
 //Framperbot stuff
 
 // Express and Socket stuff
@@ -13,7 +11,7 @@ const socketIo = require('socket.io');
 // Initializing stuff
 const app = express();
 const server = http.createServer(app);
-var path = require('path');
+const path = require('path');
 const env = require('dotenv').config({ path: path.resolve(__dirname, './.env') });
 const io = socketIo(server);
 let rainbearer;
@@ -53,24 +51,7 @@ client.on('connected', onConnectedHandler);
 client.on("raided", onRaidedHandler);
 client.connect();
 
-
-app.use(express.static(__dirname + '/public'));
-app.get('/admin', function(req, res) {
-  res.sendFile(path.join(__dirname, '/public', 'admin.html'));
-});
-app.get('/receiver', function(req, res) {
-  res.sendFile(path.join(__dirname, '/public', 'receiver.html'));
-});
-app.get('/background', function(req, res) {
-  res.sendFile(path.join(__dirname, '/public', 'background.html'));
-});
-app.get('/randomizer', function(req, res) {
-  res.sendFile(path.join(__dirname, '/public', 'randomizer.html'));
-});
-app.get('/rain', function(req, res) {
-  res.sendFile(path.join(__dirname, '/public', 'rain.html'));
-});
-
+app.use('/', express.static(__dirname + '/public'));
 
 io.on('connection', function(socket){
   console.log('A user connected');
@@ -91,7 +72,9 @@ function onMessageHandler(target, context, msg, self) {
 
   const isBroadcaster = context && context.badges && context.badges.broadcaster;
   const username = context['display-name'];
-  const commandName = msg.trim().split(' ')[0];
+  const splitMsg = msg.trim().split(' ');
+  const commandName = splitMsg[0];
+  const firstParam = splitMsg[1];
 
   // Pokemon on screen
   if (context['custom-reward-id'] && context['custom-reward-id'] == '20d21396-03d9-425f-85ce-dd265e45e85d') {
@@ -148,7 +131,8 @@ function onMessageHandler(target, context, msg, self) {
 
       case '!dealwithit':
           if (isOffCooldown(username) || username === 'Frampersand' || isBroadcaster){
-            io.emit('randomize', username, target);
+            const user = firstParam ? firstParam : username;
+            io.emit('randomize', user, target);
           } else {
             if(!checkWarning(username)){
               if(target === '#frampersand' || target === '#frampscodes'){

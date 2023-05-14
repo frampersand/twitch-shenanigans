@@ -1,6 +1,6 @@
-import uniteRoster from "./unite-roster.js";
-import getRandomArrayElement from "./utils.js";
-import randomizerMessages from "./lists/bot-messages.js";
+import uniteRoster from "../../lists/unite-roster.js";
+import getRandomArrayElement from "../../utils/utils.js";
+import randomizerMessages from "../../lists/bot-messages.js";
 
 let socket = io();
 
@@ -34,7 +34,7 @@ socket.on('randomize', (username, channel) => {
         playerContainer.appendChild(playerName);
         pokemonImage.src = getPokemonImage(uniteRoster[pokemonSelection[0]].image);
         const pokeBallUniteLogo = document.createElement('img');
-        pokeBallUniteLogo.src = './assets/pokeball-logo.png';
+        pokeBallUniteLogo.src = '../../assets/pokeball-logo.png';
         cardBack.appendChild(pokeBallUniteLogo);
         cardFront.appendChild(playerContainer);
         cardFront.appendChild(pokemonImage);
