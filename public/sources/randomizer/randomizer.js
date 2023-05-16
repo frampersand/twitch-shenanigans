@@ -1,6 +1,6 @@
 import uniteRoster from "../../lists/unite-roster.js";
 import getRandomArrayElement from "../../utils/utils.js";
-import randomizerMessages from "../../lists/bot-messages.js";
+import { randomizerMessages } from "../../lists/bot-messages.js";
 
 let socket = io();
 
