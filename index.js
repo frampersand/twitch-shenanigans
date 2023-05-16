@@ -1,19 +1,26 @@
-//Framperbot stuff
-const tmi = require('tmi.js');
-//Framperbot stuff
+// Framperbot stuff
+import tmi from 'tmi.js';
+// Framperbot stuff
 
 // Express and Socket stuff
-const express = require('express');
-const http = require('http');
-const socketIo = require('socket.io');
+import express from 'express';
+import http from 'http';
+import { Server } from "socket.io";
+import {fileURLToPath} from 'url';
 // Express and Socket stuff
 
 // Initializing stuff
 const app = express();
 const server = http.createServer(app);
-const path = require('path');
-const env = require('dotenv').config({ path: path.resolve(__dirname, './.env') });
-const io = socketIo(server);
+import path from 'path';
+import * as dotenv from 'dotenv'
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const io = new Server(server, {});
+
+import { randomizerCooldownMessages, welcomeMessages } from './public/lists/bot-messages.js';
+
+
 let rainbearer;
 let issuedCommands = {};
 let timedChecks = {};
@@ -23,8 +30,8 @@ let issuedWarnings = {};
 // Config options //
 const opts = {
   identity: {
-      username: env.parsed.BOT_USERNAME,
-      password: env.parsed.BOT_AUTH,
+      username: dotenv.config().parsed.BOT_USERNAME,
+      password: dotenv.config().parsed.BOT_AUTH,
   },
   channels: [
       'frampersand',
@@ -115,7 +122,8 @@ function onMessageHandler(target, context, msg, self) {
 }
 
   if (context['first-msg']) {
-      client.say(target, `Hey ${username}! a big warm welcome to the stream! We hope you enjoy the chill vibes in the chat!`);
+      const welcomeMessage = welcomeMessages(username);
+      client.say(target, welcomeMessage);
   }
 
   switch (commandName) {
@@ -131,13 +139,23 @@ function onMessageHandler(target, context, msg, self) {
 
       case '!dealwithit':
           if (isOffCooldown(username) || username === 'Frampersand' || isBroadcaster){
-            const user = firstParam ? firstParam : username;
-            io.emit('randomize', user, target);
+            let player;
+            if(firstParam){
+              if(firstParam[0] === '@'){
+                player = firstParam.slice(1);
+              } else {
+                client.say(target, `I'm sorry to say, but that's not a valid user. If you want to roll for someone else, give me their username properly (prefix it with @, please)`);
+                break;
+              }
+            } else {
+              player = username;
+            }
+            io.emit('randomize', player, target);
           } else {
             if(!checkWarning(username)){
               if(target === '#frampersand' || target === '#frampscodes'){
-                // TODO - Implement randomized messages
-                client.say(target, `Redeem the re-roll, @${username} you weenie`);
+                const randomCooldownMessage = randomizerCooldownMessages(username);
+                client.say(target, randomCooldownMessage);
               } else {
                 client.say(target, `I'll kindly ask you to stop spamming please @${username}`);
               }
