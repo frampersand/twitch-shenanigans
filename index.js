@@ -37,7 +37,8 @@ const opts = {
       'frampersand',
       'joesbeard',
       'frampscodes',
-      'azurequality'
+      'azurequality',
+      'bruvhd'
   ]
 };
 
@@ -49,6 +50,7 @@ const nicknames = {
   '#frampersand': 'Framps',
   '#joesbeard': 'Mr. Beard',
   '#azurequality': 'Qualts',
+  '#bruvhd': 'Bruv',
 }
 // Config options //
 
@@ -122,8 +124,10 @@ function onMessageHandler(target, context, msg, self) {
 }
 
   if (context['first-msg']) {
+    if (target === '#frampersand'){
       const welcomeMessage = welcomeMessages(username);
       client.say(target, welcomeMessage);
+    }
   }
 
   switch (commandName) {
@@ -138,6 +142,12 @@ function onMessageHandler(target, context, msg, self) {
           break;
 
       case '!dealwithit':
+        if (target === '#bruvhd'){
+          if(username === 'BruvHD' || username === 'Frampersand'){
+            io.emit('randomize', username, target);
+            console.log('Randomizing on BruvHD channel');
+          }
+         } else {
           if (isOffCooldown(username) || username === 'Frampersand' || isBroadcaster){
             let player;
             if(firstParam){
@@ -150,6 +160,7 @@ function onMessageHandler(target, context, msg, self) {
             } else {
               player = username;
             }
+            console.log('Randomizing on: ', target);
             io.emit('randomize', player, target);
           } else {
             if(!checkWarning(username)){
@@ -162,6 +173,7 @@ function onMessageHandler(target, context, msg, self) {
               issuedWarnings[username] = true;
             }
           }
+        }
           
           break;
 
