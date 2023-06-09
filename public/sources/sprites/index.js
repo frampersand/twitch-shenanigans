@@ -5,7 +5,13 @@ import getRandomArrayElement from '../../utils/utils.js';
 let socket = io();
 let currentSprites = positions;
 
-socket.on('sprite-number', function (pokemonNumber) {
+socket.on('sprite-number', function (pokemonNumber, targetContainer = '') {
+    console.log('Spriting');
+    borderSpriteGenerator(pokemonNumber, targetContainer);
+});
+
+const borderSpriteGenerator = (pokemonNumber, targetContainer) => {
+    const gameArea = targetContainer ? targetContainer : document.getElementById('game-area');
     if (pokemonNumber > 0 && pokemonNumber < 807) {
         if (currentSprites.length) {
             const position = getRandomArrayElement(0, currentSprites.length);
@@ -17,11 +23,11 @@ socket.on('sprite-number', function (pokemonNumber) {
             pokemonImage.src = getSprite(pokemonNumber);
             currentSprites.splice(position, 1);
             pokemonContainer.appendChild(pokemonImage);
-            const gameArea = document.getElementById('game-area');
+            
             gameArea.appendChild(pokemonContainer);
         }
     }
-});
+} 
 
 function getSprite(number) {
     let urlNumber = getExceptions(number.toString().padStart(3, '0'));
@@ -123,3 +129,5 @@ function getExceptions(number) {
     }
     return number;
 }
+
+export default borderSpriteGenerator;

@@ -24,15 +24,10 @@
     <div id="rain-gif"></div>
   <audio id="rain-container" src="../../assets/rain.mp4"></audio>
   <script src="/socket.io/socket.io.js"></script>
+  <script src="./listener.js" type="module"></script>
+  <script src="./index.js" type="module"></script>
     <script>
-        let socket = io();
-        socket.on('rain', () => {
-            document.getElementById('rain-gif').classList.add('active');
-            document.getElementById('rain-container').play();
-            setTimeout(() => {
-                document.getElementById('rain-gif').classList.add('fade');
-            }, 2040000);
-        })
+        
     </script>
 </body>
 </html>

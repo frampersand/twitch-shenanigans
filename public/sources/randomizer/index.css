@@ -9,23 +9,23 @@ body {
     gap: 1rem;
   }
 
-  .card.attacker .front {
+  .pokemon-card.attacker .front {
     background-color: #f16c38;
   }
-  .card.defender .front {
+  .pokemon-card.defender .front {
     background-color: #aced5b;
   }
-  .card.supporter .front {
+  .pokemon-card.supporter .front {
     background-color: #fecc51;
   }
-  .card.allrounder .front {
+  .pokemon-card.allrounder .front {
     background-color: #ce5fd3;
   }
-  .card.speedster .front {
+  .pokemon-card.speedster .front {
     background-color: #29a5e3;
   }
 
-  .card .card-content .front {
+  .pokemon-card .card-content .front {
     background-image: url("https://unite.pokemon.com/images/common/square-pattern-30.svg"),
       linear-gradient(180deg, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0) 38%);
   }
@@ -39,7 +39,7 @@ body {
     }
   }
 
-  .card {
+  .pokemon-card {
     background-color: transparent;
     width: 200px;
     height: 250px;
@@ -88,31 +88,31 @@ body {
     display: flex;
   }
 
-  .card .card-content .front img {
+  .pokemon-card .card-content .front img {
     width: 100%;
     height: auto;
     border-radius: 1rem;
     transform: scale(1);
   }
-  .card .card-content .front img.selected {
+  .pokemon-card .card-content .front img.selected {
     transform: scale(1.1);
     transition: transform 5s;
   }
 
-  .card .card-content .back img {
+  .pokemon-card .card-content .back img {
     width: 70%;
     height: auto;
     margin: auto;
   }
 
-  .card .card-content .front .pokemon-name {
+  .pokemon-card .card-content .front .pokemon-name {
     height: 30px;
     width: 100%;
     position: absolute;
     bottom: 0;
     background-color: #000;
   }
-  .card .card-content .front .pokemon-name p {
+  .pokemon-card .card-content .front .pokemon-name p {
     color: white;
     font-family: "Open Sans", sans-serif;
     margin: 0.2rem auto;
