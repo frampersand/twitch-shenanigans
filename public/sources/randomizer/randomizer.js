@@ -2,15 +2,8 @@ import uniteRoster from "../../lists/unite-roster.js";
 import getRandomArrayElement from "../../utils/utils.js";
 import { randomizerMessages } from "../../lists/bot-messages.js";
 
-let socket = io();
-
-socket.on('randomize', (username, channel) => {
-    const channelName = channel.slice(1);
-    var urlParams = new URLSearchParams(window.location.search);
-    var channelNameSource = urlParams.get('channel');
-    
-    if (channelName === channelNameSource && channelNameSource !== undefined) {
-        const container = document.getElementById('container');
+const createRandomizedCard = (username, channel, target, socket) => {
+        const container = target ? target : document.getElementById('container');
         const pokemonSelection = getRandomSelection();
         const finalSelection = pokemonSelection[pokemonSelection.length - 1];
         const cardContainer = document.createElement('div');
@@ -20,7 +13,7 @@ socket.on('randomize', (username, channel) => {
         cardFront.className = `front`;
         cardBack.className = `back`;
         cardContent.className = `card-content`;
-        cardContainer.className = `card ${uniteRoster[finalSelection].role}`;
+        cardContainer.className = `pokemon-card ${uniteRoster[finalSelection].role}`;
         const pokemonImage = document.createElement('img');
         const pokemonNameContainer = document.createElement('div');
         pokemonNameContainer.className = `pokemon-name`;
@@ -43,6 +36,9 @@ socket.on('randomize', (username, channel) => {
         cardContent.appendChild(cardBack);
         cardContainer.appendChild(cardContent);
         container.appendChild(cardContainer);
+
+        const pokemonCardWrapper = document.createElement('div');
+        pokemonCardWrapper.className = `pokemon-card-wrapper`;
     
         let counter = 0;
         const interval = setInterval(() => {
@@ -55,7 +51,9 @@ socket.on('randomize', (username, channel) => {
                 pokemonName.innerHTML = uniteRoster[finalSelection].name;
                 pokemonImage.classList.add('selected');
                 const message = randomizerMessages(username, uniteRoster[finalSelection].name);
-                socket.emit('randomized', channel, message);
+                if(channel !== 'showcase'){
+                    socket.emit('randomized', channel, message);
+                }
             }
         }, 500);
     
@@ -66,10 +64,7 @@ socket.on('randomize', (username, channel) => {
         setTimeout(() => {
             cardContainer.remove();
         }, 9000);
-    } else {
-        console.log('Either this comes from another channel, or there is no channel parameter on the URL');
-    }
-})
+}
 
 const getRandomSelection = () => {
     let selection = [];
@@ -84,3 +79,5 @@ const getRandomSelection = () => {
 const getPokemonImage = (pokemon) => {
     return `https://unite.pokemon.com/images/pokemon/${pokemon}/roster/roster-${pokemon}.png`;
 }
+
+export default createRandomizedCard;

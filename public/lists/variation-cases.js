@@ -137,7 +137,7 @@ const burmyCases = [
 ];
 
 const deerlingCases = [
-    '-autumm',
+    '-autumn',
     '-spring',
     '-summer',
     '-winter',
