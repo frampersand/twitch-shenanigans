@@ -9,22 +9,6 @@ body {
     gap: 1rem;
   }
 
-  .pokemon-card.attacker .front {
-    background-color: #f16c38;
-  }
-  .pokemon-card.defender .front {
-    background-color: #aced5b;
-  }
-  .pokemon-card.supporter .front {
-    background-color: #fecc51;
-  }
-  .pokemon-card.allrounder .front {
-    background-color: #ce5fd3;
-  }
-  .pokemon-card.speedster .front {
-    background-color: #29a5e3;
-  }
-
   .pokemon-card .card-content .front {
     background-image: url("https://unite.pokemon.com/images/common/square-pattern-30.svg"),
       linear-gradient(180deg, rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0) 38%);

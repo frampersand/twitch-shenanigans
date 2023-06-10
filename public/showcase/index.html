@@ -8,6 +8,11 @@
       integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM"
       crossorigin="anonymous"
     />
+
+    <link
+      href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300&display=swap"
+      rel="stylesheet"
+    />
     <link href="../sources/randomizer/index.css" rel="stylesheet" />
     <style>
       body {
@@ -17,17 +22,17 @@
         padding-top: 10rem;
       }
       #rain-gif.active {
-        background: url('https://i.gifer.com/2ii5.gif');
+        background: url("https://i.gifer.com/2ii5.gif");
         background-repeat: repeat-x;
         height: 200px;
         width: 100%;
         opacity: 100%;
         transition: 10s;
-    }
-    #rain-gif.fade{
+      }
+      #rain-gif.fade {
         opacity: 0;
         transition: 10s;
-    }
+      }
       .panels-container {
         position: fixed;
         top: 0;
@@ -82,7 +87,7 @@
 
       .background-showcase {
         width: 100%;
-        height: 400px;        
+        height: 400px;
       }
       .background-sprite-showcase {
         height: 100%;
@@ -103,11 +108,38 @@
         width: 100%;
         background-color: #124071;
       }
-      .showcase{
+      .showcase {
         border-radius: 0.5rem;
         border: 1px solid #c9c9c9;
         margin: 2rem 0;
       }
+
+      .stream-mockup {
+        height: 600px;
+        position: relative;
+        padding: 2rem;
+        background-color: gray;
+        display: flex;
+      }
+      .stream-content {
+        height: 100%;
+        width: 100%;
+        display: flex;
+      }
+      .stream-video-container {
+        padding: 1rem;
+        height: 100%;
+        flex: 3;
+      }
+      .stream-video {
+        border: 1px solid black;
+        height: 100%;
+      }
+      .stream-side {
+        flex: 1;
+      }
+
+
     </style>
   </head>
   <body>
@@ -140,6 +172,23 @@
         </div>
       </div>
       <div class="row">
+        <div class="col-12">
+          <div class="stream-mockup showcase">
+            <div class="stream-content">
+              <div class="stream-video-container">
+                <div class="stream-video"></div>
+              </div>
+              <div class="stream-side">
+                <div class="stream-cam">
+
+                </div>
+                <div class="stream-chat">
+
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
         <div class="col-12">
           <div class="border-showcase showcase">
             <div class="sprite-border-showcase"></div>

@@ -159,16 +159,16 @@ function onMessageHandler(target, context, msg, self) {
     case "!sprite":
       io.emit("sprite-number", firstParam);
       break;
-    
-    case "!bgcolor": 
-    io.emit("color", firstParam);
-    break;
 
-    case "!bgsprite": 
-    io.emit("pattern", firstParam);
-    break;
+    case "!bgcolor":
+      io.emit("color", firstParam);
+      break;
 
-    case '!rain':
+    case "!bgsprite":
+      io.emit("pattern", firstParam);
+      break;
+
+    case "!rain":
       io.emit("rain");
       break;
 

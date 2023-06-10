@@ -23,7 +23,6 @@ const borderSpriteGenerator = (pokemonNumber, targetContainer) => {
             pokemonImage.src = getSprite(pokemonNumber);
             currentSprites.splice(position, 1);
             pokemonContainer.appendChild(pokemonImage);
-            
             gameArea.appendChild(pokemonContainer);
         }
     }
