@@ -258,6 +258,16 @@ const uniteRoster = [
         "name": "Chandelure",
         "image": "chandelure",
         "role": "attacker",
+    },
+    {
+        "name": "Umbreon",
+        "image": "umbreon",
+        "role": "defender",
+    },
+    {
+        "name": "Leafeon",
+        "image": "leafeon",
+        "role": "speedster",
     }
 ];
 
