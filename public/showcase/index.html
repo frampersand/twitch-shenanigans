@@ -34,7 +34,7 @@
         transition: 10s;
       }
       .panels-container {
-        position: fixed;
+        /* position: fixed; */
         top: 0;
         left: 0;
         background-color: white;
@@ -67,9 +67,9 @@
         overflow: hidden;
       }
       .sprite-border-showcase {
-        border: 1px dotted gray;
+        /* border: 1px dotted gray; */
         height: 450px;
-        width: 800px;
+        width: 100%;
         position: relative;
         margin: auto;
         top: -2rem;
@@ -114,32 +114,12 @@
         margin: 2rem 0;
       }
 
-      .stream-mockup {
-        height: 600px;
-        position: relative;
-        padding: 2rem;
-        background-color: gray;
+      .pokemon-sprite {
+        position: absolute;
+        height: 50px;
         display: flex;
+        align-items: center;
       }
-      .stream-content {
-        height: 100%;
-        width: 100%;
-        display: flex;
-      }
-      .stream-video-container {
-        padding: 1rem;
-        height: 100%;
-        flex: 3;
-      }
-      .stream-video {
-        border: 1px solid black;
-        height: 100%;
-      }
-      .stream-side {
-        flex: 1;
-      }
-
-
     </style>
   </head>
   <body>
@@ -172,23 +152,7 @@
         </div>
       </div>
       <div class="row">
-        <div class="col-12">
-          <div class="stream-mockup showcase">
-            <div class="stream-content">
-              <div class="stream-video-container">
-                <div class="stream-video"></div>
-              </div>
-              <div class="stream-side">
-                <div class="stream-cam">
 
-                </div>
-                <div class="stream-chat">
-
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
         <div class="col-12">
           <div class="border-showcase showcase">
             <div class="sprite-border-showcase"></div>

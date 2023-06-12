@@ -18,8 +18,9 @@ document.getElementById("sprite-btn").addEventListener("click", function () {
 document.getElementById("color-btn").addEventListener("click", function () {
   const numberTextbox = document.getElementById("color");
   const number = numberTextbox.value;
+  const color = number[0] === "#" ? number.substring(1) : number;
   const backgroundBox = document.querySelector('.background-showcase');
-  changeBackgroundColor(number, backgroundBox);
+  changeBackgroundColor(color, backgroundBox);
 });
 
 document.getElementById("pattern-btn").addEventListener("click", function () {

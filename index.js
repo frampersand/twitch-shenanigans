@@ -120,7 +120,7 @@ function onMessageHandler(target, context, msg, self) {
     context["custom-reward-id"] &&
     context["custom-reward-id"] == "53ec69a2-37db-4d20-ab16-7bf557756d4a"
   ) {
-    let color = commandName[0] == "#" ? commandName.substring(1) : commandName;
+    let color = commandName[0] === "#" ? commandName.substring(1) : commandName;
     const regex = /^([0-9a-f]{3}){1,2}$/i;
     if (regex.exec(color)) {
       io.emit("color", color);
@@ -156,25 +156,7 @@ function onMessageHandler(target, context, msg, self) {
   }
 
   switch (commandName) {
-    case "!sprite":
-      io.emit("sprite-number", firstParam);
-      break;
 
-    case "!bgcolor":
-      io.emit("color", firstParam);
-      break;
-
-    case "!bgsprite":
-      io.emit("pattern", firstParam);
-      break;
-
-    case "!rain":
-      io.emit("rain");
-      break;
-
-    case "!ehjeh":
-      client.say(target, "SadgeCry");
-      break;
 
     case "!rainbearer":
       if (target == "#frampersand") {
