@@ -22,6 +22,7 @@ import {
   randomizerCooldownMessages,
   welcomeMessages,
 } from "./public/lists/bot-messages.js";
+import { channels } from './data/channels.js';
 
 let rainbearer;
 let issuedCommands = {};
@@ -35,13 +36,7 @@ const opts = {
     username: dotenv.config().parsed.BOT_USERNAME,
     password: dotenv.config().parsed.BOT_AUTH,
   },
-  channels: [
-    "frampersand",
-    "joesbeard",
-    "frampscodes",
-    "azurequality",
-    "bruvhd",
-  ],
+  channels
 };
 
 const uniteNames = {
@@ -69,6 +64,14 @@ io.on("connection", function (socket) {
   socket.on("disconnect", function () {
     console.log("A user disconnected");
   });
+
+  socket.on('sprite-number', (number) => {
+    io.emit("sprite-number", number);
+  })
+
+  socket.on('randomize', (username, target) => {
+    io.emit("randomize", username, target);
+  } )
 
   socket.on("randomized", (channel, message) => {
     client.say(channel, message);

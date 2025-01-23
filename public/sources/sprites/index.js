@@ -1,18 +1,23 @@
-import { genderCases, unownCases, burmyCases, deerlingCases, vivillonCases, flabebeCases, pumpkabooCases, oricorioCases } from '../../lists/variation-cases.js';
+import { genderCases, unownCases, burmyCases, deerlingCases, vivillonCases, flabebeCases, pumpkabooCases, oricorioCases, lycanrocCases, cramorantCases } from '../../lists/variation-cases.js';
 import { positions } from '../../lists/positions.js';
 import getRandomArrayElement from '../../utils/utils.js';
+import { getPokemonSpriteName } from '../background/background.js';
 
 let socket = io();
 let currentSprites = positions;
 
 socket.on('sprite-number', function (pokemonNumber, targetContainer = '') {
-    console.log('Spriting');
     borderSpriteGenerator(pokemonNumber, targetContainer);
 });
 
 const borderSpriteGenerator = (pokemonNumber, targetContainer) => {
     const gameArea = targetContainer ? targetContainer : document.getElementById('game-area');
-    if (pokemonNumber > 0 && pokemonNumber < 807) {
+    let number = pokemonNumber;
+    if(pokemonNumber === '0') {
+        number = Math.floor(Math.random() * (893)) + 1;
+    }
+    
+    if (number >= 0 && number <= 893) {
         if (currentSprites.length) {
             const position = getRandomArrayElement(0, currentSprites.length);
             const pokemonContainer = document.createElement('div');
@@ -20,7 +25,7 @@ const borderSpriteGenerator = (pokemonNumber, targetContainer) => {
             pokemonContainer.style.top = currentSprites[position].y + 'px';
             pokemonContainer.style.left = currentSprites[position].x + 'px';
             const pokemonImage = document.createElement('img');
-            pokemonImage.src = getSprite(pokemonNumber);
+            pokemonImage.src = getSprite(number);
             currentSprites.splice(position, 1);
             pokemonContainer.appendChild(pokemonImage);
             gameArea.appendChild(pokemonContainer);
@@ -29,51 +34,58 @@ const borderSpriteGenerator = (pokemonNumber, targetContainer) => {
 } 
 
 function getSprite(number) {
-    let urlNumber = getExceptions(number.toString().padStart(3, '0'));
-    if (number >= 1 && number <= 649)
-        return `https://www.pokencyclopedia.info/sprites/gen5/ani_black-white/ani_bw_${urlNumber}.gif`;
-    if (number == 720)
-        return `https://www.pokencyclopedia.info/sprites/3ds/ani_6/3ani__${urlNumber}_oras.gif`;
-    if (number >= 650 && number <= 721)
-        return `https://www.pokencyclopedia.info/sprites/3ds/ani_6/3ani__${urlNumber}_xy.gif`;
-    if (number >= 722 && number <= 802)
-        return `https://www.pokencyclopedia.info/sprites/3ds/ani_7/3ani__${urlNumber}__sm.gif`;
-    if (number >= 803 && number <= 807)
-        return `https://www.pokencyclopedia.info/sprites/3ds/ani_7/3ani__${urlNumber}__uu.gif`;
+    const spriteName = getPokemonSpriteName(number);
+    let baseUrl;
+    const spriteVersion = Math.random() < 0.1 ? 'shiny' : 'normal';
+
+    let urlName = getExceptions(number.toString().padStart(3, '0'), spriteName);
+    if (number >= 1 && number <= 649){
+        baseUrl = `https://img.pokemondb.net/sprites/black-white/anim/${spriteVersion}/`;
+        return `${baseUrl}${urlName}.gif`;
+    }
+    if (number >= 650 && number <= 807){
+        baseUrl = `https://projectpokemon.org/images/${spriteVersion}-sprite/`;
+         return `${baseUrl}${urlName}.gif`;
+    }
+    if (number >= 808 && number <= 893) {
+        baseUrl = `https://projectpokemon.org/images/sprites-models/swsh-${spriteVersion}-sprites/`;
+        return `${baseUrl}${urlName}.gif`;
+    }
 }
 
-function getExceptions(number) {
+function getExceptions(number, spriteName) {
     const randomChoice = (choices) => choices[Math.floor(Math.random() * choices.length)];
 
     const cases = {
-        gender: () => `${number}_${Math.random() < 0.5 ? 'm' : 'f'}`,
-        unown: () => `${number}${randomChoice(unownCases)}`,
-        burmy: () => `${number}${randomChoice(burmyCases)}`,
-        weather: () => `${number}-${Math.random() < 0.5 ? 'overcast' : 'sunshine'}`,
-        shellos: () => `${number}-${Math.random() < 0.5 ? 'east' : 'west'}`,
-        giratina: () => `${number}-${Math.random() < 0.5 ? 'altered' : 'origin'}`,
-        shaymin: () => `${number}-${Math.random() < 0.5 ? 'land' : 'sky'}`,
-        basculin: () => `${number}-${Math.random() < 0.5 ? 'blue-striped' : 'red-striped'}`,
-        darmanitan: () => `${number}-${Math.random() < 0.5 ? 'standard' : 'zen'}`,
-        deerling: () => `${number}${randomChoice(deerlingCases)}`,
-        therian: () => `${number}-${Math.random() < 0.5 ? 'incarnate' : 'therian__2'}`,
-        keldeo: () => `${number}-${Math.random() < 0.5 ? 'ordinary' : 'resolute__2'}`,
-        meloetta: () => `${number}-${Math.random() < 0.5 ? 'aria' : 'pirouette'}`,
-        vivillon: () => `${number}${randomChoice(vivillonCases)}_`,
-        flabebe: () => `${number}${randomChoice(flabebeCases)}_`,
-        meowstic: () => `${number}-${Math.random() < 0.5 ? 'male_' : 'female_'}`,
-        aegislash: () => `${number}-${Math.random() < 0.5 ? 'blade_' : 'shield_'}`,
-        pumpkaboo: () => `${number}${randomChoice(pumpkabooCases)}_`,
-        xerneas: () => `${number}-${Math.random() < 0.5 ? 'active_' : 'neutral_'}`,
-        hoopa: () => `${number}-${Math.random() < 0.5 ? 'confined_' : 'unbound_'}`,
-        oricorio: () => `${number}${randomChoice(oricorioCases)}`,
-        lycanroc: () => `${number}-midday`,
-        wishiwashi: () => `${number}-${Math.random() < 0.5 ? 'school' : 'solo'}`,
-        mimikyu: () => `${number}-${Math.random() < 0.5 ? 'busted' : 'disguised'}`
+        gender: () => `${spriteName}_${Math.random() < 0.5 ? 'm' : 'f'}`,
+        unown: () => `${spriteName}${randomChoice(unownCases)}`,
+        burmy: () => `${spriteName}${randomChoice(burmyCases)}`,
+        weather: () => `${spriteName}-${Math.random() < 0.5 ? 'overcast' : 'sunshine'}`,
+        shellos: () => `${spriteName}-${Math.random() < 0.5 ? 'east' : 'west'}`,
+        giratina: () => `${spriteName}-${Math.random() < 0.5 ? 'altered' : 'origin'}`,
+        shaymin: () => `${spriteName}-${Math.random() < 0.5 ? 'land' : 'sky'}`,
+        basculin: () => `${spriteName}-${Math.random() < 0.5 ? 'blue-striped' : 'red-striped'}`,
+        darmanitan: () => `${spriteName}-${Math.random() < 0.5 ? 'standard-mode' : 'zen-mode'}`,
+        deerling: () => `${spriteName}${randomChoice(deerlingCases)}`,
+        therian: () => `${spriteName}-${Math.random() < 0.5 ? 'incarnate' : 'therian'}`,
+        keldeo: () => `${spriteName}-${Math.random() < 0.5 ? 'ordinary' : 'resolute'}`,
+        meloetta: () => `${spriteName}-${Math.random() < 0.5 ? 'aria' : 'pirouette'}`,
+        vivillon: () => `${spriteName}${randomChoice(vivillonCases)}`,
+        flabebe: () => `${spriteName}${randomChoice(flabebeCases)}`,
+        meowstic: () => `${spriteName}${Math.random() < 0.5 ? '' : '-f'}`,
+        aegislash: () => `${spriteName}${Math.random() < 0.5 ? '' : '-blade'}`,
+        pumpkaboo: () => `${spriteName}${randomChoice(pumpkabooCases)}`,
+        xerneas: () => `${spriteName}${Math.random() < 0.5 ? '' : '-active'}`,
+        hoopa: () => `${spriteName}${Math.random() < 0.5 ? '' : '-unbound'}`,
+        oricorio: () => `${spriteName}${randomChoice(oricorioCases)}`,
+        lycanroc: () => `${spriteName}${randomChoice(lycanrocCases)}`,
+        wishiwashi: () => `${spriteName}${Math.random() < 0.5 ? '-school' : ''}`,
+        mimikyu: () => `${spriteName}${Math.random() < 0.5 ? '-busted' : ''}`,
+        cramorant: () => `${spriteName}${randomChoice(cramorantCases)}`,
     };
 
     const conditions = [
-        { check: () => Object.values(genderCases).includes(number), action: cases.gender },
+        // { check: () => Object.values(genderCases).includes(number), action: cases.gender },
         { check: () => number === '201', action: cases.unown },
         { check: () => ['412', '413'].includes(number), action: cases.burmy },
         { check: () => number === '421', action: cases.weather },
@@ -97,14 +109,18 @@ function getExceptions(number) {
         { check: () => number === '745', action: cases.lycanroc },
         { check: () => number === '746', action: cases.wishiwashi },
         { check: () => number === '778', action: cases.mimikyu },
-        { check: () => parseInt(number) >= 650 && parseInt(number) <= 721 && number !== '668', action: () => `${number}_` }
+        { check: () => number === '845', action: cases.cramorant },
+
+        // { check: () => parseInt(number) >= 650 && parseInt(number) <= 721 && number !== '668', action: () => `${number}_` }
     ];
+    // fix 642-645 case
+    // fix 647 case
 
     for (const condition of conditions) {
         if (condition.check()) return condition.action();
     }
 
-    return number;
+    return spriteName;
 }
 
 

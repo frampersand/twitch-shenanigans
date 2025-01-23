@@ -28,4 +28,4 @@ const changeBackgroundColor = (color, target) => {
 };
 
 
-export { changeBackgroundColor, changeBackgroundSprite };
+export { changeBackgroundColor, changeBackgroundSprite, getPokemonSpriteName };

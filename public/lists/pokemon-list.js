@@ -1540,7 +1540,7 @@ const pokemon = [
         "number": 385
     },
     {
-        "name": "deoxys-normal",
+        "name": "deoxys",
         "number": 386
     },
     {
@@ -1648,7 +1648,7 @@ const pokemon = [
         "number": 412
     },
     {
-        "name": "wormadam-plant",
+        "name": "wormadam",
         "number": 413
     },
     {
@@ -1944,7 +1944,7 @@ const pokemon = [
         "number": 486
     },
     {
-        "name": "giratina-altered",
+        "name": "giratina",
         "number": 487
     },
     {
@@ -1964,7 +1964,7 @@ const pokemon = [
         "number": 491
     },
     {
-        "name": "shaymin-land",
+        "name": "shaymin",
         "number": 492
     },
     {
@@ -2196,7 +2196,7 @@ const pokemon = [
         "number": 549
     },
     {
-        "name": "basculin-red-striped",
+        "name": "basculin",
         "number": 550
     },
     {
@@ -2216,7 +2216,7 @@ const pokemon = [
         "number": 554
     },
     {
-        "name": "darmanitan-standard",
+        "name": "darmanitan",
         "number": 555
     },
     {
@@ -2560,11 +2560,11 @@ const pokemon = [
         "number": 640
     },
     {
-        "name": "tornadus-incarnate",
+        "name": "tornadus",
         "number": 641
     },
     {
-        "name": "thundurus-incarnate",
+        "name": "thundurus",
         "number": 642
     },
     {
@@ -2576,7 +2576,7 @@ const pokemon = [
         "number": 644
     },
     {
-        "name": "landorus-incarnate",
+        "name": "landorus",
         "number": 645
     },
     {
@@ -2584,11 +2584,11 @@ const pokemon = [
         "number": 646
     },
     {
-        "name": "keldeo-ordinary",
+        "name": "keldeo",
         "number": 647
     },
     {
-        "name": "meloetta-aria",
+        "name": "meloetta",
         "number": 648
     },
     {
@@ -2708,7 +2708,7 @@ const pokemon = [
         "number": 677
     },
     {
-        "name": "meowstic-male",
+        "name": "meowstic",
         "number": 678
     },
     {
@@ -2720,7 +2720,7 @@ const pokemon = [
         "number": 680
     },
     {
-        "name": "aegislash-shield",
+        "name": "aegislash",
         "number": 681
     },
     {
@@ -2836,11 +2836,11 @@ const pokemon = [
         "number": 709
     },
     {
-        "name": "pumpkaboo-average",
+        "name": "pumpkaboo",
         "number": 710
     },
     {
-        "name": "gourgeist-average",
+        "name": "gourgeist",
         "number": 711
     },
     {
@@ -2960,7 +2960,7 @@ const pokemon = [
         "number": 740
     },
     {
-        "name": "oricorio-baile",
+        "name": "oricorio",
         "number": 741
     },
     {
@@ -2976,11 +2976,11 @@ const pokemon = [
         "number": 744
     },
     {
-        "name": "lycanroc-midday",
+        "name": "lycanroc",
         "number": 745
     },
     {
-        "name": "wishiwashi-solo",
+        "name": "wishiwashi",
         "number": 746
     },
     {
@@ -3084,7 +3084,7 @@ const pokemon = [
         "number": 771
     },
     {
-        "name": "type-null",
+        "name": "typenull",
         "number": 772
     },
     {
@@ -3136,19 +3136,19 @@ const pokemon = [
         "number": 784
     },
     {
-        "name": "tapu-koko",
+        "name": "tapukoko",
         "number": 785
     },
     {
-        "name": "tapu-lele",
+        "name": "tapulele",
         "number": 786
     },
     {
-        "name": "tapu-bulu",
+        "name": "tapubulu",
         "number": 787
     },
     {
-        "name": "tapu-fini",
+        "name": "tapufini",
         "number": 788
     },
     {
@@ -3392,7 +3392,7 @@ const pokemon = [
         "number": 848
     },
     {
-        "name": "toxtricity-amped",
+        "name": "toxtricity",
         "number": 849
     },
     {
@@ -3496,15 +3496,15 @@ const pokemon = [
         "number": 874
     },
     {
-        "name": "eiscue-ice",
+        "name": "eiscue",
         "number": 875
     },
     {
-        "name": "indeedee-male",
+        "name": "indeedee",
         "number": 876
     },
     {
-        "name": "morpeko-full-belly",
+        "name": "morpeko",
         "number": 877
     },
     {
@@ -3564,7 +3564,7 @@ const pokemon = [
         "number": 891
     },
     {
-        "name": "urshifu-single-strike",
+        "name": "urshifu",
         "number": 892
     },
     {
@@ -3591,7 +3591,6 @@ const pokemon = [
         "name": "calyrex",
         "number": 898
     },
-
     {
         "name": "wyrdeer",
         "number": 899,
