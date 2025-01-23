@@ -100,8 +100,8 @@ const genderCases = [
 ];
 
 const unownCases = [
-    '--exclamation',
-    '--question',
+    '-em',
+    '-qm',
     '-a',
     '-b',
     '-c',
@@ -144,14 +144,14 @@ const deerlingCases = [
 ]
 
 const vivillonCases = [
-    '--fancy',
-    '--poke-ball',
+    '-fancy',
+    '-pokeball',
     '-archipelago',
     '-continental',
     '-elegant',
     '-garden',
-    '-high-plains',
-    '-icy-snow',
+    '-highplains',
+    '',
     '-jungle',
     '-marine',
     '-meadow',
@@ -161,7 +161,7 @@ const vivillonCases = [
     '-polar',
     '-river',
     '-sandstorm',
-    '-savanna',
+    '-savannah',
     '-sun',
     '-tundra',
 ];
@@ -169,23 +169,35 @@ const vivillonCases = [
 const flabebeCases = [
     '-blue',
     '-orange',
-    '-red',
+    '',
     '-white',
     '-yellow',
 ];
 
 const pumpkabooCases = [
-    '-average',
+    '',
     '-large',
     '-small',
     '-super',
 ];
 
 const oricorioCases = [
-    '-baile',
+    '',
     '-pau',
-    '-pom-pom',
+    '-pompom',
     '-sensu',
 ]
 
-export { genderCases, unownCases, burmyCases, deerlingCases, vivillonCases, flabebeCases, pumpkabooCases, oricorioCases };
+const lycanrocCases = [
+    '',
+    '-midnight',
+    '-dusk'
+]
+
+const cramorantCases = [
+    '',
+    '-gulping',
+    '-gorging'
+]
+
+export { genderCases, unownCases, burmyCases, deerlingCases, vivillonCases, flabebeCases, pumpkabooCases, oricorioCases, lycanrocCases, cramorantCases };

@@ -11,7 +11,6 @@ document.getElementById("sprite-btn").addEventListener("click", function () {
     ? numberTextbox.value
     : Math.floor(Math.random() * (800 - 0 + 1) + 0);
     const spriteBox = document.querySelector('.sprite-border-showcase');
-    console.log('spriteBox: ', spriteBox);
     borderSpriteGenerator(number, spriteBox);
 });
 
@@ -32,7 +31,6 @@ document.getElementById("pattern-btn").addEventListener("click", function () {
 
 document.getElementById("randomize-btn").addEventListener("click", function () {
     const randomizerBox = document.querySelector('.randomizer-showcase');
-    console.log('randomizerBox: ', randomizerBox);
     createRandomizedCard('Frampersand', 'showcase', randomizerBox, socket);
 });
 

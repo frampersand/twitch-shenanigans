@@ -268,6 +268,86 @@ const uniteRoster = [
         "name": "Leafeon",
         "image": "leafeon",
         "role": "speedster",
+    },
+    {
+        "name": "Inteleon",
+        "image": "inteleon",
+        "role": "attacker",
+    },
+    {
+        "name": "Mewtwo X",
+        "image": "mewtwo",
+        "role": "allrounder",
+    },
+    {
+        "name": "Mewtwo Y",
+        "image": "mewtwo",
+        "role": "attacker",
+    },
+    {
+        "name": "Blaziken",
+        "image": "blaziken",
+        "role": "allrounder",
+    },
+    {
+        "name": "Mimikyu",
+        "image": "mimikyu",
+        "role": "allrounder",
+    },
+    {
+        "name": "Meowscarada",
+        "image": "meowscarada",
+        "role": "speedster",
+    },
+    {
+        "name": "Metagross",
+        "image": "metagross",
+        "role": "allrounder",
+    },
+    {
+        "name": "Gyarados",
+        "image": "gyarados",
+        "role": "allrounder",
+    },
+    {
+        "name": "Miraidon",
+        "image": "miraidon",
+        "role": "attacker",
+    },
+    {
+        "name": "Falinks",
+        "image": "falinks",
+        "role": "allrounder",
+    },
+    {
+        "name": "Ceruledge",
+        "image": "ceruledge",
+        "role": "allrounder",
+    },
+    {
+        "name": "Ho-oh",
+        "image": "ho-oh",
+        "role": "defender",
+    },
+    {
+        "name": "Armarouge",
+        "image": "armarouge",
+        "role": "attacker",
+    },
+    {
+        "name": "Darkrai",
+        "image": "darkrai",
+        "role": "speedster",
+    },
+    {
+        "name": "Psyduck",
+        "image": "psyduck",
+        "role": "supporter",
+    },
+    {
+        "name": "Tinkaton",
+        "image": "tinkaton",
+        "role": "allrounder",
     }
 ];
 
