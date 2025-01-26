@@ -54,6 +54,11 @@
         <label for="randomize">Rain</label>
         <button id="rain-btn">Activate</button>
       </div>
+      <div class="panel">
+        <label for="randomize">PMD Portrait</label>
+        <input type="text" name="" id="pmd-message" />
+        <button id="pmd-portrait-btn">Activate</button>
+      </div>
     </div>
 
     <script src="/socket.io/socket.io.js"></script>
@@ -96,6 +101,14 @@
         .getElementById("rain-btn")
         .addEventListener("click", function () {
           socket.emit("rain");
+        });
+
+        document
+        .getElementById("pmd-portrait-btn")
+        .addEventListener("click", function () {
+          const messageTextbox = document.getElementById("pmd-message");
+          const message = messageTextbox.value;
+          socket.emit("pmd-portrait", "frampersand", message);
         });
     </script>
   </body>

@@ -4,4 +4,16 @@ const getRandomArrayElement = (min, max) => {
     return Math.floor(Math.random() * (max - min) + min);
 };
 
-export default getRandomArrayElement;
+
+function getRandomItem(array) {
+    return array[Math.floor(Math.random() * array.length)];
+}
+
+function truncateString(str, maxLength = 160) {
+    if (str.length > maxLength) {
+        return str.slice(0, maxLength) + '...';
+    }
+    return str;
+}
+
+export { getRandomArrayElement, getRandomItem, truncateString };
