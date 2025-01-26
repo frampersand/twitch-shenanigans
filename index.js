@@ -13,6 +13,7 @@ import { fileURLToPath } from "url";
 const app = express();
 const server = http.createServer(app);
 import path from "path";
+import fs from "fs";
 import * as dotenv from "dotenv";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -22,12 +23,14 @@ import {
   randomizerCooldownMessages,
   welcomeMessages,
 } from "./public/lists/bot-messages.js";
+import { getRandomItem } from './public/utils/utils.js';
 import { channels } from './data/channels.js';
 
 let rainbearer;
 let issuedCommands = {};
 let timedChecks = {};
 let issuedWarnings = {};
+const portraitsFolder = path.join(__dirname, '/public/assets/portrait/');
 // Initializing stuff
 
 // Config options //
@@ -67,11 +70,15 @@ io.on("connection", function (socket) {
 
   socket.on('sprite-number', (number) => {
     io.emit("sprite-number", number);
-  })
+  });
 
   socket.on('randomize', (username, target) => {
     io.emit("randomize", username, target);
-  } )
+  });
+
+  socket.on('pmd-portrait', (username, message) => {
+    io.emit("pmd-portrait", username, message);
+  })
 
   socket.on("randomized", (channel, message) => {
     client.say(channel, message);
@@ -230,6 +237,9 @@ function onMessageHandler(target, context, msg, self) {
       break;
 
     default:
+      if (Math.random() < 0.1) {
+        io.emit("pmd-portrait", username, msg);
+      }
       console.log(`[${target}] ${username}: ${msg}`);
   }
 }
@@ -292,3 +302,38 @@ server.listen(port, function () {
 function onConnectedHandler(addr, port) {
   console.log(`* Connected to ${addr}:${port}`);
 }
+
+
+// Endpoints 
+
+app.get('/random-portrait', (req, res) => {
+  try {
+    const folders = fs.readdirSync(portraitsFolder).filter((item) => {
+      const fullPath = path.join(portraitsFolder, item);
+      return fs.statSync(fullPath).isDirectory();
+    });
+
+    if (folders.length === 0) {
+      return res.status(404).json({ error: 'No subfolders found.' });
+    }
+
+    const randomFolder = getRandomItem(folders);
+    const folderPath = path.join(portraitsFolder, randomFolder);
+
+    const pngFiles = fs.readdirSync(folderPath).filter((file) => {
+      const fullPath = path.join(folderPath, file);
+      return fs.statSync(fullPath).isFile() && path.extname(file).toLowerCase() === '.png';
+    });
+
+    if (pngFiles.length === 0) {
+      return res.status(404).json({ error: `No .png files in folder: ${randomFolder}` });
+    }
+
+    const randomPng = getRandomItem(pngFiles);
+    const filePath = path.join(randomFolder, randomPng);
+
+    res.json({ file: filePath });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});

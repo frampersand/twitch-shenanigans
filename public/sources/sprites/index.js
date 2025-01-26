@@ -1,6 +1,6 @@
 import { genderCases, unownCases, burmyCases, deerlingCases, vivillonCases, flabebeCases, pumpkabooCases, oricorioCases, lycanrocCases, cramorantCases } from '../../lists/variation-cases.js';
 import { positions } from '../../lists/positions.js';
-import getRandomArrayElement from '../../utils/utils.js';
+import { getRandomArrayElement } from '../../utils/utils.js';
 import { getPokemonSpriteName } from '../background/background.js';
 
 let socket = io();
