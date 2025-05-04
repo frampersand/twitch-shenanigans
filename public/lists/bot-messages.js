@@ -49,6 +49,6 @@ export const welcomeMessages = (username) => {
         `Everyone smile and wave to ${username} who just joined the Framily!`,
         `Friend, you just entered the Wholesome Gaming zone ${username}, relax and enjoy!`,
         `Welcome to Framperland ${username}, two tickets to ride on the Wholesome Train <3`
-        ];
+    ];
     return messages[getRandomArrayElement(0, messages.length)];
 }

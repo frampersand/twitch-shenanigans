@@ -1,4 +1,4 @@
-FROM node:16-bullseye
+FROM node:22-bullseye
 #     |    └──────────────── Version de Node / Base de Docker
 #     └───────────────────── Imagen base ( https://hub.docker.com/_/node )
 

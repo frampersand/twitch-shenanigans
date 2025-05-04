@@ -348,7 +348,22 @@ const uniteRoster = [
         "name": "Tinkaton",
         "image": "tinkaton",
         "role": "allrounder",
+    },
+    {
+        "name": "Galarian Rapidash",
+        "image": "galarian-rapidash",
+        "role": "speedster",
+    },
+    {
+        "name": "Suicune",
+        "image": "suicune",
+        "role": "allrounder",
+    },
+    {
+        "name": "Alolan Raichu",
+        "image": "alolan-raichu",
+        "role": "attacker",
     }
 ];
 
-export default uniteRoster;
+export { uniteRoster };

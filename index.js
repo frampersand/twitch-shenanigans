@@ -13,7 +13,7 @@ import { fileURLToPath } from "url";
 const app = express();
 const server = http.createServer(app);
 import path from "path";
-import fs from "fs";
+import fs, { promises } from "fs";
 import * as dotenv from "dotenv";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -23,7 +23,7 @@ import {
   randomizerCooldownMessages,
   welcomeMessages,
 } from "./public/lists/bot-messages.js";
-import { getRandomItem } from './public/utils/utils.js';
+import { getRandomItem, capitalizeFirstLetter, cleanString, getPortraitUserData } from './public/utils/utils.js';
 import { channels } from './data/channels.js';
 
 let rainbearer;
@@ -31,6 +31,7 @@ let issuedCommands = {};
 let timedChecks = {};
 let issuedWarnings = {};
 const portraitsFolder = path.join(__dirname, '/public/assets/portrait/');
+const COOLDOWN_MINUTES = 3;
 // Initializing stuff
 
 // Config options //
@@ -92,9 +93,9 @@ function onMessageHandler(target, context, msg, self) {
 
   const isBroadcaster = context && context.badges && context.badges.broadcaster;
   const username = context["display-name"];
-  const splitMsg = msg.trim().split(" ");
-  const commandName = splitMsg[0].trim();
-  const firstParam = splitMsg[1];
+  const params = cleanString(msg).split(" ");
+  const commandName = cleanString(params[0]);
+  const firstParam = params[1];
 
   // Pokemon on screen
   if (
@@ -165,9 +166,12 @@ function onMessageHandler(target, context, msg, self) {
     }
   }
 
+  // PMD portraits chat POC
+  if (username != 'StreamElements' && commandName !== '!portrait') {
+    printPMDChat({username, msg, context, target});
+  }
+
   switch (commandName) {
-
-
     case "!rainbearer":
       if (target == "#frampersand") {
         if (!rainbearer) {
@@ -183,48 +187,42 @@ function onMessageHandler(target, context, msg, self) {
 
     case "!dealwithit":
       if (target === "#bruvhd") {
-        if (username === "BruvHD" || username === "Frampersand") {
+        if (["BruvHD", "Frampersand"].includes(username)) {
           io.emit("randomize", username, target);
           console.log("Randomizing on BruvHD channel");
         }
-      } else {
-        if (
-          isOffCooldown(username) ||
-          username === "Frampersand" ||
-          isBroadcaster
-        ) {
-          let player;
-          if (firstParam) {
-            if (firstParam[0] === "@") {
-              player = firstParam.slice(1);
-            } else {
-              client.say(
-                target,
-                `I'm sorry to say, but that's not a valid user. If you want to roll for someone else, give me their username properly (prefix it with @, please)`
-              );
-              break;
-            }
+        break;
+      }
+
+      if (isOffCooldown(username, commandName) || username === "Frampersand" || isBroadcaster) {
+        let player = username;
+
+        if (firstParam) {
+          if (firstParam.startsWith("@")) {
+            player = firstParam.slice(1);
           } else {
-            player = username;
-          }
-          console.log("Randomizing on: ", target);
-          io.emit("randomize", player, target);
-        } else {
-          if (!checkWarning(username)) {
-            if (target === "#frampersand" || target === "#frampscodes") {
-              const randomCooldownMessage =
-                randomizerCooldownMessages(username);
-              client.say(target, randomCooldownMessage);
-            } else {
-              client.say(
-                target,
-                `I'll kindly ask you to stop spamming please @${username}`
-              );
-            }
-            issuedWarnings[username] = true;
+            client.say(
+              target,
+              `I'm sorry to say, but that's not a valid user. If you want to use this command for someone else, give me their username properly (prefix it with @, please)`
+            );
+            return;
           }
         }
+
+        console.log("Randomizing on:", target);
+        io.emit("randomize", player, target);
+      } else {
+        if (!checkWarning(username, commandName)) {
+          if (target === "#frampersand") {
+            const cooldownMsg = randomizerCooldownMessages(username);
+            client.say(target, cooldownMsg);
+          } else {
+            client.say(target, `I'll kindly ask you to stop spamming please @${username}`);
+          }
+          setWarning(username, commandName);
+        }
       }
+
 
       break;
 
@@ -236,10 +234,39 @@ function onMessageHandler(target, context, msg, self) {
       }
       break;
 
-    default:
-      if (Math.random() < 0.1) {
-        io.emit("pmd-portrait", username, msg);
+    case '!portrait':
+      if (isOffCooldown(username, commandName) || username === "Frampersand" || isBroadcaster) {
+        const portraitName = cleanString(params[1]);
+        const variant = cleanString(params[2]);
+
+        if (!portraitName) {
+          break;
+        }
+
+        try {
+          const updatedUser = updatePortraitHandler({
+            username,
+            portrait: portraitName,
+            variant,
+            target
+          });
+
+          if (username == 'Frampersand') {
+            client.say(target, `Your portrait has been updated successfully @${username}`);
+
+          }
+        } catch (err) {
+          console.error('Failed to update portrait:', err);
+        }
+      } else {
+        if (!checkWarning(username, commandName)) {
+          client.say(target, `I'll kindly ask you to stop spamming please @${username}`);
+          setWarning(username, commandName);
+        }
       }
+
+      break;
+    default:
       console.log(`[${target}] ${username}: ${msg}`);
   }
 }
@@ -263,6 +290,11 @@ async function onRaidedHandler(channel, username, viewers) {
   client.say(channel, `!so ${username}`);
 }
 
+async function printPMDChat({username, msg, context, target}) {
+  const portraitUserData = await getPortraitUserData();
+  const userDataForChannel = portraitUserData.filter((user) => user.channel === target);
+    io.emit("pmd-portrait", username, msg, userDataForChannel, context, target);
+}
 function checkIfBroadcaster(context) {
   return context.hasOwnProperty("broadcaster") && context["broadcaster"];
 }
@@ -271,28 +303,37 @@ function pause(time) {
   return new Promise((resolve) => setTimeout(resolve, time));
 }
 
-const isOffCooldown = (username) => {
-  if (issuedCommands.hasOwnProperty(username)) {
-    const difference = new Date() - issuedCommands[username];
-    issuedCommands[username] = new Date();
-    if (difference / 60000 >= 3) {
-      resetWarning(username);
-      return true;
-    }
-    return false;
-  } else {
-    issuedCommands[username] = new Date();
+// Handles command spam
+const isOffCooldown = (username, command) => {
+  if (!issuedCommands[username]) {
+    issuedCommands[username] = {};
+  }
+
+  const now = new Date();
+  const lastUsed = issuedCommands[username][command];
+
+  if (!lastUsed || (now - lastUsed) / 60000 >= COOLDOWN_MINUTES) {
+    issuedCommands[username][command] = now;
+    resetWarning(username, command);
     return true;
   }
+
+  return false;
 };
 
-const resetWarning = (username) => {
-  delete issuedWarnings[username];
+const resetWarning = (username, command) => {
+  delete issuedWarnings[`${username}_${command}`];
 };
 
-const checkWarning = (username) => {
-  return issuedWarnings.hasOwnProperty(username);
+const checkWarning = (username, command) => {
+  return issuedWarnings.hasOwnProperty(`${username}_${command}`);
 };
+
+const setWarning = (username, command) => {
+  issuedWarnings[`${username}_${command}`] = true;
+};
+// Handles command spam
+
 
 const port = process.env.PORT || 3000;
 server.listen(port, function () {
@@ -304,21 +345,75 @@ function onConnectedHandler(addr, port) {
 }
 
 
+
+
+async function updatePortraitHandler({ username, portrait, variant, target }) {
+  return await updatePortraitUser({
+    username,
+    portrait,
+    variant,
+    target
+  })
+}
+
+async function updatePortraitUser({ username, portrait, variant, target }) {
+  const portraitUserbasePath = path.join(__dirname, './data/portraitUserbase.json');
+
+  let data = [];
+
+  try {
+    const fileContents = await promises.readFile(portraitUserbasePath, 'utf-8');
+    data = JSON.parse(fileContents);
+  } catch (readErr) {
+    if (readErr.code !== 'ENOENT') throw readErr;
+  }
+
+  const existingUserIndex = data.findIndex(user => user.username === username && user.channel === target);
+
+  const newUserData = {
+    username,
+    portrait: portrait || '',
+    variant: variant || '',
+    channel: target
+  };
+
+  if (existingUserIndex !== -1) {
+    data[existingUserIndex] = { ...data[existingUserIndex], ...newUserData };
+  } else {
+    data.push(newUserData);
+  }
+
+  await promises.writeFile(portraitUserbasePath, JSON.stringify(data, null, 2));
+
+  return newUserData;
+}
+
+
 // Endpoints 
 
-app.get('/random-portrait', (req, res) => {
-  try {
-    const folders = fs.readdirSync(portraitsFolder).filter((item) => {
-      const fullPath = path.join(portraitsFolder, item);
-      return fs.statSync(fullPath).isDirectory();
-    });
+app.get('/portrait', (req, res) => {
 
-    if (folders.length === 0) {
-      return res.status(404).json({ error: 'No subfolders found.' });
+  const { query } = req;
+  const portraitNumber = query && query.portrait || 0;
+  const variant = query && query.variant || 0;
+  try {
+    let folder;
+    if (!portraitNumber) {
+      const folders = fs.readdirSync(portraitsFolder).filter((item) => {
+        const fullPath = path.join(portraitsFolder, item);
+        return fs.statSync(fullPath).isDirectory();
+      });
+
+      if (folders.length === 0) {
+        return res.status(404).json({ error: 'No subfolders found.' });
+      }
+
+      folder = getRandomItem(folders);
+    } else {
+      folder = String(portraitNumber).padStart(4, '0');
     }
 
-    const randomFolder = getRandomItem(folders);
-    const folderPath = path.join(portraitsFolder, randomFolder);
+    const folderPath = path.join(portraitsFolder, folder);
 
     const pngFiles = fs.readdirSync(folderPath).filter((file) => {
       const fullPath = path.join(folderPath, file);
@@ -329,11 +424,36 @@ app.get('/random-portrait', (req, res) => {
       return res.status(404).json({ error: `No .png files in folder: ${randomFolder}` });
     }
 
-    const randomPng = getRandomItem(pngFiles);
-    const filePath = path.join(randomFolder, randomPng);
+    let selectedVariant;
+    if (variant && pngFiles.find((v) => v.toLowerCase() === `${variant.toLowerCase()}.png`)) {
+
+      selectedVariant = `${capitalizeFirstLetter(variant)}.png`;
+    } else {
+      selectedVariant = getRandomItem(pngFiles);
+    }
+    const filePath = path.join(folder, selectedVariant);
 
     res.json({ file: filePath });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
+});
+
+app.get('/pmd-user-data', (req, res) => {
+  const filePath = path.join(__dirname, './data/portraitUserbase.json');
+
+  fs.readFile(filePath, 'utf8', (err, data) => {
+      if (err) {
+          console.error('Error reading JSON file:', err);
+          return res.status(500).json({ error: 'Failed to read data file' });
+      }
+      try {
+          const jsonData = JSON.parse(data);
+          res.json(jsonData);
+      } catch (parseError) {
+          console.error('Error parsing JSON:', parseError);
+          res.json([])
+          // res.status(500).json({ error: 'Invalid JSON format' });
+      }
+  });
 });

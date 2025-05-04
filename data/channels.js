@@ -3,5 +3,6 @@ export const channels = [
     "joesbeard",
     "frampscodes",
     "azurequality",
-    "bruvhd"
+    "bruvhd",
+    "drednah"
 ];
