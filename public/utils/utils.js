@@ -16,4 +16,27 @@ function truncateString(str, maxLength = 160) {
     return str;
 }
 
-export { getRandomArrayElement, getRandomItem, truncateString };
+function capitalizeFirstLetter(val) {
+    return String(val).charAt(0).toUpperCase() + String(val).slice(1);
+}
+
+function cleanString (str=''){
+    return str.replaceAll('󠀀', '').trim();
+}
+
+
+const getPortraitUserData = async () => {
+    try {
+      const response = await fetch('http://localhost:3000/pmd-user-data');
+      if (!response.ok) {
+        throw new Error(`Response status: ${response.status}`);
+      }
+      const json = await response.json();
+      return json;
+    } catch (error) {
+      console.error(error.message);
+    }
+  }
+
+
+export { getRandomArrayElement, getRandomItem, truncateString, capitalizeFirstLetter, cleanString, getPortraitUserData};
