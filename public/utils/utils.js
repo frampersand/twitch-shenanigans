@@ -25,16 +25,17 @@ function cleanString (str=''){
 }
 
 
+/** Client-side fetch for portrait user data (e.g. admin panel). Use relative URL for same-origin. */
 const getPortraitUserData = async () => {
     try {
-      const response = await fetch('http://localhost:3000/pmd-user-data');
+      const response = await fetch('/pmd-user-data');
       if (!response.ok) {
         throw new Error(`Response status: ${response.status}`);
       }
-      const json = await response.json();
-      return json;
+      return await response.json();
     } catch (error) {
       console.error(error.message);
+      return [];
     }
   }
 
