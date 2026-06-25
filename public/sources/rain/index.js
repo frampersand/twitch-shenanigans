@@ -1,7 +1,14 @@
-const activateRain = () => {
-  const container = document.getElementById("rain-gif");
+const activateRain = ({ gifEl, audioEl } = {}) => {
+  const container = gifEl || document.getElementById("rain-gif");
+  const audio = audioEl || document.getElementById("rain-container");
+
+  if (!container || !audio) return;
+
+  container.classList.remove("fade");
   container.classList.add("active");
-  document.getElementById("rain-container").play();
+  audio.currentTime = 0;
+  audio.play().catch(() => {});
+
   setTimeout(() => {
     container.classList.add("fade");
   }, 2040000);

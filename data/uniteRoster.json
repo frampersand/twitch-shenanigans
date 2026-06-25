@@ -1,0 +1,584 @@
+[
+  {
+    "id": "absol",
+    "name": "Absol",
+    "role": "speedster",
+    "image": "/unite-assets/absol.png"
+  },
+  {
+    "id": "aegislash",
+    "name": "Aegislash",
+    "role": "allrounder",
+    "image": "/unite-assets/aegislash.png"
+  },
+  {
+    "id": "alcremie",
+    "name": "Alcremie",
+    "role": "speedster",
+    "image": "/unite-assets/alcremie.png"
+  },
+  {
+    "id": "ninetales-alolan",
+    "name": "Alolan Ninetales",
+    "role": "allrounder",
+    "image": "/unite-assets/ninetales-alolan.png"
+  },
+  {
+    "id": "raichu-alolan",
+    "name": "Alolan Raichu",
+    "role": "attacker",
+    "image": "/unite-assets/raichu-alolan.png"
+  },
+  {
+    "id": "armarouge",
+    "name": "Armarouge",
+    "role": "attacker",
+    "image": "/unite-assets/armarouge.png"
+  },
+  {
+    "id": "articuno",
+    "name": "Articuno",
+    "role": "allrounder",
+    "image": "/unite-assets/articuno.png"
+  },
+  {
+    "id": "azumarill",
+    "name": "Azumarill",
+    "role": "allrounder",
+    "image": "/unite-assets/azumarill.png"
+  },
+  {
+    "id": "blastoise",
+    "name": "Blastoise",
+    "role": "defender",
+    "image": "/unite-assets/blastoise.png"
+  },
+  {
+    "id": "blaziken",
+    "name": "Blaziken",
+    "role": "allrounder",
+    "image": "/unite-assets/blaziken.png"
+  },
+  {
+    "id": "blissey",
+    "name": "Blissey",
+    "role": "supporter",
+    "image": "/unite-assets/blissey.png"
+  },
+  {
+    "id": "buzzwole",
+    "name": "Buzzwole",
+    "role": "allrounder",
+    "image": "/unite-assets/buzzwole.png"
+  },
+  {
+    "id": "ceruledge",
+    "name": "Ceruledge",
+    "role": "allrounder",
+    "image": "/unite-assets/ceruledge.png"
+  },
+  {
+    "id": "chandelure",
+    "name": "Chandelure",
+    "role": "attacker",
+    "image": "/unite-assets/chandelure.png"
+  },
+  {
+    "id": "charizard",
+    "name": "Charizard",
+    "role": "allrounder",
+    "image": "/unite-assets/charizard.png"
+  },
+  {
+    "id": "cinderace",
+    "name": "Cinderace",
+    "role": "attacker",
+    "image": "/unite-assets/cinderace.png"
+  },
+  {
+    "id": "clefable",
+    "name": "Clefable",
+    "role": "supporter",
+    "image": "/unite-assets/clefable.png"
+  },
+  {
+    "id": "comfey",
+    "name": "Comfey",
+    "role": "supporter",
+    "image": "/unite-assets/comfey.png"
+  },
+  {
+    "id": "cramorant",
+    "name": "Cramorant",
+    "role": "attacker",
+    "image": "/unite-assets/cramorant.png"
+  },
+  {
+    "id": "crustle",
+    "name": "Crustle",
+    "role": "defender",
+    "image": "/unite-assets/crustle.png"
+  },
+  {
+    "id": "darkrai",
+    "name": "Darkrai",
+    "role": "speedster",
+    "image": "/unite-assets/darkrai.png"
+  },
+  {
+    "id": "decidueye",
+    "name": "Decidueye",
+    "role": "attacker",
+    "image": "/unite-assets/decidueye.png"
+  },
+  {
+    "id": "delphox",
+    "name": "Delphox",
+    "role": "attacker",
+    "image": "/unite-assets/delphox.png"
+  },
+  {
+    "id": "dhelmise",
+    "name": "Dhelmise",
+    "role": "supporter",
+    "image": "/unite-assets/dhelmise.png"
+  },
+  {
+    "id": "dodrio",
+    "name": "Dodrio",
+    "role": "speedster",
+    "image": "/unite-assets/dodrio.png"
+  },
+  {
+    "id": "dragapult",
+    "name": "Dragapult",
+    "role": "attacker",
+    "image": "/unite-assets/dragapult.png"
+  },
+  {
+    "id": "dragonite",
+    "name": "Dragonite",
+    "role": "allrounder",
+    "image": "/unite-assets/dragonite.png"
+  },
+  {
+    "id": "duraludon",
+    "name": "Duraludon",
+    "role": "attacker",
+    "image": "/unite-assets/duraludon.png"
+  },
+  {
+    "id": "eldegoss",
+    "name": "Eldegoss",
+    "role": "supporter",
+    "image": "/unite-assets/eldegoss.png"
+  },
+  {
+    "id": "empoleon",
+    "name": "Empoleon",
+    "role": "supporter",
+    "image": "/unite-assets/empoleon.png"
+  },
+  {
+    "id": "espeon",
+    "name": "Espeon",
+    "role": "attacker",
+    "image": "/unite-assets/espeon.png"
+  },
+  {
+    "id": "falinks",
+    "name": "Falinks",
+    "role": "allrounder",
+    "image": "/unite-assets/falinks.png"
+  },
+  {
+    "id": "feraligatr",
+    "name": "Feraligatr",
+    "role": "supporter",
+    "image": "/unite-assets/feraligatr.png"
+  },
+  {
+    "id": "rapidash-galarian",
+    "name": "Galarian Rapidash",
+    "role": "speedster",
+    "image": "/unite-assets/rapidash-galarian.png"
+  },
+  {
+    "id": "garchomp",
+    "name": "Garchomp",
+    "role": "allrounder",
+    "image": "/unite-assets/garchomp.png"
+  },
+  {
+    "id": "gardevoir",
+    "name": "Gardevoir",
+    "role": "attacker",
+    "image": "/unite-assets/gardevoir.png"
+  },
+  {
+    "id": "gengar",
+    "name": "Gengar",
+    "role": "speedster",
+    "image": "/unite-assets/gengar.png"
+  },
+  {
+    "id": "glaceon",
+    "name": "Glaceon",
+    "role": "attacker",
+    "image": "/unite-assets/glaceon.png"
+  },
+  {
+    "id": "goodra",
+    "name": "Goodra",
+    "role": "defender",
+    "image": "/unite-assets/goodra.png"
+  },
+  {
+    "id": "greedent",
+    "name": "Greedent",
+    "role": "defender",
+    "image": "/unite-assets/greedent.png"
+  },
+  {
+    "id": "greninja",
+    "name": "Greninja",
+    "role": "attacker",
+    "image": "/unite-assets/greninja.png"
+  },
+  {
+    "id": "gyarados",
+    "name": "Gyarados",
+    "role": "allrounder",
+    "image": "/unite-assets/gyarados.png"
+  },
+  {
+    "id": "ho-oh",
+    "name": "Ho-oh",
+    "role": "defender",
+    "image": "/unite-assets/ho-oh.png"
+  },
+  {
+    "id": "hoopa",
+    "name": "Hoopa",
+    "role": "supporter",
+    "image": "/unite-assets/hoopa.png"
+  },
+  {
+    "id": "inteleon",
+    "name": "Inteleon",
+    "role": "attacker",
+    "image": "/unite-assets/inteleon.png"
+  },
+  {
+    "id": "lapras",
+    "name": "Lapras",
+    "role": "defender",
+    "image": "/unite-assets/lapras.png"
+  },
+  {
+    "id": "latias",
+    "name": "Latias",
+    "role": "speedster",
+    "image": "/unite-assets/latias.png"
+  },
+  {
+    "id": "latios",
+    "name": "Latios",
+    "role": "supporter",
+    "image": "/unite-assets/latios.png"
+  },
+  {
+    "id": "leafeon",
+    "name": "Leafeon",
+    "role": "speedster",
+    "image": "/unite-assets/leafeon.png"
+  },
+  {
+    "id": "lucario",
+    "name": "Lucario",
+    "role": "allrounder",
+    "image": "/unite-assets/lucario.png"
+  },
+  {
+    "id": "machamp",
+    "name": "Machamp",
+    "role": "allrounder",
+    "image": "/unite-assets/machamp.png"
+  },
+  {
+    "id": "mamoswine",
+    "name": "Mamoswine",
+    "role": "defender",
+    "image": "/unite-assets/mamoswine.png"
+  },
+  {
+    "id": "charizard-mega-x",
+    "name": "Mega Charizard X",
+    "role": "supporter",
+    "image": "/unite-assets/charizard-mega-x.png"
+  },
+  {
+    "id": "charizard-mega-y",
+    "name": "Mega Charizard Y",
+    "role": "supporter",
+    "image": "/unite-assets/charizard-mega-y.png"
+  },
+  {
+    "id": "gyarados-mega",
+    "name": "Mega Gyarados",
+    "role": "attacker",
+    "image": "/unite-assets/gyarados-mega.png"
+  },
+  {
+    "id": "lucario-mega",
+    "name": "Mega Lucario",
+    "role": "attacker",
+    "image": "/unite-assets/lucario-mega.png"
+  },
+  {
+    "id": "mewtwo-mega-x",
+    "name": "Mega Mewtwo X",
+    "role": "attacker",
+    "image": "/unite-assets/mewtwo-mega-x.png"
+  },
+  {
+    "id": "mewtwo-mega-y",
+    "name": "Mega Mewtwo Y",
+    "role": "supporter",
+    "image": "/unite-assets/mewtwo-mega-y.png"
+  },
+  {
+    "id": "meganium",
+    "name": "Meganium",
+    "role": "speedster",
+    "image": "/unite-assets/meganium.png"
+  },
+  {
+    "id": "meowscarada",
+    "name": "Meowscarada",
+    "role": "speedster",
+    "image": "/unite-assets/meowscarada.png"
+  },
+  {
+    "id": "meowth",
+    "name": "Meowth",
+    "role": "supporter",
+    "image": "/unite-assets/meowth.png"
+  },
+  {
+    "id": "metagross",
+    "name": "Metagross",
+    "role": "allrounder",
+    "image": "/unite-assets/metagross.png"
+  },
+  {
+    "id": "mew",
+    "name": "Mew",
+    "role": "attacker",
+    "image": "/unite-assets/mew.png"
+  },
+  {
+    "id": "mewtwo-mega-x",
+    "name": "Mewtwo X",
+    "role": "allrounder",
+    "image": "/unite-assets/mewtwo-mega-x.png"
+  },
+  {
+    "id": "mewtwo-mega-y",
+    "name": "Mewtwo Y",
+    "role": "attacker",
+    "image": "/unite-assets/mewtwo-mega-y.png"
+  },
+  {
+    "id": "mimikyu",
+    "name": "Mimikyu",
+    "role": "allrounder",
+    "image": "/unite-assets/mimikyu.png"
+  },
+  {
+    "id": "miraidon",
+    "name": "Miraidon",
+    "role": "attacker",
+    "image": "/unite-assets/miraidon.png"
+  },
+  {
+    "id": "moltres",
+    "name": "Moltres",
+    "role": "attacker",
+    "image": "/unite-assets/moltres.png"
+  },
+  {
+    "id": "mr-mime",
+    "name": "Mr. Mime",
+    "role": "supporter",
+    "image": "/unite-assets/mr-mime.png"
+  },
+  {
+    "id": "ninetales",
+    "name": "Ninetales",
+    "role": "attacker",
+    "image": "/unite-assets/ninetales.png"
+  },
+  {
+    "id": "pawmot",
+    "name": "Pawmot",
+    "role": "attacker",
+    "image": "/unite-assets/pawmot.png"
+  },
+  {
+    "id": "pikachu",
+    "name": "Pikachu",
+    "role": "attacker",
+    "image": "/unite-assets/pikachu.png"
+  },
+  {
+    "id": "psyduck",
+    "name": "Psyduck",
+    "role": "supporter",
+    "image": "/unite-assets/psyduck.png"
+  },
+  {
+    "id": "quaquaval",
+    "name": "Quaquaval",
+    "role": "attacker",
+    "image": "/unite-assets/quaquaval.png"
+  },
+  {
+    "id": "sableye",
+    "name": "Sableye",
+    "role": "supporter",
+    "image": "/unite-assets/sableye.png"
+  },
+  {
+    "id": "scizor",
+    "name": "Scizor",
+    "role": "allrounder",
+    "image": "/unite-assets/scizor.png"
+  },
+  {
+    "id": "sirfetchd",
+    "name": "Sirfetch'd",
+    "role": "attacker",
+    "image": "/unite-assets/sirfetchd.png"
+  },
+  {
+    "id": "skeledirge",
+    "name": "Skeledirge",
+    "role": "supporter",
+    "image": "/unite-assets/skeledirge.png"
+  },
+  {
+    "id": "slowbro",
+    "name": "Slowbro",
+    "role": "defender",
+    "image": "/unite-assets/slowbro.png"
+  },
+  {
+    "id": "snorlax",
+    "name": "Snorlax",
+    "role": "defender",
+    "image": "/unite-assets/snorlax.png"
+  },
+  {
+    "id": "suicune",
+    "name": "Suicune",
+    "role": "allrounder",
+    "image": "/unite-assets/suicune.png"
+  },
+  {
+    "id": "sylveon",
+    "name": "Sylveon",
+    "role": "attacker",
+    "image": "/unite-assets/sylveon.png"
+  },
+  {
+    "id": "talonflame",
+    "name": "Talonflame",
+    "role": "speedster",
+    "image": "/unite-assets/talonflame.png"
+  },
+  {
+    "id": "tinkaton",
+    "name": "Tinkaton",
+    "role": "allrounder",
+    "image": "/unite-assets/tinkaton.png"
+  },
+  {
+    "id": "trevenant",
+    "name": "Trevenant",
+    "role": "defender",
+    "image": "/unite-assets/trevenant.png"
+  },
+  {
+    "id": "tsareena",
+    "name": "Tsareena",
+    "role": "allrounder",
+    "image": "/unite-assets/tsareena.png"
+  },
+  {
+    "id": "typhlosion",
+    "name": "Typhlosion",
+    "role": "supporter",
+    "image": "/unite-assets/typhlosion.png"
+  },
+  {
+    "id": "tyranitar",
+    "name": "Tyranitar",
+    "role": "allrounder",
+    "image": "/unite-assets/tyranitar.png"
+  },
+  {
+    "id": "umbreon",
+    "name": "Umbreon",
+    "role": "defender",
+    "image": "/unite-assets/umbreon.png"
+  },
+  {
+    "id": "urshifu",
+    "name": "Urshifu",
+    "role": "allrounder",
+    "image": "/unite-assets/urshifu.png"
+  },
+  {
+    "id": "vaporeon",
+    "name": "Vaporeon",
+    "role": "allrounder",
+    "image": "/unite-assets/vaporeon.png"
+  },
+  {
+    "id": "venusaur",
+    "name": "Venusaur",
+    "role": "attacker",
+    "image": "/unite-assets/venusaur.png"
+  },
+  {
+    "id": "wigglytuff",
+    "name": "Wigglytuff",
+    "role": "supporter",
+    "image": "/unite-assets/wigglytuff.png"
+  },
+  {
+    "id": "zacian",
+    "name": "Zacian",
+    "role": "allrounder",
+    "image": "/unite-assets/zacian.png"
+  },
+  {
+    "id": "zapdos",
+    "name": "Zapdos",
+    "role": "supporter",
+    "image": "/unite-assets/zapdos.png"
+  },
+  {
+    "id": "zeraora",
+    "name": "Zeraora",
+    "role": "speedster",
+    "image": "/unite-assets/zeraora.png"
+  },
+  {
+    "id": "zoroark",
+    "name": "Zoroark",
+    "role": "speedster",
+    "image": "/unite-assets/zoroark.png"
+  }
+]

@@ -1,0 +1,12 @@
+[
+  {
+    "channel": "#frampersand",
+    "preferences": {
+      "solidBubbles": true,
+      "solidBubblesColor": "#000",
+      "bubbleTextColor": "#ffffff",
+      "chatDirection": "up",
+      "portraitShape": "rounded"
+    }
+  }
+]

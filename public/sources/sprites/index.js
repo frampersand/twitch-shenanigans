@@ -1,10 +1,20 @@
 import { genderCases, unownCases, burmyCases, deerlingCases, vivillonCases, flabebeCases, pumpkabooCases, oricorioCases, lycanrocCases, cramorantCases } from '../../lists/variation-cases.js';
 import { positions } from '../../lists/positions.js';
 import { getRandomArrayElement } from '../../utils/utils.js';
-import { getPokemonSpriteName } from '../background/background.js';
+import { getPokemonSpriteName } from '../../utils/pokemonIcons.js';
 
 let socket = io();
-let currentSprites = positions;
+let customPositionPool = null;
+let currentSprites = [...positions];
+
+function getPositionPool() {
+    return customPositionPool ? [...customPositionPool] : [...positions];
+}
+
+export function setSpritePositionPool(pool) {
+    customPositionPool = Array.isArray(pool) ? pool.map((entry) => ({ ...entry })) : null;
+    currentSprites = getPositionPool();
+}
 
 socket.on('sprite-number', function (pokemonNumber, targetContainer = '') {
     borderSpriteGenerator(pokemonNumber, targetContainer);
@@ -12,26 +22,33 @@ socket.on('sprite-number', function (pokemonNumber, targetContainer = '') {
 
 const borderSpriteGenerator = (pokemonNumber, targetContainer) => {
     const gameArea = targetContainer ? targetContainer : document.getElementById('game-area');
-    let number = pokemonNumber;
-    if(pokemonNumber === '0') {
-        number = Math.floor(Math.random() * (893)) + 1;
+    const isRandomRequest =
+        pokemonNumber === '0' ||
+        pokemonNumber === 0 ||
+        pokemonNumber === '' ||
+        pokemonNumber == null;
+
+    let number = isRandomRequest
+        ? Math.floor(Math.random() * 893) + 1
+        : Number(pokemonNumber);
+
+    if (!Number.isFinite(number) || number < 1 || number > 893) {
+        return;
     }
-    
-    if (number >= 0 && number <= 893) {
-        if (currentSprites.length) {
-            const position = getRandomArrayElement(0, currentSprites.length);
-            const pokemonContainer = document.createElement('div');
-            pokemonContainer.className = 'pokemon-sprite';
-            pokemonContainer.style.top = currentSprites[position].y + 'px';
-            pokemonContainer.style.left = currentSprites[position].x + 'px';
-            const pokemonImage = document.createElement('img');
-            pokemonImage.src = getSprite(number);
-            currentSprites.splice(position, 1);
-            pokemonContainer.appendChild(pokemonImage);
-            gameArea.appendChild(pokemonContainer);
-        }
+
+    if (currentSprites.length) {
+        const position = getRandomArrayElement(0, currentSprites.length);
+        const pokemonContainer = document.createElement('div');
+        pokemonContainer.className = 'pokemon-sprite';
+        pokemonContainer.style.top = currentSprites[position].y + 'px';
+        pokemonContainer.style.left = currentSprites[position].x + 'px';
+        const pokemonImage = document.createElement('img');
+        pokemonImage.src = getSprite(number);
+        currentSprites.splice(position, 1);
+        pokemonContainer.appendChild(pokemonImage);
+        gameArea.appendChild(pokemonContainer);
     }
-} 
+}
 
 function getSprite(number) {
     const spriteName = getPokemonSpriteName(number);
@@ -121,6 +138,13 @@ function getExceptions(number, spriteName) {
     }
 
     return spriteName;
+}
+
+export function resetSpriteBorder(container) {
+    currentSprites = getPositionPool();
+    if (container) {
+        container.innerHTML = '';
+    }
 }
 
 

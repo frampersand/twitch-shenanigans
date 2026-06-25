@@ -1,6 +1,4 @@
 import { truncateString } from '../../utils/utils.js';
-import { uniteRoster } from "../../lists/unite-roster.js";
-import { randomizerMessages } from "../../lists/bot-messages.js";
 
 const getPortrait = (data) => {
     let queryParams = data ? `?portrait=${data.portrait}&variant=${data.variant}` : '';
@@ -83,19 +81,4 @@ const generatePortrait = async (message, username, userBase, context = { color: 
         // }, 3000);
     });
 }
-// Code to test live chat
-// setInterval(() => {
-//     const username = 'Frampersand';
-//     const userbase = [
-//         {
-//             "username": "Frampersand",
-//             "portrait": "143",
-//             "url": "",
-//             "variant": "Inspired"
-//         }
-//     ];
-//     const message = randomizerMessages(username, uniteRoster[Math.floor(Math.random() * (uniteRoster.length - 1))].name);
-//     generatePortrait(message, truncateString(username, 25), { color: '#' + (Math.random() * 0xFFFFFF << 0).toString(16).padStart(6, '0') }, userbase)
-// }, 5000);
-
 export { generatePortrait };

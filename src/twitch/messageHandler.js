@@ -36,8 +36,8 @@ function createMessageHandler(deps) {
       client.say(target, welcomeMessage);
     }
 
-    // PMD portrait overlay for regular chat (exclude StreamElements and !portrait)
-    if (username !== "StreamElements" && commandName !== "!portrait") {
+    // PMD portrait overlay for regular chat (exclude StreamElements and commands)
+    if (username !== "StreamElements" && commandName !== "!portrait" && commandName !== "!pmdconfig") {
       const userDataForChannel = await getPortraitUserDataForChannel(target);
       io.emit(
         EVENTS.PMD_PORTRAIT,
@@ -59,6 +59,8 @@ function createMessageHandler(deps) {
       } else if (commandName === "!guesswhosback") {
         await commandHandler(client, target, username);
       } else if (commandName === "!portrait") {
+        await commandHandler(client, target, username, params, isBroadcaster);
+      } else if (commandName === "!pmdconfig") {
         await commandHandler(client, target, username, params, isBroadcaster);
       }
     } else {

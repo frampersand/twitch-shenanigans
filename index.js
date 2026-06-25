@@ -6,6 +6,7 @@ import { fileURLToPath } from "url";
 
 import { config } from "./src/config/index.js";
 import portraitRoutes from "./src/routes/portrait.js";
+import uniteRosterRoutes from "./src/routes/uniteRoster.js";
 import { createTwitchClient } from "./src/twitch/client.js";
 import { setupSocketHandlers } from "./src/socket/setup.js";
 
@@ -18,9 +19,11 @@ const io = new Server(server, {});
 
 // Static files
 app.use("/", express.static(path.join(__dirname, "public")));
+app.use("/unite-assets", express.static(config.uniteAssetsFolder));
 
 // API routes
 app.use("/", portraitRoutes);
+app.use("/", uniteRosterRoutes);
 
 // Twitch client and Socket.IO (client needs io, socket handlers need client for chat)
 const client = createTwitchClient(io);

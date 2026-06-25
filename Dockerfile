@@ -24,6 +24,11 @@ COPY . .
 # desde los comandos o el compose)
 EXPOSE 8080
 
+# Persist roster data and cached sprites across redeploys (mount at runtime):
+#   /app/data/uniteRoster.json
+#   /app/data/uniteRoster.meta.json
+#   /app/data/unite-assets/
+
 # Si usas CMD puedes cambiar el programa
 # por defecto de SH por NODE ubicado
 # previamente en /app
