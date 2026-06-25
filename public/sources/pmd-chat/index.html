@@ -6,8 +6,6 @@
     <style>
         body {
             background-color: transparent;
-            display: flex;
-            flex-direction: column-reverse;
         }
 
         @font-face {
@@ -27,7 +25,31 @@
 
         #chat-container {
             display: flex;
+        }
+
+        #chat-container.chat-up {
             flex-direction: column-reverse;
+        }
+
+        #chat-container.chat-down {
+            flex-direction: column;
+        }
+
+        #chat-container.solid-bubbles .pmd-portrait-message {
+            background: var(--solid-bubble-color, #6961a7);
+            padding: 10px 16px;
+        }
+
+        #chat-container.portrait-square .pmd-portrait-message-box > img {
+            border-radius: 0;
+        }
+
+        #chat-container.portrait-round .pmd-portrait-message-box > img {
+            border-radius: 50%;
+        }
+
+        #chat-container.portrait-rounded .pmd-portrait-message-box > img {
+            border-radius: 4px;
         }
 
         .pmd-portrait-container {
@@ -45,7 +67,6 @@
         .pmd-portrait-message-box > img {
             height: 80px;
             width: 80px;
-            border-radius: 4px;
         }
 
         .fade {
@@ -58,7 +79,9 @@
             width: fit-content;
             min-width: 85px;
             max-width: 400px;
-            left: 105px;
+            left: 95px;
+            top: 8px;
+            z-index: 100;
             border-radius: 4px;
             padding: 2px 10px;
             background: #494981;
@@ -73,11 +96,9 @@
             font-family: exo;
             -webkit-font-smoothing: antialiased;
             width: 400px;
-            /* background: #6961a7; */
-            /* height: 30px; */
-            border-radius: 4px;
+            border-radius: 8px;
             padding: 5px 10px;
-            color: white;
+            color: var(--bubble-text-color, #ffffff);
             position: relative;
             left: 15px;
             border-top-left-radius: 0;
@@ -99,7 +120,7 @@
 </head>
 
 <body>
-    <div id="chat-container"></div>
+    <div id="chat-container" class="chat-up portrait-rounded"></div>
     <script src="/socket.io/socket.io.js"></script>
     <script src="./listener.js" type="module"></script>
     <script type='text/javascript' src='../../libs/tinycolor/tinycolor.js'></script>

@@ -105,3 +105,9 @@ dist
 
 .DS_Store
 package-lock.json
+
+# Personal backlog (not for repo)
+BACKLOG.md
+
+# Cached Pokemon UNITE sprites (persist via Docker volume)
+data/unite-assets/

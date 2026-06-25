@@ -1,11 +1,14 @@
-import { uniteRoster } from "../../lists/unite-roster.js";
+import { loadUniteRoster, getPokemonImagePath } from "../../utils/loadUniteRoster.js";
 import { getRandomArrayElement } from "../../utils/utils.js";
 import pokemonRoles from "../../lists/pokemon-roles.js";
 import { randomizerMessages } from "../../lists/bot-messages.js";
 
-const createRandomizedCard = (username, channel, target, socket) => {
+const createRandomizedCard = async (username, channel, target, socket) => {
+    const uniteRoster = await loadUniteRoster();
+    if (!uniteRoster.length) return;
+
     const container = target ? target : document.getElementById('container');
-    const pokemonSelection = getRandomSelection();
+    const pokemonSelection = getRandomSelection(uniteRoster);
     const finalSelection = pokemonSelection[pokemonSelection.length - 1];
 
     const cardContainer = document.createElement('div');
@@ -28,7 +31,7 @@ const createRandomizedCard = (username, channel, target, socket) => {
     const playerName = document.createElement('p');
     playerName.innerHTML = username;
     playerContainer.appendChild(playerName);
-    pokemonImage.src = getPokemonImage(uniteRoster[pokemonSelection[0]].image);
+    pokemonImage.src = getPokemonImagePath(uniteRoster[pokemonSelection[0]]);
     const pokeBallUniteLogo = document.createElement('img');
     pokeBallUniteLogo.src = '../../assets/pokeball-logo.png';
     cardBack.appendChild(pokeBallUniteLogo);
@@ -40,18 +43,15 @@ const createRandomizedCard = (username, channel, target, socket) => {
     cardContainer.appendChild(cardContent);
     container.appendChild(cardContainer);
 
-    const pokemonCardWrapper = document.createElement('div');
-    pokemonCardWrapper.className = `pokemon-card-wrapper`;
-
     let counter = 0;
     const interval = setInterval(() => {
-        pokemonImage.src = getPokemonImage(uniteRoster[pokemonSelection[counter]].image);
+        pokemonImage.src = getPokemonImagePath(uniteRoster[pokemonSelection[counter]]);
         pokemonName.innerHTML = uniteRoster[pokemonSelection[counter]].name;
         cardFront.style.backgroundColor = pokemonRoles[uniteRoster[pokemonSelection[counter]].role];
         counter++;
         if (counter === 5) {
             window.clearInterval(interval);
-            pokemonImage.src = getPokemonImage(uniteRoster[finalSelection].image);
+            pokemonImage.src = getPokemonImagePath(uniteRoster[finalSelection]);
             cardFront.style.backgroundColor = pokemonRoles[uniteRoster[finalSelection].role];
             pokemonName.innerHTML = uniteRoster[finalSelection].name;
             pokemonImage.classList.add('selected');
@@ -71,7 +71,7 @@ const createRandomizedCard = (username, channel, target, socket) => {
     }, 9000);
 }
 
-const getRandomSelection = () => {
+const getRandomSelection = (uniteRoster) => {
     let selection = [];
     let i = 0;
     while (i < 5) {
@@ -79,10 +79,6 @@ const getRandomSelection = () => {
         i++;
     }
     return selection;
-}
-
-const getPokemonImage = (pokemon) => {
-    return `https://unite.pokemon.com/images/pokemon/${pokemon}/roster/roster-${pokemon}.png`;
 }
 
 export default createRandomizedCard;

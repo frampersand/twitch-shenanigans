@@ -13,3 +13,11 @@ export function capitalizeFirstLetter(val) {
 export function pause(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
+
+export async function safeSay(client, channel, message) {
+  try {
+    await client.say(channel, message);
+  } catch (err) {
+    console.warn(`[twitch] could not send to ${channel}:`, err?.message ?? err);
+  }
+}

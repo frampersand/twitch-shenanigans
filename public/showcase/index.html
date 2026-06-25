@@ -1,231 +1,134 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
-  <title>Frampersand's interactive overlays showcase</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"
-    integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous" />
-
-  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300&display=swap" rel="stylesheet" />
-  <link href="../sources/randomizer/index.css" rel="stylesheet" />
-  <style>
-    body {
-      background-color: white;
-    }
-
-    .container {
-      padding-top: 10rem;
-    }
-
-    #rain-gif.active {
-      background: url("https://i.gifer.com/2ii5.gif");
-      background-repeat: repeat-x;
-      height: 200px;
-      width: 100%;
-      opacity: 100%;
-      transition: 10s;
-    }
-
-    #rain-gif.fade {
-      opacity: 0;
-      transition: 10s;
-    }
-
-    .panels-container {
-      position: fixed;
-      top: 0px;
-      padding-top: 10px;
-      left: 0;
-      background-color: white;
-      display: flex;
-      gap: 1rem;
-      justify-content: center;
-      flex-wrap: wrap;
-      flex-direction: row;
-      z-index: 1000;
-    }
-
-    .showcase-panel {
-      background: white;
-      border: 1px solid #ddd;
-      border-radius: 1rem;
-      padding: 1rem;
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-      align-items: center;
-    }
-
-    .showcase-panel button {
-      padding: 0.4rem;
-      border: 1px solid #ddd;
-      border-radius: 0.5rem;
-    }
-
-    .border-showcase {
-      width: 100%;
-      padding: 3rem 1rem;
-      overflow: hidden;
-    }
-
-    .sprite-border-showcase {
-      /* border: 1px dotted gray; */
-      height: 450px;
-      width: 850px;
-      position: relative;
-      margin: auto;
-      top: -4.5rem;
-      transform: scale(0.80);
-      left: -1rem;
-      background-color: rgba(0, 0, 0, 0.7);
-      border-radius: 1rem;
-    }
-
-    .sprite-border-showcase .pokemon-sprite {
-      position: absolute;
-      height: 50px;
-      display: flex;
-      align-items: center;
-    }
-
-    .sprite-border-showcase .pokemon-sprite img {
-      max-width: 50px;
-    }
-
-    .background-showcase {
-      width: 100%;
-      height: 100%;
-    }
-
-    .background-sprite-showcase {
-      height: 100%;
-      width: 100%;
-      position: absolute;
-    }
-
-    .randomizer-showcase {
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 1rem;
-      z-index: 100;
-      /* width: 100%;
-      height: 280px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 1rem; */
-    }
-
-    .rain-showcase {
-      /* height: 200px;
-        width: 100%;
-        background-color: #124071; */
-    }
-
-    .showcase {
-      border-radius: 0.5rem;
-      border: 1px solid #c9c9c9;
-      margin: 2rem 0;
-    }
-
-    .pokemon-sprite {
-      position: absolute;
-      height: 50px;
-      display: flex;
-      align-items: center;
-    }
-
-    .showcase-container {
-      position: relative;
-      width: 850px;
-      height: 450px;
-    }
-  </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Frampersand — Overlay Showcase</title>
+  <link rel="stylesheet" href="showcase.css" />
+  <link rel="stylesheet" href="../sources/randomizer/index.css" />
 </head>
 
 <body>
-  <div class="container">
-    <div class="row">
-      <div class="panels-container">
-        <div class="showcase-panel">
-          <label for="sprite">Sprite</label>
-          <input type="text" name="sprite" id="sprite" />
-          <button id="sprite-btn">Send</button>
-        </div>
-        <div class="showcase-panel">
-          <label for="color">Background color</label>
-          <input type="text" name="color" id="color" />
-          <button id="color-btn">Send</button>
-        </div>
-        <div class="showcase-panel">
-          <label for="pattern">Pattern</label>
-          <input type="text" name="" id="pattern" />
-          <button id="pattern-btn">Send</button>
-        </div>
-        <div class="showcase-panel">
-          <label for="randomize">Randomize</label>
-          <button id="randomize-btn">Activate</button>
-        </div>
-        <div class="showcase-panel">
-          <label for="randomize">Rain</label>
-          <button id="rain-btn">Activate</button>
-        </div>
-      </div>
-    </div>
+  <header class="showcase-header">
+    <h1>Interactive Overlay Showcase</h1>
+    <p>Preview bot sources in a mock Twitch layout. Use the controls below the stream to trigger each feature.</p>
+  </header>
 
-    <div class="row">
-
-      <div class="col-8">
-        <div class="showcase-container">
-          <div class="background-sprite-showcase"></div>
-          <div class="randomizer-showcase"></div>
-          <div class="border-showcase background-showcase rain-showcase showcase">
-            <div class="sprite-border-showcase"></div>
-
+  <main class="showcase-main">
+    <section class="stream-column">
+      <div class="stream-stage" id="stream-stage">
+        <div class="stream-stage-inner" id="stream-stage-inner">
+          <div class="stream-layer layer-background-color" id="layer-background-color"></div>
+          <div class="stream-layer layer-background-pattern" id="layer-background-pattern"></div>
+          <div class="stream-layer layer-sprites" id="layer-sprites"></div>
+          <div class="stream-layer layer-randomizer" id="layer-randomizer"></div>
+          <div class="stream-layer layer-pmd-chat" id="layer-pmd-chat">
+            <div id="chat-container" class="chat-up portrait-rounded"></div>
+          </div>
+          <div class="stream-layer layer-rain" id="layer-rain">
+            <div class="rain-gif" id="rain-gif"></div>
+          </div>
+          <div class="stream-chrome">
+            <span class="stream-live-badge">LIVE</span>
+            <span class="stream-title">Frampersand · Overlay Demo</span>
           </div>
         </div>
       </div>
-      <div class="col-4">
-        <div style="width: 100%; height: 450px; border: 1px solid gray; border-radius: 2rem; background-color: black;">
 
-        </div>
+      <section class="controls-panel" aria-label="Overlay controls">
+        <article class="control-card">
+          <h3>Sprite border</h3>
+          <div class="toggle-row">
+            <label for="toggle-sprites">Show layer</label>
+            <input type="checkbox" id="toggle-sprites" checked />
+          </div>
+          <div class="control-row">
+            <input type="number" id="sprite-number" placeholder="Dex # (empty = random)" min="1" max="893" />
+            <button class="btn btn-primary" id="sprite-add-btn" type="button">Add</button>
+          </div>
+          <div class="control-row">
+            <button class="btn" id="sprite-random-btn" type="button">Random</button>
+            <button class="btn btn-ghost" id="sprite-clear-btn" type="button">Clear</button>
+          </div>
+        </article>
+
+        <article class="control-card">
+          <h3>Background</h3>
+          <div class="toggle-row">
+            <label for="toggle-background-color">Color layer</label>
+            <input type="checkbox" id="toggle-background-color" checked />
+          </div>
+          <div class="toggle-row">
+            <label for="toggle-background-pattern">Pattern layer</label>
+            <input type="checkbox" id="toggle-background-pattern" checked />
+          </div>
+          <div class="control-row">
+            <button class="btn" data-color="1a1a2e" type="button">Midnight</button>
+            <button class="btn" data-color="124071" type="button">Ocean</button>
+            <button class="btn" data-color="494981" type="button">PMD</button>
+          </div>
+          <div class="control-row">
+            <input type="text" id="background-color" placeholder="Hex color (e.g. 9146ff)" />
+            <button class="btn btn-primary" id="color-btn" type="button">Apply</button>
+          </div>
+          <div class="control-row">
+            <input type="number" id="pattern-number" placeholder="Dex # (empty = random)" min="1" max="1010" />
+            <button class="btn btn-primary" id="pattern-btn" type="button">Apply</button>
+          </div>
+        </article>
+
+        <article class="control-card">
+          <h3>Randomizer</h3>
+          <div class="toggle-row">
+            <label for="toggle-randomizer">Show layer</label>
+            <input type="checkbox" id="toggle-randomizer" checked />
+          </div>
+          <div class="control-row">
+            <button class="btn btn-primary" id="randomize-btn" type="button">Deal with it!</button>
+          </div>
+        </article>
+
+        <article class="control-card">
+          <h3>Rain</h3>
+          <div class="toggle-row">
+            <label for="toggle-rain">Show layer</label>
+            <input type="checkbox" id="toggle-rain" checked />
+          </div>
+          <div class="control-row">
+            <button class="btn btn-primary" id="rain-btn" type="button">Make it rain</button>
+          </div>
+        </article>
+
+        <article class="control-card">
+          <h3>PMD chat</h3>
+          <div class="toggle-row">
+            <label for="toggle-pmd">Show layer</label>
+            <input type="checkbox" id="toggle-pmd" checked />
+          </div>
+          <div class="toggle-row">
+            <label for="toggle-pmd-sync">Sync with mock chat</label>
+            <input type="checkbox" id="toggle-pmd-sync" checked />
+          </div>
+          <div class="control-row">
+            <button class="btn btn-primary" id="pmd-test-btn" type="button">Test message</button>
+          </div>
+        </article>
+      </section>
+    </section>
+
+    <aside class="chat-column">
+      <div class="chat-header">Stream Chat</div>
+      <div class="chat-messages" id="chat-messages"></div>
+      <div class="chat-input-mock">
+        <input type="text" placeholder="Send a message (mock)" disabled />
       </div>
-    </div>
+    </aside>
+  </main>
 
-
-
-
-
-    <!-- <div class="row">
-
-        <div class="col-12">
-          <div class="border-showcase showcase">
-            <div class="sprite-border-showcase"></div>
-          </div>
-        </div>
-        <div class="col-12">
-          <div class="background-showcase showcase">
-            <div class="background-sprite-showcase"></div>
-          </div>
-        </div>
-        <div class="col-12">
-          <div class="randomizer-showcase-container showcase">
-            <div class="randomizer-showcase"></div>
-          </div>
-        </div>
-        <div class="col">
-          <div class="rain-showcase showcase">
-            <div id="rain-gif"></div>
-          </div>
-        </div>
-      </div> -->
-  </div>
-  <audio id="rain-container" src="../assets/rain.mp4"></audio>
+  <audio id="rain-audio" src="../assets/rain.mp4" preload="auto"></audio>
   <script src="/socket.io/socket.io.js"></script>
+  <script src="../libs/tinycolor/tinycolor.js"></script>
   <script src="index.js" type="module"></script>
 </body>
 

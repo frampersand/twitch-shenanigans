@@ -2,6 +2,7 @@ import { createRainbearerHandler } from "./rainbearer.js";
 import { createDealWithItHandler } from "./dealwithit.js";
 import { createGuessWhosBackHandler } from "./guesswhosback.js";
 import { createPortraitHandler } from "./portrait.js";
+import { createPmdConfigHandler } from "./pmdconfig.js";
 
 export function createCommandHandlers(deps) {
   const { io, rainbearerState } = deps;
@@ -11,5 +12,6 @@ export function createCommandHandlers(deps) {
     "!dealwithit": createDealWithItHandler(io),
     "!guesswhosback": createGuessWhosBackHandler(),
     "!portrait": createPortraitHandler(io),
+    "!pmdconfig": createPmdConfigHandler(io),
   };
 }
