@@ -1,0 +1,76 @@
+name: Deploy to DigitalOcean
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract Docker metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=raw,value=latest
+            type=sha,prefix=
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+
+      - name: Deploy to droplet
+        uses: appleboy/ssh-action@v1
+        env:
+          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GHCR_USER: ${{ github.actor }}
+          BOT_USERNAME: ${{ secrets.BOT_USERNAME }}
+          BOT_AUTH: ${{ secrets.BOT_AUTH }}
+          IMAGE: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+        with:
+          host: ${{ secrets.DROPLET_HOST }}
+          username: ${{ secrets.DROPLET_USER }}
+          key: ${{ secrets.DROPLET_SSH_KEY }}
+          envs: GHCR_TOKEN,GHCR_USER,BOT_USERNAME,BOT_AUTH,IMAGE
+          script: |
+            set -e
+            mkdir -p /opt/twitch-shenanigans/data
+            echo "$GHCR_TOKEN" | docker login ghcr.io -u "$GHCR_USER" --password-stdin
+            docker pull "$IMAGE"
+            docker stop twitch-shenanigans 2>/dev/null || true
+            docker rm twitch-shenanigans 2>/dev/null || true
+            docker run -d \
+              --name twitch-shenanigans \
+              --restart unless-stopped \
+              -p 8080:8080 \
+              -e PORT=8080 \
+              -e BOT_USERNAME="$BOT_USERNAME" \
+              -e BOT_AUTH="$BOT_AUTH" \
+              -v /opt/twitch-shenanigans/data:/app/data \
+              "$IMAGE"

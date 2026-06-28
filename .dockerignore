@@ -1,0 +1,26 @@
+# Control de versiones
+.git
+.gitignore
+.github
+
+# Dependencias (se reinstalan dentro de la imagen)
+node_modules
+npm-debug.log
+
+# Entornos / secretos
+.env
+.env.*
+
+# Archivos de desarrollo y editor
+nodemon.json
+.vscode
+.idea
+*.md
+README.md
+
+# Datos que se montan como volumen en runtime
+data/unite-assets
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
