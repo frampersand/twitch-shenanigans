@@ -1,45 +1,44 @@
-import { cleanString } from "../../public/utils/utils.js";
-import { REWARD_IDS } from "../config/rewards.js";
+import { HOME_CHANNEL } from "../config/channels.js";
+import { cleanString, safeSay } from "../utils/helpers.js";
 import { createRewardHandlers } from "./rewards.js";
 import { createCommandHandlers } from "./commands/index.js";
-import { welcomeMessages } from "../../public/lists/bot-messages.js";
+import { welcomeMessages } from "../../shared/bot-messages.js";
 import { getPortraitUserDataForChannel } from "../services/portrait.js";
 import { EVENTS } from "../socket/events.js";
+import { overlayRoom } from "../socket/rooms.js";
 
 function createMessageHandler(deps) {
   const { client, io } = deps;
-  const rainbearerState = { current: null };
-  const rewardHandlers = createRewardHandlers({ client, io, rainbearerState });
-  const commandHandlers = createCommandHandlers({ io, rainbearerState });
+  const rewardHandlers = createRewardHandlers({ client, io });
+  const commandHandlers = createCommandHandlers({ io });
 
-  return async function onMessageHandler(target, context, msg, self) {
-    if (self) return;
-
-    const isBroadcaster = context?.badges?.broadcaster;
-    const username = context["display-name"];
+  async function handleMessage(target, context, msg) {
+    const isBroadcaster = Boolean(context?.badges?.broadcaster);
+    const username = context["display-name"] || context.username;
+    const login = (context.username || "").toLowerCase();
     const params = cleanString(msg).split(" ");
-    const commandName = cleanString(params[0]);
-    const firstParam = params[1];
+    const rawCommand = cleanString(params[0]);
+    const commandName = rawCommand.toLowerCase();
     const rewardId = context["custom-reward-id"];
 
-    // Handle channel rewards
+    // Handle channel rewards (they get the raw first word: hex colors, dex numbers)
     if (rewardId) {
       const handler = rewardHandlers[rewardId];
       if (handler) {
-        handler(target, context, commandName, username);
+        await handler(target, context, rawCommand, username);
       }
     }
 
     // First-time chatter welcome
-    if (context["first-msg"] && target === "#frampersand") {
+    if (context["first-msg"] && target === HOME_CHANNEL) {
       const welcomeMessage = welcomeMessages(username);
-      client.say(target, welcomeMessage);
+      await safeSay(client, target, welcomeMessage);
     }
 
     // PMD portrait overlay for regular chat (exclude StreamElements and commands)
-    if (username !== "StreamElements" && commandName !== "!portrait" && commandName !== "!pmdconfig") {
+    if (login !== "streamelements" && commandName !== "!portrait" && commandName !== "!pmdconfig") {
       const userDataForChannel = await getPortraitUserDataForChannel(target);
-      io.emit(
+      io.to(overlayRoom(target)).emit(
         EVENTS.PMD_PORTRAIT,
         username,
         msg,
@@ -52,19 +51,20 @@ function createMessageHandler(deps) {
     // Chat commands
     const commandHandler = commandHandlers[commandName];
     if (commandHandler) {
-      if (commandName === "!rainbearer") {
-        commandHandler(client, target);
-      } else if (commandName === "!dealwithit") {
-        commandHandler(client, target, username, firstParam, isBroadcaster);
-      } else if (commandName === "!guesswhosback") {
-        await commandHandler(client, target, username);
-      } else if (commandName === "!portrait") {
-        await commandHandler(client, target, username, params, isBroadcaster);
-      } else if (commandName === "!pmdconfig") {
-        await commandHandler(client, target, username, params, isBroadcaster);
-      }
+      await commandHandler({ client, target, username, login, params, isBroadcaster });
     } else {
       console.log(`[${target}] ${username}: ${msg}`);
+    }
+  }
+
+  return async function onMessageHandler(target, context, msg, self) {
+    if (self) return;
+
+    // tmi.js doesn't await listeners, so a throw here would be an unhandled rejection and kill the process
+    try {
+      await handleMessage(target, context, msg);
+    } catch (err) {
+      console.error(`[${target}] failed to handle message:`, err);
     }
   };
 }

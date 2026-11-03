@@ -1,7 +1,9 @@
 import { truncateString } from '../../utils/utils.js';
 
 const getPortrait = (data) => {
-    let queryParams = data ? `?portrait=${data.portrait}&variant=${data.variant}` : '';
+    let queryParams = data
+        ? `?portrait=${encodeURIComponent(data.portrait)}&variant=${encodeURIComponent(data.variant)}`
+        : '';
     return fetch(`/portrait${queryParams}`)
         .then((response) => {
             if (!response.ok) {
@@ -9,7 +11,7 @@ const getPortrait = (data) => {
             }
             return response.json();
         })
-        .then((data) => `../../../assets/portrait/${data.file}`)
+        .then((data) => data.url)
         .catch((error) => {
             console.error(error);
             return null;
@@ -19,7 +21,7 @@ const getPortrait = (data) => {
 
 
 
-const generatePortrait = async (message, username, userBase, context = { color: '#494981' }) => {
+const generatePortrait = async (message, username, userBase = [], context = { color: '#494981' }) => {
     const { color } = context;
     const userData = userBase.find((user) => user.username.toLowerCase() === username.toLowerCase());
     // if (userData){

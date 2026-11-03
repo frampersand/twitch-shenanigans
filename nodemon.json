@@ -1,4 +1,4 @@
 {
-  "watch": ["index.js", "src", "public"],
+  "watch": ["index.js", "src", "shared", "public"],
   "ignore": ["data"]
 }

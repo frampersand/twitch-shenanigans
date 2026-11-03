@@ -104,10 +104,9 @@ dist
 .tern-port
 
 .DS_Store
-package-lock.json
 
 # Personal backlog (not for repo)
 BACKLOG.md
 
-# Cached Pokemon UNITE sprites (persist via Docker volume)
-data/unite-assets/
+# Runtime state written by the bot (lives in the Docker volume in production)
+data/rainbearer.json

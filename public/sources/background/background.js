@@ -1,5 +1,5 @@
-import tinycolor from "https://esm.sh/tinycolor2";
-import { getPokemonIconUrl, getPokemonSpriteName } from "../../utils/pokemonIcons.js";
+// tinycolor is loaded as a global from /libs/tinycolor/tinycolor.js by the host page
+import { getPokemonIconUrl, getPokemonSpriteName } from "/shared/pokemonIcons.js";
 import { mountClusterPattern } from "./clusterPattern.js";
 
 const changeBackgroundSprite = (number, target) => {

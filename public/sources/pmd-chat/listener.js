@@ -1,6 +1,7 @@
 import { generatePortrait } from "./index.js";
 import { startMockChat } from "./mock.js";
 import { applyChannelSettings } from "./layout.js";
+import { joinOverlayChannel } from "../../utils/overlayChannel.js";
 
 const urlParams = new URLSearchParams(window.location.search);
 const channelNameSource = urlParams.get("channel");
@@ -12,7 +13,7 @@ const PMD_CONFIG_REQUEST_EVENT = "pmd-config-request";
 const PMD_CONFIG_EVENT = "pmd-config";
 
 function isActiveChannel(channelName) {
-    return Boolean(channelNameSource) && channelName === channelNameSource;
+    return Boolean(channelNameSource) && channelName.toLowerCase() === channelNameSource.toLowerCase();
 }
 
 function tryStartMock() {
@@ -40,5 +41,6 @@ applyChannelSettings();
 if (!channelNameSource) {
     console.warn("[pmd-chat] missing ?channel= URL param — source will not render messages or load config");
 } else {
+    joinOverlayChannel(socket, channelNameSource);
     socket.emit(PMD_CONFIG_REQUEST_EVENT, channelNameSource);
 }

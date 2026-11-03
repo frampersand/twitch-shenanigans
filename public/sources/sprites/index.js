@@ -1,9 +1,11 @@
-import { genderCases, unownCases, burmyCases, deerlingCases, vivillonCases, flabebeCases, pumpkabooCases, oricorioCases, lycanrocCases, cramorantCases } from '../../lists/variation-cases.js';
+import { unownCases, burmyCases, deerlingCases, vivillonCases, flabebeCases, pumpkabooCases, oricorioCases, lycanrocCases, cramorantCases } from '../../lists/variation-cases.js';
 import { positions } from '../../lists/positions.js';
 import { getRandomArrayElement } from '../../utils/utils.js';
-import { getPokemonSpriteName } from '../../utils/pokemonIcons.js';
+import { getPokemonSpriteName } from '/shared/pokemonIcons.js';
+import { getOverlayChannel, joinOverlayChannel } from '../../utils/overlayChannel.js';
 
 let socket = io();
+joinOverlayChannel(socket, getOverlayChannel());
 let customPositionPool = null;
 let currentSprites = [...positions];
 

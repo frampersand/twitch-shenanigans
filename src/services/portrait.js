@@ -1,21 +1,26 @@
-import path from "path";
-import { promises as fs } from "fs";
 import { config } from "../config/index.js";
+import { pmdManifestUrl } from "../../shared/cdn.js";
+import { readJson, updateJson } from "../utils/jsonStore.js";
+import { getRandomItem } from "../utils/helpers.js";
 
-const { portraitUserbasePath, portraitsFolder } = config;
+const { portraitUserbasePath, cdnBaseUrl } = config;
 
-function getRandomItem(arr) {
-  return arr[Math.floor(Math.random() * arr.length)];
-}
+export class PortraitNotFoundError extends Error {}
+
+/**
+ * In-memory copy of the userbase. This process is the only writer, so it's loaded
+ * once and kept in sync on every update (restart to pick up manual edits).
+ */
+let userDataCache = null;
 
 export async function getPortraitUserData() {
-  try {
-    const contents = await fs.readFile(portraitUserbasePath, "utf-8");
-    return JSON.parse(contents);
-  } catch (err) {
-    if (err.code === "ENOENT") return [];
-    throw err;
+  if (!userDataCache) {
+    userDataCache = readJson(portraitUserbasePath, []).catch((err) => {
+      userDataCache = null;
+      throw err;
+    });
   }
+  return userDataCache;
 }
 
 export async function getPortraitUserDataForChannel(channel) {
@@ -24,15 +29,6 @@ export async function getPortraitUserDataForChannel(channel) {
 }
 
 export async function updatePortraitUser({ username, portrait, variant, target }) {
-  let data = [];
-
-  try {
-    const contents = await fs.readFile(portraitUserbasePath, "utf-8");
-    data = JSON.parse(contents);
-  } catch (err) {
-    if (err.code !== "ENOENT") throw err;
-  }
-
   const newUserData = {
     username,
     portrait: portrait || "",
@@ -40,51 +36,63 @@ export async function updatePortraitUser({ username, portrait, variant, target }
     channel: target,
   };
 
-  const existingIndex = data.findIndex(
-    (user) => user.username === username && user.channel === target
-  );
+  const next = await updateJson(portraitUserbasePath, [], (data) => {
+    const existingIndex = data.findIndex(
+      (user) => user.username.toLowerCase() === username.toLowerCase() && user.channel === target
+    );
 
-  if (existingIndex !== -1) {
-    data[existingIndex] = { ...data[existingIndex], ...newUserData };
-  } else {
-    data.push(newUserData);
-  }
+    if (existingIndex !== -1) {
+      data[existingIndex] = { ...data[existingIndex], ...newUserData };
+    } else {
+      data.push(newUserData);
+    }
+    return data;
+  });
 
-  await fs.writeFile(portraitUserbasePath, JSON.stringify(data, null, 2));
+  userDataCache = Promise.resolve(next);
   return newUserData;
 }
 
-/** Get a portrait file path (folder/variant.png) for API response */
+/** How long a fetched portrait manifest is trusted before re-fetching */
+const MANIFEST_TTL_MS = 6 * 60 * 60 * 1000;
+let manifestCache = null;
+
+/**
+ * The CDN's PMD manifest maps each portrait folder ("0025") to its emotions ("Happy").
+ * Kept in memory; if a refresh fails, the last good copy keeps serving.
+ */
+async function getPortraitManifest() {
+  if (manifestCache && Date.now() - manifestCache.loadedAt < MANIFEST_TTL_MS) {
+    return manifestCache.portraits;
+  }
+
+  try {
+    const response = await fetch(pmdManifestUrl(cdnBaseUrl));
+    if (!response.ok) throw new Error(`PMD manifest request failed with status ${response.status}`);
+    const { portraits } = await response.json();
+    manifestCache = { loadedAt: Date.now(), portraits };
+  } catch (err) {
+    if (!manifestCache) throw err;
+    console.error("Failed to refresh PMD manifest, keeping the cached one:", err.message);
+    manifestCache.loadedAt = Date.now();
+  }
+  return manifestCache.portraits;
+}
+
+/** Get a portrait file path (folder/emotion.png) relative to the CDN's portrait folder */
 export async function getPortraitFile(portraitNumber = 0, variant = "") {
-  let folder;
-  if (!portraitNumber) {
-    const entries = await fs.readdir(portraitsFolder, { withFileTypes: true });
-    const folders = entries
-      .filter((e) => e.isDirectory())
-      .map((e) => e.name);
-    if (folders.length === 0) {
-      throw new Error("No subfolders found.");
-    }
-    folder = getRandomItem(folders);
-  } else {
-    folder = String(portraitNumber).padStart(4, "0");
+  const portraits = await getPortraitManifest();
+  const folder = portraitNumber
+    ? String(portraitNumber).padStart(4, "0")
+    : getRandomItem(Object.keys(portraits));
+
+  const emotions = portraits[folder];
+  if (!emotions?.length) {
+    throw new PortraitNotFoundError(`No portrait folder: ${folder}`);
   }
 
-  const folderPath = path.join(portraitsFolder, folder);
-  const files = await fs.readdir(folderPath);
-  const pngFiles = files.filter(
-    (file) => path.extname(file).toLowerCase() === ".png"
+  const variantMatch = variant && emotions.find(
+    (emotion) => emotion.toLowerCase() === variant.toLowerCase()
   );
-
-  if (pngFiles.length === 0) {
-    throw new Error(`No .png files in folder: ${folder}`);
-  }
-
-  let selectedVariant;
-  const variantMatch = variant && pngFiles.find(
-    (v) => v.toLowerCase() === `${variant.toLowerCase()}.png`
-  );
-  selectedVariant = variantMatch || getRandomItem(pngFiles);
-
-  return path.join(folder, selectedVariant);
+  return `${folder}/${variantMatch || getRandomItem(emotions)}.png`;
 }

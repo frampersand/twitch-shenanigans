@@ -1,9 +1,6 @@
 let cachedRoster = null;
 
-export function invalidateUniteRosterCache() {
-  cachedRoster = null;
-}
-
+/** Roster entries carry their CDN image URL (`entry.image`) */
 export async function loadUniteRoster() {
   if (cachedRoster) return cachedRoster;
 
@@ -14,16 +11,4 @@ export async function loadUniteRoster() {
 
   cachedRoster = await response.json();
   return cachedRoster;
-}
-
-export function getPokemonImagePath(imageOrEntry) {
-  if (typeof imageOrEntry === "object" && imageOrEntry?.image) {
-    return imageOrEntry.image;
-  }
-
-  if (typeof imageOrEntry === "string" && imageOrEntry.startsWith("/")) {
-    return imageOrEntry;
-  }
-
-  return `/unite-assets/${imageOrEntry}.png`;
 }

@@ -1,13 +1,19 @@
-export function createRainbearerHandler(rainbearerState) {
-  return (client, target) => {
-    if (target !== "#frampersand") return;
+import { HOME_CHANNEL } from "../../config/channels.js";
+import { getRainbearer } from "../../services/rainbearer.js";
+import { safeSay } from "../../utils/helpers.js";
 
-    if (!rainbearerState.current) {
-      client.say(target, `There's currently not a rainbearer yet`);
+export function createRainbearerHandler() {
+  return async ({ client, target }) => {
+    if (target !== HOME_CHANNEL) return;
+
+    const rainbearer = await getRainbearer(target);
+    if (!rainbearer) {
+      await safeSay(client, target, `There's currently not a rainbearer yet`);
     } else {
-      client.say(
+      await safeSay(
+        client,
         target,
-        `The current Rainbearer is ${rainbearerState.current}, pay your respects if you may, for they brought the downpour sounds for our enjoyment!`
+        `The current Rainbearer is ${rainbearer}, pay your respects if you may, for they brought the downpour sounds for our enjoyment!`
       );
     }
   };

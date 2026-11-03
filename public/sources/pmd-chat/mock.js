@@ -1,7 +1,7 @@
 import { generatePortrait } from "./index.js";
 import { truncateString } from "../../utils/utils.js";
 import { loadUniteRoster } from "../../utils/loadUniteRoster.js";
-import { randomizerMessages } from "../../lists/bot-messages.js";
+import { randomizerMessages } from "/shared/bot-messages.js";
 
 const DEFAULT_USERBASE = [
     {

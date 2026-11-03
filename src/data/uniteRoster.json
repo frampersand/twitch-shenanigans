@@ -1,0 +1,487 @@
+[
+  {
+    "id": "absol",
+    "name": "Absol",
+    "role": "speedster"
+  },
+  {
+    "id": "aegislash",
+    "name": "Aegislash",
+    "role": "allrounder"
+  },
+  {
+    "id": "alcremie",
+    "name": "Alcremie",
+    "role": "speedster"
+  },
+  {
+    "id": "ninetales-alolan",
+    "name": "Alolan Ninetales",
+    "role": "allrounder"
+  },
+  {
+    "id": "raichu-alolan",
+    "name": "Alolan Raichu",
+    "role": "attacker"
+  },
+  {
+    "id": "armarouge",
+    "name": "Armarouge",
+    "role": "attacker"
+  },
+  {
+    "id": "articuno",
+    "name": "Articuno",
+    "role": "allrounder"
+  },
+  {
+    "id": "azumarill",
+    "name": "Azumarill",
+    "role": "allrounder"
+  },
+  {
+    "id": "blastoise",
+    "name": "Blastoise",
+    "role": "defender"
+  },
+  {
+    "id": "blaziken",
+    "name": "Blaziken",
+    "role": "allrounder"
+  },
+  {
+    "id": "blissey",
+    "name": "Blissey",
+    "role": "supporter"
+  },
+  {
+    "id": "buzzwole",
+    "name": "Buzzwole",
+    "role": "allrounder"
+  },
+  {
+    "id": "ceruledge",
+    "name": "Ceruledge",
+    "role": "allrounder"
+  },
+  {
+    "id": "chandelure",
+    "name": "Chandelure",
+    "role": "attacker"
+  },
+  {
+    "id": "charizard",
+    "name": "Charizard",
+    "role": "allrounder"
+  },
+  {
+    "id": "cinderace",
+    "name": "Cinderace",
+    "role": "attacker"
+  },
+  {
+    "id": "clefable",
+    "name": "Clefable",
+    "role": "supporter"
+  },
+  {
+    "id": "comfey",
+    "name": "Comfey",
+    "role": "supporter"
+  },
+  {
+    "id": "cramorant",
+    "name": "Cramorant",
+    "role": "attacker"
+  },
+  {
+    "id": "crustle",
+    "name": "Crustle",
+    "role": "defender"
+  },
+  {
+    "id": "darkrai",
+    "name": "Darkrai",
+    "role": "speedster"
+  },
+  {
+    "id": "decidueye",
+    "name": "Decidueye",
+    "role": "attacker"
+  },
+  {
+    "id": "delphox",
+    "name": "Delphox",
+    "role": "attacker"
+  },
+  {
+    "id": "dhelmise",
+    "name": "Dhelmise",
+    "role": "supporter"
+  },
+  {
+    "id": "dodrio",
+    "name": "Dodrio",
+    "role": "speedster"
+  },
+  {
+    "id": "dragapult",
+    "name": "Dragapult",
+    "role": "attacker"
+  },
+  {
+    "id": "dragonite",
+    "name": "Dragonite",
+    "role": "allrounder"
+  },
+  {
+    "id": "duraludon",
+    "name": "Duraludon",
+    "role": "attacker"
+  },
+  {
+    "id": "eldegoss",
+    "name": "Eldegoss",
+    "role": "supporter"
+  },
+  {
+    "id": "empoleon",
+    "name": "Empoleon",
+    "role": "supporter"
+  },
+  {
+    "id": "espeon",
+    "name": "Espeon",
+    "role": "attacker"
+  },
+  {
+    "id": "falinks",
+    "name": "Falinks",
+    "role": "allrounder"
+  },
+  {
+    "id": "feraligatr",
+    "name": "Feraligatr",
+    "role": "supporter"
+  },
+  {
+    "id": "rapidash-galarian",
+    "name": "Galarian Rapidash",
+    "role": "speedster"
+  },
+  {
+    "id": "garchomp",
+    "name": "Garchomp",
+    "role": "allrounder"
+  },
+  {
+    "id": "gardevoir",
+    "name": "Gardevoir",
+    "role": "attacker"
+  },
+  {
+    "id": "gengar",
+    "name": "Gengar",
+    "role": "speedster"
+  },
+  {
+    "id": "glaceon",
+    "name": "Glaceon",
+    "role": "attacker"
+  },
+  {
+    "id": "goodra",
+    "name": "Goodra",
+    "role": "defender"
+  },
+  {
+    "id": "greedent",
+    "name": "Greedent",
+    "role": "defender"
+  },
+  {
+    "id": "greninja",
+    "name": "Greninja",
+    "role": "attacker"
+  },
+  {
+    "id": "gyarados",
+    "name": "Gyarados",
+    "role": "allrounder"
+  },
+  {
+    "id": "ho-oh",
+    "name": "Ho-oh",
+    "role": "defender"
+  },
+  {
+    "id": "hoopa",
+    "name": "Hoopa",
+    "role": "supporter"
+  },
+  {
+    "id": "inteleon",
+    "name": "Inteleon",
+    "role": "attacker"
+  },
+  {
+    "id": "lapras",
+    "name": "Lapras",
+    "role": "defender"
+  },
+  {
+    "id": "latias",
+    "name": "Latias",
+    "role": "speedster"
+  },
+  {
+    "id": "latios",
+    "name": "Latios",
+    "role": "supporter"
+  },
+  {
+    "id": "leafeon",
+    "name": "Leafeon",
+    "role": "speedster"
+  },
+  {
+    "id": "lucario",
+    "name": "Lucario",
+    "role": "allrounder"
+  },
+  {
+    "id": "machamp",
+    "name": "Machamp",
+    "role": "allrounder"
+  },
+  {
+    "id": "mamoswine",
+    "name": "Mamoswine",
+    "role": "defender"
+  },
+  {
+    "id": "charizard-mega-x",
+    "name": "Mega Charizard X",
+    "role": "supporter"
+  },
+  {
+    "id": "charizard-mega-y",
+    "name": "Mega Charizard Y",
+    "role": "supporter"
+  },
+  {
+    "id": "gyarados-mega",
+    "name": "Mega Gyarados",
+    "role": "attacker"
+  },
+  {
+    "id": "lucario-mega",
+    "name": "Mega Lucario",
+    "role": "attacker"
+  },
+  {
+    "id": "mewtwo-mega-x",
+    "name": "Mega Mewtwo X",
+    "role": "attacker"
+  },
+  {
+    "id": "mewtwo-mega-y",
+    "name": "Mega Mewtwo Y",
+    "role": "supporter"
+  },
+  {
+    "id": "meganium",
+    "name": "Meganium",
+    "role": "speedster"
+  },
+  {
+    "id": "meowscarada",
+    "name": "Meowscarada",
+    "role": "speedster"
+  },
+  {
+    "id": "meowth",
+    "name": "Meowth",
+    "role": "supporter"
+  },
+  {
+    "id": "metagross",
+    "name": "Metagross",
+    "role": "allrounder"
+  },
+  {
+    "id": "mew",
+    "name": "Mew",
+    "role": "attacker"
+  },
+  {
+    "id": "mewtwo-mega-x",
+    "name": "Mewtwo X",
+    "role": "allrounder"
+  },
+  {
+    "id": "mewtwo-mega-y",
+    "name": "Mewtwo Y",
+    "role": "attacker"
+  },
+  {
+    "id": "mimikyu",
+    "name": "Mimikyu",
+    "role": "allrounder"
+  },
+  {
+    "id": "miraidon",
+    "name": "Miraidon",
+    "role": "attacker"
+  },
+  {
+    "id": "moltres",
+    "name": "Moltres",
+    "role": "attacker"
+  },
+  {
+    "id": "mr-mime",
+    "name": "Mr. Mime",
+    "role": "supporter"
+  },
+  {
+    "id": "ninetales",
+    "name": "Ninetales",
+    "role": "attacker"
+  },
+  {
+    "id": "pawmot",
+    "name": "Pawmot",
+    "role": "attacker"
+  },
+  {
+    "id": "pikachu",
+    "name": "Pikachu",
+    "role": "attacker"
+  },
+  {
+    "id": "psyduck",
+    "name": "Psyduck",
+    "role": "supporter"
+  },
+  {
+    "id": "quaquaval",
+    "name": "Quaquaval",
+    "role": "attacker"
+  },
+  {
+    "id": "sableye",
+    "name": "Sableye",
+    "role": "supporter"
+  },
+  {
+    "id": "scizor",
+    "name": "Scizor",
+    "role": "allrounder"
+  },
+  {
+    "id": "sirfetchd",
+    "name": "Sirfetch'd",
+    "role": "attacker"
+  },
+  {
+    "id": "skeledirge",
+    "name": "Skeledirge",
+    "role": "supporter"
+  },
+  {
+    "id": "slowbro",
+    "name": "Slowbro",
+    "role": "defender"
+  },
+  {
+    "id": "snorlax",
+    "name": "Snorlax",
+    "role": "defender"
+  },
+  {
+    "id": "suicune",
+    "name": "Suicune",
+    "role": "allrounder"
+  },
+  {
+    "id": "sylveon",
+    "name": "Sylveon",
+    "role": "attacker"
+  },
+  {
+    "id": "talonflame",
+    "name": "Talonflame",
+    "role": "speedster"
+  },
+  {
+    "id": "tinkaton",
+    "name": "Tinkaton",
+    "role": "allrounder"
+  },
+  {
+    "id": "trevenant",
+    "name": "Trevenant",
+    "role": "defender"
+  },
+  {
+    "id": "tsareena",
+    "name": "Tsareena",
+    "role": "allrounder"
+  },
+  {
+    "id": "typhlosion",
+    "name": "Typhlosion",
+    "role": "supporter"
+  },
+  {
+    "id": "tyranitar",
+    "name": "Tyranitar",
+    "role": "allrounder"
+  },
+  {
+    "id": "umbreon",
+    "name": "Umbreon",
+    "role": "defender"
+  },
+  {
+    "id": "urshifu",
+    "name": "Urshifu",
+    "role": "allrounder"
+  },
+  {
+    "id": "vaporeon",
+    "name": "Vaporeon",
+    "role": "allrounder"
+  },
+  {
+    "id": "venusaur",
+    "name": "Venusaur",
+    "role": "attacker"
+  },
+  {
+    "id": "wigglytuff",
+    "name": "Wigglytuff",
+    "role": "supporter"
+  },
+  {
+    "id": "zacian",
+    "name": "Zacian",
+    "role": "allrounder"
+  },
+  {
+    "id": "zapdos",
+    "name": "Zapdos",
+    "role": "supporter"
+  },
+  {
+    "id": "zeraora",
+    "name": "Zeraora",
+    "role": "speedster"
+  },
+  {
+    "id": "zoroark",
+    "name": "Zoroark",
+    "role": "speedster"
+  }
+]

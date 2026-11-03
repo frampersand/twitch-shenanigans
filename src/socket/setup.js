@@ -1,42 +1,56 @@
+import { HOME_CHANNEL } from "../config/channels.js";
 import { EVENTS } from "./events.js";
+import { overlayRoom, randomizerRoom, toJoinedChannel } from "./rooms.js";
 import { getPmdPreferencesForChannel } from "../services/pmdChatPreferences.js";
-import { handleRandomizerConnect } from "../services/uniteRoster/connectSync.js";
+import { getPortraitUserDataForChannel } from "../services/portrait.js";
+import { isValidAdminToken } from "../services/adminAuth.js";
+import { randomizeForPlayer } from "../services/randomizer.js";
 
-export function setupSocketHandlers(io, client) {
+const HEX_COLOR = /^#?([0-9a-f]{3}){1,2}$/i;
+const MAX_TEXT_LENGTH = 500;
+const ADMIN_DEFAULT_CHANNEL = HOME_CHANNEL;
+
+function isShortString(value, max = MAX_TEXT_LENGTH) {
+  return typeof value === "string" && value.length > 0 && value.length <= max;
+}
+
+/**
+ * Socket clients are overlays (read-only listeners) and the admin panel.
+ * Overlays join their channel's room and only receive that channel's events.
+ * Anything that changes what's on stream requires the admin token in the handshake.
+ * The bot never says anything a socket client sent it.
+ */
+export function setupSocketHandlers(io) {
   io.on("connection", (socket) => {
-    console.log("A user connected");
+    const isAdmin = isValidAdminToken(socket.handshake.auth?.token);
+    console.log(`A user connected${isAdmin ? " (admin)" : ""}`);
+    // Tell the admin panel whether its token worked (overlays send no token and get nothing)
+    if (socket.handshake.auth?.token) {
+      socket.emit(EVENTS.ADMIN_STATUS, isAdmin);
+    }
     socket.on("disconnect", () => {
       console.log("A user disconnected");
     });
 
-    socket.on(EVENTS.SPRITE_NUMBER, (number) => {
-      io.emit(EVENTS.SPRITE_NUMBER, number);
-    });
-
-    socket.on(EVENTS.RANDOMIZE, (username, target) => {
-      io.emit(EVENTS.RANDOMIZE, username, target);
-    });
-
-    socket.on(EVENTS.RANDOMIZER_CONNECT, async (channel) => {
-      try {
-        const result = await handleRandomizerConnect(channel);
-        if (!result.skipped && result.added?.length) {
-          console.log(
-            `Unite roster sync added ${result.added.length} pokemon: ${result.added.join(", ")}`
-          );
-          io.emit(EVENTS.UNITE_ROSTER_UPDATED);
-        }
-      } catch (err) {
-        console.error("Randomizer connect sync failed:", err);
+    socket.on(EVENTS.OVERLAY_CONNECT, (channel) => {
+      const joinedChannel = toJoinedChannel(channel);
+      if (!joinedChannel) {
+        console.warn(`Overlay tried to join unknown channel: ${JSON.stringify(channel)}`);
+        return;
       }
+      socket.join(overlayRoom(joinedChannel));
     });
 
-    socket.on(EVENTS.PMD_PORTRAIT, (username, message) => {
-      io.emit(EVENTS.PMD_PORTRAIT, username, message);
+    socket.on(EVENTS.RANDOMIZER_CONNECT, (channel) => {
+      const joinedChannel = toJoinedChannel(channel);
+      if (!joinedChannel) return;
+
+      socket.join(overlayRoom(joinedChannel));
+      socket.join(randomizerRoom(joinedChannel));
     });
 
     socket.on(EVENTS.PMD_CONFIG_REQUEST, async (channel) => {
-      if (!channel) {
+      if (!isShortString(channel, 26)) {
         socket.emit(EVENTS.PMD_CONFIG, "", {});
         return;
       }
@@ -52,8 +66,65 @@ export function setupSocketHandlers(io, client) {
       }
     });
 
-    socket.on(EVENTS.RANDOMIZED, (channel, message) => {
-      client.say(channel, message);
+    if (!isAdmin) return;
+
+    // Admin panel test triggers: each takes an optional channel as its last argument
+    const adminRoom = (channel) => {
+      const joinedChannel = toJoinedChannel(channel ?? ADMIN_DEFAULT_CHANNEL);
+      return joinedChannel && io.to(overlayRoom(joinedChannel));
+    };
+
+    socket.on(EVENTS.SPRITE_NUMBER, (number, channel) => {
+      const room = adminRoom(channel);
+      if (!room || !Number.isInteger(Number(number))) return;
+      room.emit(EVENTS.SPRITE_NUMBER, String(number));
+    });
+
+    socket.on(EVENTS.COLOR, (color, channel) => {
+      const room = adminRoom(channel);
+      if (!room || !isShortString(color, 7) || !HEX_COLOR.test(color)) return;
+      room.emit(EVENTS.COLOR, color.replace(/^#/, ""));
+    });
+
+    socket.on(EVENTS.PATTERN, (number, channel) => {
+      const room = adminRoom(channel);
+      const parsed = parseInt(number, 10);
+      if (!room || !Number.isInteger(parsed)) return;
+      room.emit(EVENTS.PATTERN, parsed);
+    });
+
+    socket.on(EVENTS.RAIN, (channel) => {
+      const room = adminRoom(channel);
+      if (room) room.emit(EVENTS.RAIN);
+    });
+
+    socket.on(EVENTS.RANDOMIZE, async (username, channel) => {
+      const joinedChannel = toJoinedChannel(channel ?? ADMIN_DEFAULT_CHANNEL);
+      if (!isShortString(username, 25) || !joinedChannel) return;
+      try {
+        // Test roll: shows on the overlay but stays out of chat
+        await randomizeForPlayer({ io, channel: joinedChannel, player: username, announce: false });
+      } catch (err) {
+        console.error("Admin randomize failed:", err);
+      }
+    });
+
+    socket.on(EVENTS.PMD_PORTRAIT, async (username, message, channel) => {
+      const joinedChannel = toJoinedChannel(channel ?? ADMIN_DEFAULT_CHANNEL);
+      if (!isShortString(username, 25) || !isShortString(message) || !joinedChannel) return;
+      try {
+        const userBase = await getPortraitUserDataForChannel(joinedChannel);
+        io.to(overlayRoom(joinedChannel)).emit(
+          EVENTS.PMD_PORTRAIT,
+          username,
+          message,
+          userBase,
+          { color: "#494981" },
+          joinedChannel
+        );
+      } catch (err) {
+        console.error("Admin PMD portrait failed:", err);
+      }
     });
   });
 }

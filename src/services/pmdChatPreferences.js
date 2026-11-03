@@ -1,4 +1,4 @@
-import { promises as fs } from "fs";
+import { readJson, updateJson } from "../utils/jsonStore.js";
 import { config } from "../config/index.js";
 
 const { pmdChatPreferencesPath } = config;
@@ -107,17 +107,7 @@ function mergeChannelData(data) {
 }
 
 async function getPreferencesData() {
-  try {
-    const contents = await fs.readFile(pmdChatPreferencesPath, "utf-8");
-    return mergeChannelData(JSON.parse(contents));
-  } catch (err) {
-    if (err.code === "ENOENT") return [];
-    throw err;
-  }
-}
-
-async function persistPreferencesData(data) {
-  await fs.writeFile(pmdChatPreferencesPath, JSON.stringify(mergeChannelData(data), null, 2));
+  return mergeChannelData(await readJson(pmdChatPreferencesPath, []));
 }
 
 export async function getPmdPreferencesForChannel(target) {
@@ -137,29 +127,32 @@ export async function updatePmdPreference({ target, preference, value }) {
     return { error: parsed.error };
   }
 
-  const data = await getPreferencesData();
   const normalizedTarget = normalizeChannel(target);
-  const existingIndex = data.findIndex(
-    (entry) => normalizeChannel(entry.channel) === normalizedTarget
-  );
 
-  if (existingIndex === -1) {
-    data.push({
-      channel: normalizedTarget,
-      preferences: { [parsed.preference]: parsed.value },
-    });
-  } else {
-    data[existingIndex] = {
-      ...data[existingIndex],
-      channel: normalizedTarget,
-      preferences: {
-        ...(data[existingIndex].preferences || {}),
-        [parsed.preference]: parsed.value,
-      },
-    };
-  }
+  await updateJson(pmdChatPreferencesPath, [], (raw) => {
+    const data = mergeChannelData(raw);
+    const existingIndex = data.findIndex(
+      (entry) => normalizeChannel(entry.channel) === normalizedTarget
+    );
 
-  await persistPreferencesData(data);
+    if (existingIndex === -1) {
+      data.push({
+        channel: normalizedTarget,
+        preferences: { [parsed.preference]: parsed.value },
+      });
+    } else {
+      data[existingIndex] = {
+        ...data[existingIndex],
+        channel: normalizedTarget,
+        preferences: {
+          ...(data[existingIndex].preferences || {}),
+          [parsed.preference]: parsed.value,
+        },
+      };
+    }
+    return mergeChannelData(data);
+  });
+
   return { value: parsed.value, preference: parsed.preference };
 }
 

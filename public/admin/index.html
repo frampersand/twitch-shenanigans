@@ -22,6 +22,12 @@
         gap: 0.5rem;
         align-items: center;
       }
+      .toolbar {
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+        margin-bottom: 1rem;
+      }
       .panel button {
         padding: 0.4rem;
         border: 1px solid #ddd;
@@ -30,6 +36,11 @@
     </style>
   </head>
   <body>
+    <div class="toolbar">
+      <label for="channel">Channel</label>
+      <input type="text" id="channel" value="frampersand" />
+      <span id="admin-status">Connecting…</span>
+    </div>
     <div class="container">
       <div class="panel">
         <label for="sprite">Sprite</label>
@@ -63,7 +74,34 @@
 
     <script src="/socket.io/socket.io.js"></script>
     <script>
-      var socket = io();
+      // Admin events need ADMIN_TOKEN. Open as /admin/#token=... or enter it when prompted.
+      function getAdminToken() {
+        var fromHash = new URLSearchParams(location.hash.slice(1)).get("token");
+        if (fromHash) {
+          history.replaceState(null, "", location.pathname + location.search);
+        }
+        var stored = null;
+        try { stored = sessionStorage.getItem("adminToken"); } catch (e) {}
+        var token = fromHash || stored || window.prompt("Admin token") || "";
+        try { sessionStorage.setItem("adminToken", token); } catch (e) {}
+        return token;
+      }
+
+      var socket = io({ auth: { token: getAdminToken() } });
+
+      socket.on("admin-status", function (isAdmin) {
+        document.getElementById("admin-status").textContent = isAdmin
+          ? "Admin token accepted"
+          : "Admin token rejected: reload and enter the right one";
+        if (!isAdmin) {
+          try { sessionStorage.removeItem("adminToken"); } catch (e) {}
+        }
+      });
+
+      // Target channel for every trigger; the server ignores channels the bot hasn't joined
+      function channel() {
+        return "#" + document.getElementById("channel").value.trim().replace(/^#/, "").toLowerCase();
+      }
 
       document
         .getElementById("sprite-btn")
@@ -72,7 +110,7 @@
           const number = numberTextbox.value
             ? numberTextbox.value
             : Math.floor(Math.random() * (800 - 0 + 1) + 0);
-          socket.emit("sprite-number", number);
+          socket.emit("sprite-number", number, channel());
         });
 
       document
@@ -80,7 +118,7 @@
         .addEventListener("click", function () {
           const numberTextbox = document.getElementById("color");
           const number = numberTextbox.value;
-          socket.emit("color", number);
+          socket.emit("color", number, channel());
         });
 
       document
@@ -88,27 +126,27 @@
         .addEventListener("click", function () {
           const numberTextbox = document.getElementById("pattern");
           const number = numberTextbox.value;
-          socket.emit("pattern", number);
+          socket.emit("pattern", number, channel());
         });
 
-        document
+      document
         .getElementById("randomize-btn")
         .addEventListener("click", function () {
-          socket.emit("randomize", 'Frampersand', '#showcase');
-        });
-        
-        document
-        .getElementById("rain-btn")
-        .addEventListener("click", function () {
-          socket.emit("rain");
+          socket.emit("randomize", "Frampersand", channel());
         });
 
-        document
+      document
+        .getElementById("rain-btn")
+        .addEventListener("click", function () {
+          socket.emit("rain", channel());
+        });
+
+      document
         .getElementById("pmd-portrait-btn")
         .addEventListener("click", function () {
           const messageTextbox = document.getElementById("pmd-message");
           const message = messageTextbox.value;
-          socket.emit("pmd-portrait", "frampersand", message);
+          socket.emit("pmd-portrait", "Frampersand", message, channel());
         });
     </script>
   </body>

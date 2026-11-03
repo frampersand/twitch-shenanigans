@@ -1,9 +1,8 @@
 import tmi from "tmi.js";
 import { config } from "../config/index.js";
-import { channels } from "../../data/channels.js";
+import { channels } from "../config/channels.js";
 import { createMessageHandler } from "./messageHandler.js";
-import { setupSocketHandlers } from "../socket/setup.js";
-import { pause } from "../utils/helpers.js";
+import { pause, safeSay } from "../utils/helpers.js";
 
 function createTwitchClient(io) {
   const opts = {
@@ -22,15 +21,18 @@ function createTwitchClient(io) {
     console.log(`* Connected to ${addr}:${port}`);
   });
   client.on("raided", async (channel, username, viewers) => {
-    client.say(
+    await safeSay(
+      client,
       channel,
       `OI! ${username} with the RAAAAID!! welcome to you and your ${viewers} viewers!`
     );
     await pause(1500);
-    client.say(channel, `!so ${username}`);
+    await safeSay(client, channel, `!so ${username}`);
   });
 
-  client.connect();
+  client.connect().catch((err) => {
+    console.error("[twitch] could not connect:", err?.message ?? err);
+  });
   return client;
 }
 

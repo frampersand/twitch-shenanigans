@@ -1,4 +1,5 @@
 import { EVENTS } from "../../socket/events.js";
+import { overlayRoom } from "../../socket/rooms.js";
 import { safeSay } from "../../utils/helpers.js";
 import {
   getPmdPreferencesForChannel,
@@ -7,7 +8,7 @@ import {
 } from "../../services/pmdChatPreferences.js";
 
 export function createPmdConfigHandler(io) {
-  return async (client, target, username, params, isBroadcaster) => {
+  return async ({ client, target, username, params, isBroadcaster }) => {
     if (!isBroadcaster) return;
 
     const preference = params[1];
@@ -57,7 +58,7 @@ export function createPmdConfigHandler(io) {
 
     const channel = target.slice(1).toLowerCase();
     const prefs = await getPmdPreferencesForChannel(target.toLowerCase());
-    io.emit(EVENTS.PMD_CONFIG, channel, prefs);
+    io.to(overlayRoom(target.toLowerCase())).emit(EVENTS.PMD_CONFIG, channel, prefs);
 
     await safeSay(
       client,

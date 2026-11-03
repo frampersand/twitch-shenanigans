@@ -5,7 +5,8 @@ import activateRain from "../sources/rain/index.js";
 import { generatePortrait } from "../sources/pmd-chat/index.js";
 import { applyChannelSettings } from "../sources/pmd-chat/layout.js";
 import { loadUniteRoster } from "../utils/loadUniteRoster.js";
-import { randomizerMessages } from "../lists/bot-messages.js";
+import { joinOverlayChannel } from "../utils/overlayChannel.js";
+import { randomizerMessages } from "/shared/bot-messages.js";
 import { positions } from "../lists/positions.js";
 
 const SHOWCASE_CHANNEL = "frampersand";
@@ -186,6 +187,8 @@ function startMockChatLoop() {
 }
 
 function loadPmdConfig() {
+  // Joining the room keeps the preview in sync with live !pmdconfig changes
+  joinOverlayChannel(state.socket, SHOWCASE_CHANNEL);
   state.socket.emit(PMD_CONFIG_REQUEST, SHOWCASE_CHANNEL);
 }
 
@@ -219,7 +222,7 @@ function initControls() {
 
   document.getElementById("randomize-btn").addEventListener("click", () => {
     const user = randomMockUsername();
-    createRandomizedCard(user.name, "showcase", elements.layerRandomizer, state.socket);
+    createRandomizedCard(user.name, elements.layerRandomizer);
   });
 
   document.getElementById("rain-btn").addEventListener("click", () => {

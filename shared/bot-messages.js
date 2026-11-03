@@ -1,4 +1,6 @@
-import { getRandomArrayElement } from "../utils/utils.js";
+/** Bot chat lines, shared by the server (chat) and the showcase/mock overlays (previews) */
+
+const pickRandom = (messages) => messages[Math.floor(Math.random() * messages.length)];
 
 export const randomizerMessages = (username, pokemon) => {
 
@@ -20,7 +22,7 @@ export const randomizerMessages = (username, pokemon) => {
         `Unfortunately, I believe you might actually do well with ${pokemon}, @${username}`,
     ];
 
-    return messages[getRandomArrayElement(0, messages.length)];
+    return pickRandom(messages);
 };
 
 export const randomizerCooldownMessages = (username) => {
@@ -36,7 +38,7 @@ export const randomizerCooldownMessages = (username) => {
         `Listen, why did you ask for my opinion if you don't want to hear it @${username}`
     ];
 
-    return messages[getRandomArrayElement(0, messages.length)];
+    return pickRandom(messages);
 }
 
 export const welcomeMessages = (username) => {
@@ -50,5 +52,5 @@ export const welcomeMessages = (username) => {
         `Friend, you just entered the Wholesome Gaming zone ${username}, relax and enjoy!`,
         `Welcome to Framperland ${username}, two tickets to ride on the Wholesome Train <3`
     ];
-    return messages[getRandomArrayElement(0, messages.length)];
+    return pickRandom(messages);
 }

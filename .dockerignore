@@ -17,10 +17,11 @@ nodemon.json
 .idea
 *.md
 README.md
-
-# Datos que se montan como volumen en runtime
-data/unite-assets
+!THIRD_PARTY_NOTICES.md
 
 # Sistema operativo
 .DS_Store
 Thumbs.db
+# Tests and tooling
+test
+eslint.config.js
