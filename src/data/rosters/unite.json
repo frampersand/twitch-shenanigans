@@ -280,16 +280,6 @@
     "role": "attacker"
   },
   {
-    "id": "mewtwo-mega-x",
-    "name": "Mega Mewtwo X",
-    "role": "attacker"
-  },
-  {
-    "id": "mewtwo-mega-y",
-    "name": "Mega Mewtwo Y",
-    "role": "supporter"
-  },
-  {
     "id": "meganium",
     "name": "Meganium",
     "role": "speedster"

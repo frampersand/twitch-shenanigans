@@ -6,6 +6,10 @@ import { welcomeMessages } from "../../shared/bot-messages.js";
 import { getPortraitUserDataForChannel } from "../services/portrait.js";
 import { EVENTS } from "../socket/events.js";
 import { overlayRoom } from "../socket/rooms.js";
+import { redemptionsViaEventSub } from "../services/twitchConnections.js";
+
+/** Setup commands that would just clutter the PMD chat overlay */
+const PMD_HIDDEN_COMMANDS = new Set(["!portrait", "!pmdconfig", "!cardstyle"]);
 
 function createMessageHandler(deps) {
   const { client, io } = deps;
@@ -21,8 +25,9 @@ function createMessageHandler(deps) {
     const commandName = rawCommand.toLowerCase();
     const rewardId = context["custom-reward-id"];
 
-    // Handle channel rewards (they get the raw first word: hex colors, dex numbers)
-    if (rewardId) {
+    // Handle channel rewards (they get the raw first word: hex colors, dex numbers).
+    // Channels connected to EventSub get every redemption from there, so skip the chat copy.
+    if (rewardId && !(await redemptionsViaEventSub(target))) {
       const handler = rewardHandlers[rewardId];
       if (handler) {
         await handler(target, context, rawCommand, username);
@@ -35,8 +40,8 @@ function createMessageHandler(deps) {
       await safeSay(client, target, welcomeMessage);
     }
 
-    // PMD portrait overlay for regular chat (exclude StreamElements and commands)
-    if (login !== "streamelements" && commandName !== "!portrait" && commandName !== "!pmdconfig") {
+    // PMD portrait overlay for regular chat (exclude StreamElements and the setup commands)
+    if (login !== "streamelements" && !PMD_HIDDEN_COMMANDS.has(commandName)) {
       const userDataForChannel = await getPortraitUserDataForChannel(target);
       io.to(overlayRoom(target)).emit(
         EVENTS.PMD_PORTRAIT,

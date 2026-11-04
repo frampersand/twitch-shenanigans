@@ -1,6 +1,7 @@
 import { EVENTS } from "../../socket/events.js";
 import { overlayRoom } from "../../socket/rooms.js";
 import { safeSay } from "../../utils/helpers.js";
+import { botReplies } from "../../../shared/bot-messages.js";
 import {
   getPmdPreferencesForChannel,
   getSupportedPmdPreferences,
@@ -13,14 +14,10 @@ export function createPmdConfigHandler(io) {
 
     const preference = params[1];
     const value = params[2];
+    const supported = getSupportedPmdPreferences();
 
     if (!preference || typeof value === "undefined") {
-      const supported = getSupportedPmdPreferences().join(", ");
-      await safeSay(
-        client,
-        target,
-        `Usage: !pmdconfig <preference> <value> (available: ${supported}). Example: !pmdconfig chatDirection up`
-      );
+      await safeSay(client, target, botReplies.pmdUsage(supported));
       return;
     }
 
@@ -30,29 +27,8 @@ export function createPmdConfigHandler(io) {
       value,
     });
 
-    if (result.error === "unsupported") {
-      const supported = getSupportedPmdPreferences().join(", ");
-      await safeSay(client, target, `Unsupported preference "${preference}". Available: ${supported}`);
-      return;
-    }
-
-    if (result.error === "invalid_boolean") {
-      await safeSay(client, target, `Preference "${preference}" expects true/false.`);
-      return;
-    }
-
-    if (result.error === "invalid_chat_direction") {
-      await safeSay(client, target, `Preference "${preference}" expects up or down.`);
-      return;
-    }
-
-    if (result.error === "invalid_color") {
-      await safeSay(client, target, `Preference "${preference}" expects a hex color (e.g. #6961a7 or 6961a7).`);
-      return;
-    }
-
-    if (result.error === "invalid_portrait_shape") {
-      await safeSay(client, target, `Preference "${preference}" expects square, round, or rounded.`);
+    if (result.error) {
+      await safeSay(client, target, botReplies.pmdError(result.error, preference, supported));
       return;
     }
 
@@ -60,10 +36,6 @@ export function createPmdConfigHandler(io) {
     const prefs = await getPmdPreferencesForChannel(target.toLowerCase());
     io.to(overlayRoom(target.toLowerCase())).emit(EVENTS.PMD_CONFIG, channel, prefs);
 
-    await safeSay(
-      client,
-      target,
-      `@${username} set ${result.preference}=${String(result.value)}`
-    );
+    await safeSay(client, target, botReplies.pmdSet(username, result.preference, result.value));
   };
 }

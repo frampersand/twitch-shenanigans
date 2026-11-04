@@ -42,6 +42,66 @@ test("rolls are announced in chat only when a randomizer overlay is open", async
   assert.equal(noOverlay.client.said.length, 0);
 });
 
+test("!dealwithit rolls the named game and role, and reroll repeats it", async () => {
+  const { getRoster } = await import("../src/services/rosters.js");
+  const { io, handle } = setup();
+  await handle("#frampersand", chatContext("gamer_one", "GamerOne"), "!dealwithit valorant duelist", false);
+  const [roll] = emitsOf(io, "randomize");
+  assert.equal(roll[5], "valorant");
+  assert.equal(getRoster("valorant").find((entry) => entry.id === roll[4])?.role, "duelist");
+
+  await handle(
+    "#frampersand",
+    chatContext("gamer_one", "GamerOne", { "custom-reward-id": REWARD_IDS.REROLL }),
+    "",
+    false
+  );
+  const reroll = emitsOf(io, "randomize")[1];
+  assert.equal(reroll[5], "valorant");
+  assert.equal(getRoster("valorant").find((entry) => entry.id === reroll[4])?.role, "duelist");
+});
+
+test("!cardstyle sets the channel's randomizer card, broadcaster only", async () => {
+  const { client, io, handle } = setup();
+  const broadcaster = chatContext("joesbeard", "JoesBeard", { badges: { broadcaster: "1" } });
+
+  await handle("#joesbeard", chatContext("viewer_x"), "!cardstyle holo", false);
+  assert.equal(client.said.length, 0);
+
+  await handle("#joesbeard", broadcaster, "!cardstyle sparkly", false);
+  assert.match(client.said.at(-1)[1], /don't know that card style/);
+
+  await handle("#joesbeard", broadcaster, "!cardstyle Slot", false);
+  assert.match(client.said.at(-1)[1], /now use: Slot reel/);
+  await handle("#joesbeard", chatContext("roller_a"), "!dealwithit", false);
+  assert.equal(emitsOf(io, "randomize").at(-1)[6], "reel");
+
+  // Other channels keep their own setting
+  await handle("#frampersand", chatContext("roller_b"), "!dealwithit", false);
+  assert.equal(emitsOf(io, "randomize").at(-1)[6], "classic");
+
+  // "random" picks a real style for each roll
+  await handle("#joesbeard", broadcaster, "!cardstyle random", false);
+  for (let i = 0; i < 6; i++) await handle("#joesbeard", broadcaster, "!dealwithit", false);
+  const styles = emitsOf(io, "randomize").slice(-6).map((roll) => roll[6]);
+  assert.ok(styles.every((style) => ["classic", "holo", "reel", "lockin"].includes(style)));
+
+  await handle("#joesbeard", broadcaster, "!cardstyle", false);
+  assert.match(client.said.at(-1)[1], /a random style every roll/);
+});
+
+test("a mistyped !dealwithit gets help once and keeps the cooldown", async () => {
+  const { client, io, handle } = setup();
+  const typo = () => handle("#frampersand", chatContext("typo_roller"), "!dealwithit minecraft", false);
+  await typo();
+  await typo();
+  assert.equal(client.said.filter(([, m]) => /I don't know that one/.test(m)).length, 1);
+  assert.equal(emitsOf(io, "randomize").length, 0);
+
+  await handle("#frampersand", chatContext("typo_roller"), "!dealwithit overwatch", false);
+  assert.equal(emitsOf(io, "randomize")[0][5], "overwatch");
+});
+
 test("restricted channels only let listed logins roll", async () => {
   const { io, handle } = setup();
   await handle("#bruvhd", chatContext("randomviewer"), "!dealwithit", false);
@@ -74,13 +134,48 @@ test("concurrent !portrait commands all persist", async () => {
   const { handle } = setup();
   await Promise.all(
     Array.from({ length: 15 }, (_, i) =>
-      handle("#frampersand", chatContext(`viewer${i}`, `Viewer${i}`), `!portrait ${i + 1} happy`, false)
+      handle("#frampersand", chatContext(`viewer${i}`, `Viewer${i}`), `!portrait ${i % 2 ? 25 : 1} happy`, false)
     )
   );
   const saved = JSON.parse(await readFile(path.join(dataDir, "portraitUserbase.json"), "utf8"));
   for (let i = 0; i < 15; i++) {
-    assert.ok(saved.some((u) => u.username === `Viewer${i}` && u.portrait === String(i + 1)));
+    assert.ok(saved.some((u) => u.username === `Viewer${i}` && u.portrait === String(i % 2 ? 25 : 1)));
   }
+});
+
+test("!portrait rejects numbers the CDN has no portrait for", async () => {
+  const { client, handle } = setup();
+  for (const input of ["9999", "pikachu", "-1"]) {
+    await handle("#frampersand", chatContext(`picky_${input}`, "Picky"), `!portrait ${input}`, false);
+  }
+  assert.equal(client.said.length, 3);
+  for (const [, message] of client.said) assert.match(message, /couldn't find that portrait/);
+
+  await handle("#frampersand", chatContext("tricky"), "!portrait 25 <img>", false);
+  const saved = JSON.parse(await readFile(path.join(dataDir, "portraitUserbase.json"), "utf8"));
+  assert.ok(!saved.some((u) => u.username.startsWith("Picky")));
+  assert.deepEqual(
+    saved.find((u) => u.username === "tricky"),
+    { username: "tricky", portrait: "25", variant: "", channel: "#frampersand" }
+  );
+});
+
+test("a mistyped !portrait doesn't cost the viewer their cooldown", async () => {
+  const { client, handle } = setup();
+  const typo = () => handle("#frampersand", chatContext("typo_fan", "TypoFan"), "!portrait 99999", false);
+
+  await typo();
+  await typo();
+  // Only one "not found" reply, so typos can't be used to spam the bot
+  assert.equal(client.said.filter(([, m]) => /couldn't find/.test(m)).length, 1);
+
+  await handle("#frampersand", chatContext("typo_fan", "TypoFan"), "!portrait 25", false);
+  const saved = JSON.parse(await readFile(path.join(dataDir, "portraitUserbase.json"), "utf8"));
+  assert.equal(saved.find((u) => u.username === "TypoFan")?.portrait, "25");
+
+  // After a successful change the normal cooldown applies
+  await handle("#frampersand", chatContext("typo_fan", "TypoFan"), "!portrait 1", false);
+  assert.match(client.said.at(-1)[1], /stop spamming/);
 });
 
 test("the Rainbearer survives a restart", async () => {

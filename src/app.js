@@ -5,7 +5,10 @@ import path from "path";
 
 import { config } from "./config/index.js";
 import portraitRoutes from "./routes/portrait.js";
-import uniteRosterRoutes from "./routes/uniteRoster.js";
+import rosterRoutes from "./routes/rosters.js";
+import channelRoutes from "./routes/channels.js";
+import authRoutes from "./routes/auth.js";
+import eventSubRoutes from "./routes/eventsub.js";
 import { setupSocketHandlers } from "./socket/setup.js";
 
 /** Build the HTTP + Socket.IO server without connecting to Twitch or listening (tests use this) */
@@ -22,7 +25,11 @@ export function createApp() {
 
   // API routes
   app.use("/", portraitRoutes);
-  app.use("/", uniteRosterRoutes);
+  app.use("/", rosterRoutes);
+  app.use("/", channelRoutes);
+  // Twitch login (dashboard) and EventSub webhooks for channel point redemptions
+  app.use("/", authRoutes);
+  app.use("/", eventSubRoutes);
 
   setupSocketHandlers(io);
 

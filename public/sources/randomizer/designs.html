@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Randomizer card designs · FramperBot</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="index.css" />
+  <link rel="stylesheet" href="designs.css" />
+  <style>
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: #0e0e10;
+      color: #efeff1;
+      font-family: "Segoe UI", system-ui, sans-serif;
+    }
+
+    header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 16px 24px;
+      border-bottom: 1px solid #2f2f35;
+      background: #18181b;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 18px;
+    }
+
+    header p {
+      margin: 2px 0 0;
+      color: #adadb8;
+      font-size: 13px;
+    }
+
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+    }
+
+    select,
+    button {
+      height: 34px;
+      padding: 0 12px;
+      border-radius: 6px;
+      border: 1px solid #3d3d44;
+      background: #1f1f23;
+      color: inherit;
+      font: inherit;
+      font-size: 13px;
+      cursor: pointer;
+    }
+
+    button.primary {
+      background: #9146ff;
+      border-color: #9146ff;
+      font-weight: 600;
+    }
+
+    main {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(min(480px, 100%), 1fr));
+      gap: 16px;
+      padding: 24px;
+    }
+
+    section {
+      border: 1px solid #2f2f35;
+      border-radius: 10px;
+      background: #18181b;
+      overflow: hidden;
+    }
+
+    .section-head {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 12px 16px;
+      border-bottom: 1px solid #2f2f35;
+    }
+
+    .section-head h2 {
+      margin: 0;
+      font-size: 15px;
+    }
+
+    .section-head code {
+      color: #cdb4ff;
+      font-size: 12px;
+    }
+
+    .section-head p {
+      margin: 2px 0 0;
+      color: #adadb8;
+      font-size: 13px;
+    }
+
+    .stage {
+      height: 340px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background:
+        linear-gradient(315deg, #3b1f5e 0%, #12101c 75%);
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <div>
+      <h1>Randomizer card designs</h1>
+      <p>The broadcaster picks one with <code>!cardstyle classic|holo|reel|lockin</code>, or <code>!cardstyle random</code> for a different one every roll.</p>
+    </div>
+    <div class="controls">
+      <select id="game" aria-label="Game"></select>
+      <button class="primary" id="roll" type="button">Roll all</button>
+      <button id="auto" type="button" aria-pressed="false">Auto-roll: off</button>
+    </div>
+  </header>
+  <main id="designs"></main>
+
+  <script type="module">
+    import createRandomizedCard from "./randomizer.js";
+    import { createDesignCard, DESIGNS } from "./designs.js";
+    import { RANDOMIZER_GAMES } from "/shared/randomizerGames.js";
+
+    const gameSelect = document.getElementById("game");
+    for (const [id, game] of Object.entries(RANDOMIZER_GAMES)) gameSelect.add(new Option(game.name, id));
+
+    const stages = {};
+    const addSection = (key, title, description, param) => {
+      const section = document.createElement("section");
+      section.innerHTML = `<div class="section-head"><div><h2></h2><p></p></div><code></code></div><div class="stage"></div>`;
+      section.querySelector("h2").textContent = title;
+      section.querySelector("p").textContent = description;
+      section.querySelector("code").textContent = param;
+      document.getElementById("designs").appendChild(section);
+      stages[key] = section.querySelector(".stage");
+    };
+    addSection("classic", "Classic", "The original card: art spins through picks and settles", "!cardstyle classic");
+    for (const [id, design] of Object.entries(DESIGNS)) addSection(id, design.name, design.description, `!cardstyle ${id}`);
+
+    const rollAll = () => {
+      const game = gameSelect.value;
+      for (const stage of Object.values(stages)) stage.replaceChildren();
+      createRandomizedCard("Frampersand", stages.classic, null, game);
+      for (const id of Object.keys(DESIGNS)) createDesignCard({ design: id, username: "Frampersand", target: stages[id], game });
+    };
+
+    let timer = null;
+    const autoButton = document.getElementById("auto");
+    autoButton.addEventListener("click", () => {
+      const on = !timer;
+      autoButton.setAttribute("aria-pressed", String(on));
+      autoButton.textContent = `Auto-roll: ${on ? "on" : "off"}`;
+      clearInterval(timer);
+      timer = on ? setInterval(rollAll, 9000) : null;
+      if (on) rollAll();
+    });
+    document.getElementById("roll").addEventListener("click", rollAll);
+    gameSelect.addEventListener("change", rollAll);
+    rollAll();
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard · FramperBot</title>
+  <link rel="stylesheet" href="/home/home.css" />
+  <style>
+    .panel {
+      width: var(--page);
+      max-width: 560px;
+      margin: 4rem auto;
+      padding: 2rem;
+      border-radius: 16px;
+      background: var(--panel);
+      border: 1px solid var(--border);
+    }
+
+    .panel h1 {
+      margin: 0 0 0.5rem;
+      font-size: 26px;
+    }
+
+    .panel p {
+      color: var(--muted);
+    }
+
+    .status {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 1.25rem 0;
+      padding: 12px 14px;
+      border-radius: 10px;
+      background: var(--panel-raised);
+      border: 1px solid var(--border);
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--faint);
+      flex-shrink: 0;
+    }
+
+    .dot.ok {
+      background: #3fd68b;
+    }
+
+    .dot.wait {
+      background: #e8a33c;
+    }
+
+    .button-twitch {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+    }
+  </style>
+</head>
+
+<body>
+  <header class="topbar">
+    <a class="brand" href="/">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <span class="brand-name">FramperBot</span>
+    </a>
+    <nav class="topnav" aria-label="Main">
+      <a href="/showcase/">Showcase</a>
+    </nav>
+  </header>
+
+  <main class="panel" id="panel" aria-live="polite">
+    <h1>Dashboard</h1>
+    <p>Loading…</p>
+  </main>
+
+  <script type="module">
+    const panel = document.getElementById("panel");
+    const notice = new URLSearchParams(location.search).get("login");
+
+    function render(html) {
+      panel.innerHTML = html;
+    }
+
+    const me = await fetch("/api/me").then((r) => r.json()).catch(() => null);
+
+    if (!me) {
+      render(`<h1>Dashboard</h1><p>The dashboard isn't reachable right now. Try again in a bit.</p>`);
+    } else if (!me.loggedIn) {
+      const message = notice === "failed" ? "<p>That login didn't work. Try again.</p>"
+        : notice === "cancelled" ? "<p>Login cancelled.</p>" : "";
+      render(me.loginAvailable
+        ? `<h1>Dashboard</h1>${message}<p>Log in with your Twitch account to manage FramperBot on your channel.
+           FramperBot only asks to read your channel point redemptions, so rewards work without asking viewers for text.</p>
+           <a class="button button-twitch" href="/auth/twitch/login">Log in with Twitch</a>`
+        : `<h1>Dashboard</h1><p>Twitch login isn't set up on this server yet.</p>`);
+    } else {
+      const status = {
+        enabled: ["ok", "Channel points connected: every redemption reaches FramperBot, with or without text."],
+        webhook_callback_verification_pending: ["wait", "Channel points connecting: Twitch is verifying FramperBot. Refresh in a minute."],
+        not_connected: ["", "Channel points not connected yet. Log in again to retry."],
+      }[me.channelPoints] ?? ["", `Channel points disconnected (${me.channelPoints}). Log in again to reconnect.`];
+
+      const login = me.login.replace(/[^a-z0-9_]/g, "");
+      render(`<h1>Hi, ${login}</h1>
+        ${me.channelJoined
+          ? `<div class="status"><span class="dot ${status[0]}" aria-hidden="true"></span><span>${status[1]}</span></div>
+             <p>Card style, PMD chat look and OBS setup are coming to this page next.</p>`
+          : `<p>FramperBot isn't on your channel yet. Say hi to Frampersand on Twitch if you'd like it.</p>`}
+        <button class="button" id="logout" type="button">Log out</button>`);
+      document.getElementById("logout").addEventListener("click", async () => {
+        await fetch("/auth/logout", { method: "POST" });
+        location.assign("/dashboard/");
+      });
+    }
+  </script>
+</body>
+
+</html>

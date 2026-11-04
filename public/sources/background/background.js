@@ -1,7 +1,8 @@
 // tinycolor is loaded as a global from /libs/tinycolor/tinycolor.js by the host page
 import { getPokemonIconUrl, getPokemonSpriteName } from "/shared/pokemonIcons.js";
-import { mountClusterPattern } from "./clusterPattern.js";
+import { mountTilePattern } from "./tilePattern.js";
 
+/** Returns the dex number shown, or false if the input isn't a valid one */
 const changeBackgroundSprite = (number, target) => {
     const targetArea = target ? target : document.getElementById("pattern-container");
     const raw = String(number ?? "").trim();
@@ -19,7 +20,7 @@ const changeBackgroundSprite = (number, target) => {
         return false;
     }
 
-    mountClusterPattern(targetArea, pokemonNumber, { isRandom, spriteUrl });
+    mountTilePattern(targetArea, { spriteUrl });
     return pokemonNumber;
 };
 

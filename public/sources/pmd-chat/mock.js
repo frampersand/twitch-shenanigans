@@ -1,6 +1,6 @@
 import { generatePortrait } from "./index.js";
 import { truncateString } from "../../utils/utils.js";
-import { loadUniteRoster } from "../../utils/loadUniteRoster.js";
+import { loadRoster } from "../../utils/loadRoster.js";
 import { randomizerMessages } from "/shared/bot-messages.js";
 
 const DEFAULT_USERBASE = [
@@ -39,7 +39,7 @@ export function startMockChat(urlParams, channelName) {
     }));
 
     let uniteRoster = [];
-    loadUniteRoster()
+    loadRoster("unite")
         .then((roster) => {
             uniteRoster = roster;
         })

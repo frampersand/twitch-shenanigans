@@ -5,6 +5,7 @@ import { getPmdPreferencesForChannel } from "../services/pmdChatPreferences.js";
 import { getPortraitUserDataForChannel } from "../services/portrait.js";
 import { isValidAdminToken } from "../services/adminAuth.js";
 import { randomizeForPlayer } from "../services/randomizer.js";
+import { DEFAULT_GAME, findGame } from "../../shared/randomizerGames.js";
 
 const HEX_COLOR = /^#?([0-9a-f]{3}){1,2}$/i;
 const MAX_TEXT_LENGTH = 500;
@@ -98,12 +99,14 @@ export function setupSocketHandlers(io) {
       if (room) room.emit(EVENTS.RAIN);
     });
 
-    socket.on(EVENTS.RANDOMIZE, async (username, channel) => {
+    socket.on(EVENTS.RANDOMIZE, async (username, channel, game) => {
       const joinedChannel = toJoinedChannel(channel ?? ADMIN_DEFAULT_CHANNEL);
       if (!isShortString(username, 25) || !joinedChannel) return;
+      const gameId = typeof game === "string" ? findGame(game) : DEFAULT_GAME;
+      if (!gameId) return;
       try {
         // Test roll: shows on the overlay but stays out of chat
-        await randomizeForPlayer({ io, channel: joinedChannel, player: username, announce: false });
+        await randomizeForPlayer({ io, channel: joinedChannel, player: username, game: gameId, announce: false });
       } catch (err) {
         console.error("Admin randomize failed:", err);
       }

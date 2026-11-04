@@ -5,7 +5,8 @@ import { ADMIN_TOKEN, useTempDataDir } from "./helpers.js";
 
 await useTempDataDir();
 const { createApp } = await import("../src/app.js");
-const { getUniteRoster } = await import("../src/services/uniteRoster.js");
+const { getRoster } = await import("../src/services/rosters.js");
+const { RANDOMIZER_GAMES } = await import("../shared/randomizerGames.js");
 
 let server;
 let baseUrl;
@@ -84,7 +85,13 @@ test("admin randomize reaches randomizer overlays with a server-picked id", asyn
   const [[player, channel, id]] = eventsOf(randomizer, "randomize");
   assert.equal(player, "Tester");
   assert.equal(channel, "#frampersand");
-  assert.ok(getUniteRoster().some((entry) => entry.id === id));
+  assert.ok(getRoster("unite").some((entry) => entry.id === id));
+
+  admin.emit("randomize", "Tester", "#frampersand", "valorant");
+  await wait(100);
+  const [, , valorantId, game] = eventsOf(randomizer, "randomize")[1];
+  assert.equal(game, "valorant");
+  assert.ok(getRoster("valorant").some((entry) => entry.id === valorantId));
 });
 
 test("admin-only HTTP endpoints require the token", async () => {
@@ -97,7 +104,7 @@ test("admin-only HTTP endpoints require the token", async () => {
 });
 
 test("UNITE roster is static and points at the CDN", async () => {
-  const roster = await (await fetch(`${baseUrl}/api/unite-roster`)).json();
+  const roster = await (await fetch(`${baseUrl}/api/rosters/unite`)).json();
   assert.ok(roster.length > 90);
   for (const entry of roster) {
     assert.match(entry.id, /^[a-z0-9-]+$/);
@@ -105,6 +112,23 @@ test("UNITE roster is static and points at the CDN", async () => {
   }
   const sync = await fetch(`${baseUrl}/api/unite-roster/sync`, { method: "POST" });
   assert.equal(sync.status, 404);
+});
+
+test("every randomizer game has a roster with known roles", async () => {
+  for (const [game, { roles }] of Object.entries(RANDOMIZER_GAMES)) {
+    const roster = await (await fetch(`${baseUrl}/api/rosters/${game}`)).json();
+    assert.ok(roster.length >= 20, `${game} roster looks too short`);
+    assert.equal(new Set(roster.map((entry) => entry.id)).size, roster.length, `${game} has duplicate ids`);
+    const folder = game === "unite" ? "unite" : `randomizer/${game}`;
+    const extension = game === "league" ? "jpg" : "png";
+    for (const entry of roster) {
+      assert.ok(entry.name, `${game} entry without a name`);
+      assert.equal(entry.image, `${process.env.CDN_BASE_URL}/${folder}/${entry.id}.${extension}`);
+      assert.ok(Object.hasOwn(roles, entry.role), `${game}: ${entry.name} has unknown role ${entry.role}`);
+    }
+  }
+  assert.equal((await fetch(`${baseUrl}/api/rosters/__proto__`)).status, 404);
+  assert.equal((await fetch(`${baseUrl}/api/rosters/minecraft`)).status, 404);
 });
 
 test("/portrait picks from the CDN manifest and returns CDN URLs", async () => {
@@ -123,6 +147,14 @@ test("/portrait picks from the CDN manifest and returns CDN URLs", async () => {
   assert.equal(missing.status, 404);
   const repeated = await fetch(`${baseUrl}/portrait?portrait=1&variant=a&variant=b`);
   assert.equal(repeated.status, 200);
+});
+
+test("/api/channels lists the joined channels for the home page", async () => {
+  const res = await fetch(`${baseUrl}/api/channels`);
+  assert.equal(res.status, 200);
+  const list = await res.json();
+  assert.ok(list.includes("frampersand"));
+  assert.ok(list.every((name) => /^[a-z0-9_]+$/.test(name)));
 });
 
 test("shared modules are served to the overlays", async () => {

@@ -2,10 +2,8 @@ import { unownCases, burmyCases, deerlingCases, vivillonCases, flabebeCases, pum
 import { positions } from '../../lists/positions.js';
 import { getRandomArrayElement } from '../../utils/utils.js';
 import { getPokemonSpriteName } from '/shared/pokemonIcons.js';
-import { getOverlayChannel, joinOverlayChannel } from '../../utils/overlayChannel.js';
 
-let socket = io();
-joinOverlayChannel(socket, getOverlayChannel());
+// Socket wiring lives in listener.js, so the showcase can import this without joining a live room
 let customPositionPool = null;
 let currentSprites = [...positions];
 
@@ -17,10 +15,6 @@ export function setSpritePositionPool(pool) {
     customPositionPool = Array.isArray(pool) ? pool.map((entry) => ({ ...entry })) : null;
     currentSprites = getPositionPool();
 }
-
-socket.on('sprite-number', function (pokemonNumber, targetContainer = '') {
-    borderSpriteGenerator(pokemonNumber, targetContainer);
-});
 
 const borderSpriteGenerator = (pokemonNumber, targetContainer) => {
     const gameArea = targetContainer ? targetContainer : document.getElementById('game-area');

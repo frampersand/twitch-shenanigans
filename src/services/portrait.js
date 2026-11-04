@@ -79,6 +79,12 @@ async function getPortraitManifest() {
   return manifestCache.portraits;
 }
 
+/** Whether the CDN has a portrait folder for this dex number */
+export async function isKnownPortrait(portraitNumber) {
+  const portraits = await getPortraitManifest();
+  return Boolean(portraits[String(portraitNumber).padStart(4, "0")]?.length);
+}
+
 /** Get a portrait file path (folder/emotion.png) relative to the CDN's portrait folder */
 export async function getPortraitFile(portraitNumber = 0, variant = "") {
   const portraits = await getPortraitManifest();

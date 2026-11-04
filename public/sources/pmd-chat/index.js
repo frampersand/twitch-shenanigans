@@ -21,19 +21,23 @@ const getPortrait = (data) => {
 
 
 
-const generatePortrait = async (message, username, userBase = [], context = { color: '#494981' }) => {
-    const { color } = context;
+const DEFAULT_NAME_COLOR = '#494981';
+
+/** The viewer's chosen portrait; a random one if that fails (unknown number); null if the CDN is down */
+const getPortraitWithFallback = async (userData) => {
+    const imageUrl = await getPortrait(userData);
+    if (imageUrl || !userData) return imageUrl;
+    return getPortrait();
+}
+
+const generatePortrait = async (message, username, userBase = [], context = {}) => {
+    // Twitch sends color: null for viewers who never picked a name color
+    const color = context?.color || DEFAULT_NAME_COLOR;
     const userData = userBase.find((user) => user.username.toLowerCase() === username.toLowerCase());
-    // if (userData){
-    //     getUserPortrait(userData).then(imageUrl){
-    //         buildPortrait(imageUrl)
-    //     };
-    // }
-    getPortrait(userData).then((imageUrl) => {
-        console.log('imageUrl :', imageUrl);
+    getPortraitWithFallback(userData).then((imageUrl) => {
+        // Still show the message without a portrait rather than dropping it
         if (!imageUrl) {
-            console.error('Image URL could not be retrieved');
-            return;
+            console.error('Portrait could not be retrieved for', username);
         }
 
         const currentChats = document.getElementsByClassName('pmd-portrait-container');
@@ -59,14 +63,16 @@ const generatePortrait = async (message, username, userBase = [], context = { co
         const portraitMessageBox = document.createElement('div');
         portraitMessageBox.className = 'pmd-portrait-message-box';
 
-        const img = document.createElement('img');
-        img.src = imageUrl;
+        if (imageUrl) {
+            const img = document.createElement('img');
+            img.src = imageUrl;
+            portraitMessageBox.appendChild(img);
+        }
 
         const textDiv = document.createElement('div');
         textDiv.className = 'pmd-portrait-message';
         textDiv.textContent = truncateString(message);
 
-        portraitMessageBox.appendChild(img);
         portraitMessageBox.appendChild(textDiv);
 
         container.appendChild(userContainer);

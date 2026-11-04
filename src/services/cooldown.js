@@ -4,21 +4,26 @@ const issuedCommands = {};
 const issuedWarnings = {};
 const { cooldownMinutes } = config;
 
-export function isOffCooldown(username, command) {
+/** Whether the command is still cooling down, without starting a new cooldown */
+export function isCoolingDown(username, command, minutes = cooldownMinutes) {
+  const lastUsed = issuedCommands[username]?.[command];
+  return Boolean(lastUsed) && (new Date() - lastUsed) / 60000 < minutes;
+}
+
+/** Start (or restart) the command's cooldown and clear any spam warning for it */
+export function startCooldown(username, command) {
   if (!issuedCommands[username]) {
     issuedCommands[username] = {};
   }
+  issuedCommands[username][command] = new Date();
+  resetWarning(username, command);
+}
 
-  const now = new Date();
-  const lastUsed = issuedCommands[username][command];
-
-  if (!lastUsed || (now - lastUsed) / 60000 >= cooldownMinutes) {
-    issuedCommands[username][command] = now;
-    resetWarning(username, command);
-    return true;
-  }
-
-  return false;
+/** Check and start in one step: true (and the cooldown starts) when the command may run */
+export function isOffCooldown(username, command) {
+  if (isCoolingDown(username, command)) return false;
+  startCooldown(username, command);
+  return true;
 }
 
 export function checkWarning(username, command) {

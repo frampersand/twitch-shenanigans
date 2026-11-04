@@ -1,0 +1,438 @@
+/* Alternative randomizer cards, picked per channel with !cardstyle (see designs.js) */
+
+/* The reel's landing math assumes widths include padding */
+.dwi-card,
+.dwi-card * {
+  box-sizing: border-box;
+}
+
+.dwi-card {
+  --role: #8f5bff;
+  position: relative;
+  flex-shrink: 0;
+  font-family: "Open Sans", "Segoe UI", sans-serif;
+  color: #fff;
+  animation: dwi-enter 0.45s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.dwi-card.dwi-leaving {
+  opacity: 0;
+  transform: translateY(-12px) scale(0.97);
+  transition: opacity 1.2s ease, transform 1.2s ease;
+}
+
+@keyframes dwi-enter {
+  from { opacity: 0; transform: translateY(16px) scale(0.92); }
+  to { opacity: 1; transform: none; }
+}
+
+.dwi-card .no-art {
+  display: grid;
+  place-items: center;
+}
+
+.dwi-card .art-initials {
+  font-size: 44px;
+  font-weight: 700;
+  opacity: 0.85;
+}
+
+/* ---------- Holo card ---------- */
+
+.dwi-holo {
+  width: 210px;
+  height: 294px;
+  perspective: 1200px;
+}
+
+.holo-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transition: transform 0.7s cubic-bezier(0.3, 1.4, 0.5, 1);
+  animation: holo-shuffle 1.8s ease-in-out;
+}
+
+.holo-flipped .holo-inner {
+  transform: rotateY(180deg);
+}
+
+@keyframes holo-shuffle {
+  0%, 100% { transform: rotate(0); }
+  15% { transform: rotate(-4deg) translateX(-6px); }
+  35% { transform: rotate(4deg) translateX(6px); }
+  55% { transform: rotate(-3deg) translateX(-4px); }
+  75% { transform: rotate(2deg) translateX(3px); }
+}
+
+.holo-face {
+  position: absolute;
+  inset: 0;
+  border-radius: 14px;
+  overflow: hidden;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.45);
+}
+
+.holo-back {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: 6px solid #fff;
+  /* Neutral on purpose: a role-colored back would give the pick away before the flip */
+  background:
+    repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.06) 0 10px, transparent 10px 20px),
+    radial-gradient(circle at 50% 40%, #3a3150, #120f1c 75%);
+}
+
+.holo-back-logo {
+  width: 70%;
+  max-height: 46%;
+  object-fit: contain;
+  filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.35));
+}
+
+.holo-back-game {
+  font-size: 20px;
+  font-weight: 700;
+  text-align: center;
+  padding: 0 14px;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+.holo-back-for {
+  font-size: 13px;
+  opacity: 0.85;
+}
+
+.holo-front {
+  transform: rotateY(180deg);
+  border: 6px solid var(--role);
+  background: radial-gradient(circle at 50% 35%, color-mix(in srgb, var(--role) 45%, #fff), #16121f 85%);
+}
+
+.holo-art {
+  position: absolute;
+  inset: 26px 10px 48px;
+  border-radius: 8px;
+  overflow: hidden;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.holo-art img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top;
+}
+
+.holo-role {
+  position: absolute;
+  top: 6px;
+  left: 8px;
+  z-index: 2;
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: var(--role);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.holo-player {
+  position: absolute;
+  top: 7px;
+  right: 10px;
+  z-index: 2;
+  font-size: 11px;
+  opacity: 0.85;
+}
+
+.holo-plate {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  padding: 0 10px;
+  background: linear-gradient(180deg, rgba(10, 8, 16, 0.7), #0a0810);
+  font-size: 18px;
+  font-weight: 700;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Foil sweep that keeps moving across the front */
+.holo-sheen {
+  position: absolute;
+  inset: -40%;
+  z-index: 3;
+  pointer-events: none;
+  background: linear-gradient(115deg, transparent 38%, rgba(255, 255, 255, 0.55) 46%, rgba(170, 220, 255, 0.35) 50%, rgba(255, 180, 240, 0.3) 54%, transparent 62%);
+  mix-blend-mode: overlay;
+  animation: holo-sheen 2.6s ease-in-out infinite;
+}
+
+@keyframes holo-sheen {
+  from { transform: translateX(-45%); }
+  to { transform: translateX(45%); }
+}
+
+/* ---------- Slot reel ---------- */
+
+.dwi-reel {
+  width: 420px;
+  padding: 12px 14px 14px;
+  border-radius: 16px;
+  background: rgba(14, 12, 22, 0.92);
+  border: 2px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.45);
+}
+
+.reel-title {
+  margin: 0 0 10px;
+  font-size: 13px;
+  text-align: center;
+  opacity: 0.85;
+}
+
+.reel-window {
+  position: relative;
+  height: 132px;
+  overflow: hidden;
+  border-radius: 10px;
+  background: #0a0910;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 18%, #000 82%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 18%, #000 82%, transparent);
+}
+
+.reel-strip {
+  display: flex;
+  height: 100%;
+  will-change: transform;
+}
+
+.reel-tile {
+  flex: 0 0 104px;
+  height: 100%;
+  padding: 6px 4px;
+}
+
+.reel-art {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  border-radius: 8px;
+  background: var(--tile-role);
+}
+
+.reel-art img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top;
+}
+
+.reel-marker {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 108px;
+  transform: translateX(-50%);
+  border: 3px solid #fff;
+  border-radius: 10px;
+  box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.25);
+  pointer-events: none;
+}
+
+.reel-landed .reel-marker {
+  border-color: var(--role);
+  box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.45), 0 0 24px var(--role);
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+.reel-result {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  height: 34px;
+  margin-top: 10px;
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 0.35s ease, transform 0.35s ease;
+}
+
+.reel-landed .reel-result {
+  opacity: 1;
+  transform: none;
+}
+
+.reel-name {
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.reel-role {
+  padding: 1px 10px;
+  border-radius: 999px;
+  background: var(--role);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* ---------- Lock-in banner ---------- */
+
+.dwi-lockin {
+  width: 460px;
+  height: 190px;
+  display: flex;
+  border-radius: 6px;
+  overflow: hidden;
+  background: #0e0c16;
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.45);
+  transition: background-color 0.15s;
+}
+
+.lockin-slab {
+  position: relative;
+  flex: 0 0 200px;
+  background: var(--role);
+  clip-path: polygon(0 0, 100% 0, 82% 100%, 0 100%);
+  transition: background-color 0.15s;
+}
+
+.lockin-lines {
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(115deg, rgba(255, 255, 255, 0.14) 0 3px, transparent 3px 18px);
+  animation: lockin-lines 0.6s linear infinite;
+}
+
+@keyframes lockin-lines {
+  to { background-position: 36px 0; }
+}
+
+.lockin-portrait {
+  position: absolute;
+  inset: 0;
+}
+
+.lockin-art {
+  position: absolute;
+  inset: 0;
+  animation: lockin-slide 0.45s cubic-bezier(0.2, 0.9, 0.2, 1);
+}
+
+.lockin-art img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top;
+}
+
+@keyframes lockin-slide {
+  from { transform: translateX(60px); opacity: 0; }
+  to { transform: none; opacity: 1; }
+}
+
+.lockin-text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 6px;
+  padding: 0 18px 0 4px;
+  min-width: 0;
+}
+
+.lockin-player {
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  opacity: 0.75;
+}
+
+.lockin-name {
+  margin: 0;
+  font-size: 30px;
+  font-weight: 700;
+  font-style: italic;
+  line-height: 1.05;
+  text-transform: uppercase;
+  overflow-wrap: anywhere;
+}
+
+.lockin-role {
+  align-self: flex-start;
+  padding: 1px 10px;
+  background: var(--role);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  transition: background-color 0.15s;
+}
+
+.lockin-game {
+  font-size: 12px;
+  opacity: 0.6;
+}
+
+.lockin-flash {
+  position: absolute;
+  inset: 0;
+  background: #fff;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.lockin-locked .lockin-flash {
+  animation: lockin-flash 0.5s ease-out;
+}
+
+@keyframes lockin-flash {
+  from { opacity: 0.85; }
+  to { opacity: 0; }
+}
+
+.lockin-stamp {
+  position: absolute;
+  right: 16px;
+  bottom: 14px;
+  padding: 2px 10px;
+  border: 3px solid #fff;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  opacity: 0;
+  transform: rotate(-8deg) scale(1.8);
+}
+
+.lockin-locked .lockin-stamp {
+  opacity: 1;
+  transform: rotate(-8deg) scale(1);
+  transition: transform 0.3s cubic-bezier(0.3, 1.6, 0.5, 1) 0.1s, opacity 0.2s 0.1s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dwi-card *,
+  .dwi-card {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

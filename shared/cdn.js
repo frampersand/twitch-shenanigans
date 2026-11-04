@@ -20,3 +20,14 @@ export function pokemonIconUrl(number, base = CDN_BASE_URL) {
 export function uniteImageUrl(id, base = CDN_BASE_URL) {
     return `${base}/unite/${encodeURIComponent(id)}.png`;
 }
+
+/** The game's logo for card backs; UNITE uses the Poké Ball bundled with the app */
+export function gameLogoUrl(game, base = CDN_BASE_URL) {
+    if (game === "unite") return "/assets/pokeball-logo.png";
+    return `${base}/randomizer/logos/${encodeURIComponent(game)}.svg`;
+}
+
+/** Art for the other randomizer games: randomizer/<game>/<id>.<png|jpg> */
+export function randomizerImageUrl(game, id, extension = "png", base = CDN_BASE_URL) {
+    return `${base}/randomizer/${encodeURIComponent(game)}/${encodeURIComponent(id)}.${extension}`;
+}

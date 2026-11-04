@@ -1,69 +1,112 @@
-import { loadUniteRoster } from "../../utils/loadUniteRoster.js";
+import { loadRoster } from "../../utils/loadRoster.js";
 import { getRandomArrayElement } from "../../utils/utils.js";
-import pokemonRoles from "../../lists/pokemon-roles.js";
+import { DEFAULT_GAME, RANDOMIZER_GAMES, roleOf } from "/shared/randomizerGames.js";
+import { gameLogoUrl } from "/shared/cdn.js";
+
+const SPIN_TICKS = 5;
+const TICK_MS = 500;
 
 /**
- * Render a randomizer card. The server picks the final pokemon (pokemonId) and
- * posts the chat message itself; when no id is given (showcase), pick locally.
+ * Render a randomizer card. The server picks the final character (pickId) and posts the
+ * chat message itself; when no id is given (showcase), the last spin is the pick.
+ * Cards show the character's art on a role-colored card; if the art can't load (say, a
+ * character added to the roster before its image reached the CDN), the card switches to
+ * a text layout with the name in the middle instead of a broken image.
  */
-const createRandomizedCard = async (username, target, pokemonId) => {
-    const uniteRoster = await loadUniteRoster();
-    if (!uniteRoster.length) return;
+const createRandomizedCard = async (username, target, pickId, game = DEFAULT_GAME) => {
+    const roster = await loadRoster(game);
+    if (!roster.length) return;
 
     const container = target ? target : document.getElementById('container');
-    const pokemonSelection = getRandomSelection(uniteRoster);
-    const pickedIndex = uniteRoster.findIndex((entry) => entry.id === pokemonId);
+    const selection = getRandomSelection(roster);
+    const pickedIndex = roster.findIndex((entry) => entry.id === pickId);
     if (pickedIndex !== -1) {
-        pokemonSelection[pokemonSelection.length - 1] = pickedIndex;
+        selection[selection.length - 1] = pickedIndex;
     }
-    const finalSelection = pokemonSelection[pokemonSelection.length - 1];
+    const finalEntry = roster[selection[selection.length - 1]];
+    const gameName = RANDOMIZER_GAMES[game]?.name ?? game;
+    let textMode = !roster.some((entry) => entry.image);
+    let current = roster[selection[0]];
 
     const cardContainer = document.createElement('div');
     const cardContent = document.createElement('div');
     const cardFront = document.createElement('div');
     const cardBack = document.createElement('div');
-    cardFront.className = `front`;
-    cardFront.style.backgroundColor = pokemonRoles[uniteRoster[pokemonSelection[0]].role];
-    cardBack.className = `back`;
-    cardContent.className = `card-content`;
-    cardContainer.className = `pokemon-card`;
-    const pokemonImage = document.createElement('img');
-    const pokemonNameContainer = document.createElement('div');
-    pokemonNameContainer.className = `pokemon-name`;
-    const pokemonName = document.createElement('p');
-    pokemonName.textContent = uniteRoster[pokemonSelection[0]].name;
-    pokemonNameContainer.appendChild(pokemonName);
+    cardFront.className = 'front';
+    cardBack.className = 'back';
+    cardContent.className = 'card-content';
+    cardContainer.className = 'pokemon-card';
+    cardContainer.dataset.game = game;
+    // Rectangular art fills the card instead of sitting in it as a growing picture
+    cardContainer.classList.toggle('art-opaque', Boolean(RANDOMIZER_GAMES[game]?.opaqueArt));
+
     const playerContainer = document.createElement('div');
-    playerContainer.className = `player-name`;
+    playerContainer.className = 'player-name';
     const playerName = document.createElement('p');
     playerName.textContent = username;
     playerContainer.appendChild(playerName);
-    pokemonImage.src = uniteRoster[pokemonSelection[0]].image;
-    const pokeBallUniteLogo = document.createElement('img');
-    pokeBallUniteLogo.src = '../../assets/pokeball-logo.png';
-    cardBack.appendChild(pokeBallUniteLogo);
-    cardFront.appendChild(playerContainer);
-    cardFront.appendChild(pokemonImage);
-    cardFront.appendChild(pokemonNameContainer);
+
+    const pickImage = document.createElement('img');
+    pickImage.alt = '';
+
+    // Text layout: the name is the centerpiece and the bar shows the game
+    const center = document.createElement('div');
+    center.className = 'pick-center';
+    const centerName = document.createElement('p');
+    const roleLabel = document.createElement('span');
+    roleLabel.className = 'pick-role';
+    center.append(centerName, roleLabel);
+
+    const nameContainer = document.createElement('div');
+    nameContainer.className = 'pokemon-name';
+    const barText = document.createElement('p');
+    nameContainer.appendChild(barText);
+
+    // The game's logo on the back (the Poké Ball for UNITE); its name if the logo can't load
+    const backLogo = document.createElement('img');
+    backLogo.alt = gameName;
+    backLogo.src = gameLogoUrl(game);
+    backLogo.addEventListener('error', () => {
+        const backLabel = document.createElement('p');
+        backLabel.className = 'back-label';
+        backLabel.textContent = gameName;
+        backLogo.replaceWith(backLabel);
+    });
+    cardBack.appendChild(backLogo);
+
+    cardFront.append(playerContainer, pickImage, center, nameContainer);
     cardContent.appendChild(cardFront);
     cardContent.appendChild(cardBack);
     cardContainer.appendChild(cardContent);
     container.appendChild(cardContainer);
 
+    const show = (entry) => {
+        current = entry;
+        const role = roleOf(game, entry.role);
+        cardFront.style.backgroundColor = role.color;
+        cardContainer.classList.toggle('text-card', textMode);
+        centerName.textContent = entry.name;
+        roleLabel.textContent = role.label;
+        barText.textContent = textMode ? gameName : entry.name;
+        if (!textMode && entry.image) pickImage.src = entry.image;
+    };
+    pickImage.addEventListener('error', () => {
+        textMode = true;
+        show(current);
+    });
+    show(current);
+
     let counter = 0;
     const interval = setInterval(() => {
-        pokemonImage.src = uniteRoster[pokemonSelection[counter]].image;
-        pokemonName.textContent = uniteRoster[pokemonSelection[counter]].name;
-        cardFront.style.backgroundColor = pokemonRoles[uniteRoster[pokemonSelection[counter]].role];
+        show(roster[selection[counter]]);
         counter++;
-        if (counter === 5) {
+        if (counter === SPIN_TICKS) {
             window.clearInterval(interval);
-            pokemonImage.src = uniteRoster[finalSelection].image;
-            cardFront.style.backgroundColor = pokemonRoles[uniteRoster[finalSelection].role];
-            pokemonName.textContent = uniteRoster[finalSelection].name;
-            pokemonImage.classList.add('selected');
+            show(finalEntry);
+            pickImage.classList.add('selected');
+            cardFront.classList.add('selected');
         }
-    }, 500);
+    }, TICK_MS);
 
     setTimeout(() => {
         cardContainer.classList.add('fade');
@@ -74,12 +117,10 @@ const createRandomizedCard = async (username, target, pokemonId) => {
     }, 9000);
 }
 
-const getRandomSelection = (uniteRoster) => {
-    let selection = [];
-    let i = 0;
-    while (i < 5) {
-        selection.push(getRandomArrayElement(0, uniteRoster.length));
-        i++;
+const getRandomSelection = (roster) => {
+    const selection = [];
+    while (selection.length < SPIN_TICKS) {
+        selection.push(getRandomArrayElement(0, roster.length));
     }
     return selection;
 }

@@ -4,21 +4,27 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Frampersand — Overlay Showcase</title>
+  <title>FramperBot showcase</title>
   <link rel="stylesheet" href="showcase.css" />
   <link rel="stylesheet" href="../sources/randomizer/index.css" />
+  <link rel="stylesheet" href="../sources/randomizer/designs.css" />
 </head>
 
 <body>
-  <header class="showcase-header">
-    <h1>Interactive Overlay Showcase</h1>
-    <p>Preview bot sources in a mock Twitch layout. Use the controls below the stream to trigger each feature.</p>
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <span class="brand-name">FramperBot</span>
+      <span class="brand-divider" aria-hidden="true"></span>
+      <span class="brand-page">Overlay showcase</span>
+    </div>
+    <p class="topbar-hint">Chat or redeem a reward to see what viewers can do</p>
   </header>
 
-  <main class="showcase-main">
-    <section class="stream-column">
-      <div class="stream-stage" id="stream-stage">
-        <div class="stream-stage-inner" id="stream-stage-inner">
+  <main class="layout">
+    <section class="watch" aria-label="Stream preview">
+      <div class="player" id="stream-stage">
+        <div class="player-inner" id="stream-stage-inner">
           <div class="stream-layer layer-background-color" id="layer-background-color"></div>
           <div class="stream-layer layer-background-pattern" id="layer-background-pattern"></div>
           <div class="stream-layer layer-sprites" id="layer-sprites"></div>
@@ -29,104 +35,108 @@
           <div class="stream-layer layer-rain" id="layer-rain">
             <div class="rain-gif" id="rain-gif"></div>
           </div>
-          <div class="stream-chrome">
-            <span class="stream-live-badge">LIVE</span>
-            <span class="stream-title">Frampersand · Overlay Demo</span>
+        </div>
+        <div class="player-chrome">
+          <span class="live-badge">LIVE</span>
+          <div class="action-feed" id="action-feed" aria-live="polite"></div>
+          <div class="volume" id="volume" data-level="mid">
+            <button class="volume-button" id="volume-mute" type="button" aria-label="Mute rain sound">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path class="icon-speaker" d="M4 9h4l5-4v14l-5-4H4z" />
+                <path class="icon-wave-1" d="M16 9a4 4 0 0 1 0 6" />
+                <path class="icon-wave-2" d="M18.5 6.5a7.5 7.5 0 0 1 0 11" />
+                <path class="icon-mute" d="M16 9l5 6M21 9l-5 6" />
+              </svg>
+            </button>
+            <input type="range" id="volume-slider" min="0" max="100" step="1" value="40"
+              aria-label="Rain volume" />
           </div>
         </div>
       </div>
 
-      <section class="controls-panel" aria-label="Overlay controls">
-        <article class="control-card">
-          <h3>Sprite border</h3>
-          <div class="toggle-row">
-            <label for="toggle-sprites">Show layer</label>
-            <input type="checkbox" id="toggle-sprites" checked />
+      <div class="channel-row">
+        <div class="channel-avatar" id="channel-avatar" aria-hidden="true"></div>
+        <div class="channel-text">
+          <p class="channel-name" id="channel-name">Frampersand</p>
+          <p class="channel-title">Overlay demo: everything here is triggered from chat</p>
+          <div class="channel-tags">
+            <span>Pokémon UNITE</span><span>PMD</span><span>Interactive</span>
           </div>
-          <div class="control-row">
-            <input type="number" id="sprite-number" placeholder="Dex # (empty = random)" min="1" max="893" />
-            <button class="btn btn-primary" id="sprite-add-btn" type="button">Add</button>
-          </div>
-          <div class="control-row">
-            <button class="btn" id="sprite-random-btn" type="button">Random</button>
-            <button class="btn btn-ghost" id="sprite-clear-btn" type="button">Clear</button>
-          </div>
-        </article>
+        </div>
+      </div>
 
-        <article class="control-card">
-          <h3>Background</h3>
-          <div class="toggle-row">
-            <label for="toggle-background-color">Color layer</label>
-            <input type="checkbox" id="toggle-background-color" checked />
-          </div>
-          <div class="toggle-row">
-            <label for="toggle-background-pattern">Pattern layer</label>
-            <input type="checkbox" id="toggle-background-pattern" checked />
-          </div>
-          <div class="control-row">
-            <button class="btn" data-color="1a1a2e" type="button">Midnight</button>
-            <button class="btn" data-color="124071" type="button">Ocean</button>
-            <button class="btn" data-color="494981" type="button">PMD</button>
-          </div>
-          <div class="control-row">
-            <input type="text" id="background-color" placeholder="Hex color (e.g. 9146ff)" />
-            <button class="btn btn-primary" id="color-btn" type="button">Apply</button>
-          </div>
-          <div class="control-row">
-            <input type="number" id="pattern-number" placeholder="Dex # (empty = random)" min="1" max="1010" />
-            <button class="btn btn-primary" id="pattern-btn" type="button">Apply</button>
-          </div>
-        </article>
+      <div class="layers" role="group" aria-label="Overlay layers">
+        <span class="layers-label">Layers</span>
+        <button class="chip" type="button" aria-pressed="true" data-layer="layer-background-color">Background</button>
+        <button class="chip" type="button" aria-pressed="true" data-layer="layer-background-pattern">Pattern</button>
+        <button class="chip" type="button" aria-pressed="true" data-layer="layer-sprites">Sprites</button>
+        <button class="chip" type="button" aria-pressed="true" data-layer="layer-randomizer">Randomizer</button>
+        <button class="chip" type="button" aria-pressed="true" data-layer="layer-rain">Rain</button>
+        <button class="chip" type="button" aria-pressed="true" data-layer="layer-pmd-chat">PMD chat</button>
+        <button class="chip chip-ghost" type="button" id="reset-stage">Reset stage</button>
+      </div>
 
-        <article class="control-card">
-          <h3>Randomizer</h3>
-          <div class="toggle-row">
-            <label for="toggle-randomizer">Show layer</label>
-            <input type="checkbox" id="toggle-randomizer" checked />
-          </div>
-          <div class="control-row">
-            <button class="btn btn-primary" id="randomize-btn" type="button">Deal with it!</button>
-          </div>
-        </article>
-
-        <article class="control-card">
-          <h3>Rain</h3>
-          <div class="toggle-row">
-            <label for="toggle-rain">Show layer</label>
-            <input type="checkbox" id="toggle-rain" checked />
-          </div>
-          <div class="control-row">
-            <button class="btn btn-primary" id="rain-btn" type="button">Make it rain</button>
-          </div>
-        </article>
-
-        <article class="control-card">
-          <h3>PMD chat</h3>
-          <div class="toggle-row">
-            <label for="toggle-pmd">Show layer</label>
-            <input type="checkbox" id="toggle-pmd" checked />
-          </div>
-          <div class="toggle-row">
-            <label for="toggle-pmd-sync">Sync with mock chat</label>
-            <input type="checkbox" id="toggle-pmd-sync" checked />
-          </div>
-          <div class="control-row">
-            <button class="btn btn-primary" id="pmd-test-btn" type="button">Test message</button>
-          </div>
-        </article>
+      <section class="actions" aria-labelledby="actions-heading">
+        <h2 id="actions-heading">What viewers can do</h2>
+        <div class="action-grid" id="action-grid"></div>
       </section>
     </section>
 
-    <aside class="chat-column">
-      <div class="chat-header">Stream Chat</div>
-      <div class="chat-messages" id="chat-messages"></div>
-      <div class="chat-input-mock">
-        <input type="text" placeholder="Send a message (mock)" disabled />
+    <aside class="chat" aria-label="Stream chat">
+      <div class="chat-header">
+        <span>Stream chat</span>
+        <button class="demo-pill" id="demo-toggle" type="button" aria-pressed="true">
+          <span class="demo-dot" aria-hidden="true"></span>
+          <span id="demo-label">Demo playing</span>
+        </button>
+      </div>
+
+      <div class="chat-log" id="chat-log" aria-live="polite"></div>
+
+      <div class="composer">
+        <div class="suggestions" id="suggestions" role="listbox" aria-label="Commands" hidden></div>
+
+        <div class="points-popover" id="points-popover" role="dialog" aria-labelledby="points-heading" hidden>
+          <div class="points-head">
+            <h3 id="points-heading">Channel points rewards</h3>
+            <button class="icon-button" id="points-close" type="button" aria-label="Close rewards">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" /></svg>
+            </button>
+          </div>
+          <div class="reward-list" id="reward-list"></div>
+          <form class="reward-form" id="reward-form" hidden>
+            <button class="back-link" type="button" id="reward-back">All rewards</button>
+            <p class="reward-form-title" id="reward-form-title"></p>
+            <p class="reward-form-help" id="reward-form-help"></p>
+            <input type="text" id="reward-input" autocomplete="off" />
+            <p class="field-error" id="reward-error" role="alert"></p>
+            <button class="button-primary" type="submit" id="reward-submit">Redeem</button>
+          </form>
+        </div>
+
+        <form class="chat-form" id="chat-form">
+          <input type="text" id="chat-input" autocomplete="off" maxlength="200"
+            placeholder="Send a message, or type ! for commands" aria-label="Chat message"
+            aria-autocomplete="list" aria-controls="suggestions" />
+        </form>
+
+        <div class="composer-bar">
+          <button class="points-button" id="points-button" type="button" aria-haspopup="dialog"
+            aria-expanded="false">
+            <span class="points-icon" aria-hidden="true"></span>
+            <span>Rewards</span>
+          </button>
+          <div class="identity" role="group" aria-label="Chatting as">
+            <button type="button" class="identity-option" data-identity="viewer" aria-pressed="true">Viewer</button>
+            <button type="button" class="identity-option" data-identity="broadcaster" aria-pressed="false">Broadcaster</button>
+          </div>
+          <button class="button-primary" type="submit" form="chat-form">Chat</button>
+        </div>
       </div>
     </aside>
   </main>
 
-  <audio id="rain-audio" src="../assets/rain.mp4" preload="auto"></audio>
+  <audio id="rain-audio" src="../assets/rain.mp4" preload="none"></audio>
   <script src="/socket.io/socket.io.js"></script>
   <script src="../libs/tinycolor/tinycolor.js"></script>
   <script src="index.js" type="module"></script>
