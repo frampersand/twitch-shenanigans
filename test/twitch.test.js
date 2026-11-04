@@ -233,6 +233,21 @@ test("dashboard: settings are validated and only accepted from our own page", as
 
   assert.equal((await dashboard("/joesbeard/rewards", { method: "PUT", body: { feature: "rain", rewardId: "someone-elses-reward" } })).status, 400);
   assert.equal((await dashboard("/joesbeard/rewards", { method: "PUT", body: { feature: "confetti", rewardId: null } })).status, 400);
+
+  const put = (body) => dashboard("/joesbeard/background", { method: "PUT", body });
+  assert.deepEqual((await (await put({ scene: "candy" })).json()).background, { scene: "candy", color: null, speed: 1 });
+  assert.deepEqual((await (await put({ color: "#FF6600", speed: 0.5 })).json()).background, { scene: "candy", color: "#ff6600", speed: 0.5 });
+  assert.equal((await (await put({ color: null })).json()).background.color, null);
+  assert.equal((await (await put({ scene: "plain", color: "#112233" })).json()).background.scene, "plain");
+  assert.equal((await put({ scene: "minecraft" })).status, 400);
+  assert.equal((await put({ color: "orange" })).status, 400);
+  assert.equal((await put({ speed: 5 })).status, 400);
+  assert.equal((await put({ speed: "fast" })).status, 400);
+  assert.equal((await put({})).status, 400);
+  const saved = await (await dashboard("/joesbeard")).json();
+  assert.equal(saved.background.scene, "plain");
+  assert.equal(saved.backgroundNow, null);
+  assert.equal((await dashboard("/joesbeard/background/reset", { method: "POST", body: {} })).status, 200);
 });
 
 test("dashboard: linked rewards trigger their feature, and the old IDs step aside", async () => {
@@ -286,6 +301,7 @@ test("self-serve: a new streamer accepts the terms, joins, and can remove Frampe
   assert.equal(settings.terms.accepted, settings.terms.current);
   assert.deepEqual(settings.rewards, []);
   await dashboard("/newstreamer/card-style", { cookie, method: "PUT", body: { cardStyle: "holo" } });
+  await dashboard("/newstreamer/background", { cookie, method: "PUT", body: { scene: "ether", color: "#123456" } });
 
   // Removing needs the channel name typed back, then wipes the channel's data
   assert.equal((await dashboard("/newstreamer/leave", { cookie, method: "POST", body: { confirm: "nope" } })).status, 400);
@@ -295,9 +311,11 @@ test("self-serve: a new streamer accepts the terms, joins, and can remove Frampe
   assert.ok(!(await (await fetch(`${baseUrl}/api/channels`)).json()).includes("newstreamer"));
   assert.ok(twitchCalls.some((c) => c.method === "DELETE" && c.url.includes("/eventsub/subscriptions")));
 
-  // Joining again starts from scratch: the old card style is gone
+  // Joining again starts from scratch: the old card style and background are gone
   await dashboard("/join", { cookie, method: "POST", body: { acceptTerms: true } });
-  assert.equal((await (await dashboard("/newstreamer", { cookie })).json()).cardStyle, "classic");
+  const fresh = await (await dashboard("/newstreamer", { cookie })).json();
+  assert.equal(fresh.cardStyle, "classic");
+  assert.deepEqual(fresh.background, { scene: "aurora", color: null, speed: 1 });
 
   // The home channel can't be removed
   const owner = await loginAs("owner-code");

@@ -115,6 +115,45 @@
         <div class="preview-stage" id="style-preview" aria-label="Card preview"></div>
       </section>
 
+      <section class="card" aria-labelledby="scene-title">
+        <div class="card-head">
+          <div>
+            <h2 id="scene-title">Background</h2>
+            <p>The Background source shows a color, or an animated scene painted in that color. Pick how it starts
+              each stream. Viewers' <strong>Background color</strong> and <strong>Animated scene</strong> rewards
+              change it live, and each keeps the other: a new color repaints the scene, a new scene takes the color.</p>
+          </div>
+        </div>
+        <div class="scene-now" id="scene-now" hidden>
+          <span id="scene-now-text"></span>
+          <button class="button small" id="scene-reset" type="button">Back to default</button>
+        </div>
+        <form class="scene-controls" id="scene-controls" novalidate>
+          <fieldset class="scene-mode">
+            <legend>Starts with</legend>
+            <label><input type="radio" name="mode" value="plain" /> A plain color</label>
+            <label><input type="radio" name="mode" value="scene" /> An animated scene</label>
+          </fieldset>
+          <div class="scene-color">
+            <label class="color-field">Color <input type="color" name="color" value="#9146ff" /></label>
+            <span class="palette" id="scene-palette" aria-label="The tones scenes are painted with"></span>
+            <label class="scene-check" id="own-colors-field"><input type="checkbox" name="ownColors" />
+              <span>Use the scene's own colors until a viewer picks one</span></label>
+          </div>
+        </form>
+        <div class="scene-pick" id="scene-pick">
+          <div class="style-grid scene-grid" id="scene-grid" role="radiogroup" aria-label="Animated scene"></div>
+          <label class="scene-speed"><span>Speed</span>
+            <input type="range" id="scene-speed" min="0" max="2" step="0.05" />
+            <output id="scene-speed-label"></output>
+          </label>
+        </div>
+        <div class="scene-preview" id="scene-preview" aria-label="Background preview"></div>
+        <p class="note">The <strong>Animated scene</strong> reward takes a scene's name or number (like <code>lava</code> or
+          <code>8</code>), or <code>plain</code> for just the color; empty picks a random one. The Pokémon pattern is a
+          separate source that goes on top.</p>
+      </section>
+
       <section class="card" aria-labelledby="pmd-title">
         <div class="card-head">
           <div>

@@ -108,3 +108,13 @@ Follow-ups from the November 2026 project assessment (security, bugs, quality, l
 - [ ] Add Docker log rotation (e.g. `logging: { options: { max-size: "10m", max-file: "3" } }`) so logs don't grow between deploys
 - [ ] If sign-ups grow past ~20 channels, apply for Twitch's verified bot status (unverified bots have chat join limits)
 - [ ] Once every channel has linked its rewards, `src/config/rewards.js` can go
+
+## Background (color and animated scene)
+
+- [X] `/sources/shader/`: a plain color or one of nine animated WebGL scenes from Paper Shaders (vendored in `public/libs/paper-shaders`, Apache-2.0), crossfades, still-gradient fallback without WebGL, renders at 1080p max
+- [X] Dashboard default look: plain color or animated scene, color (or the scene's own colors), speed (`data/backgroundScenes.json`), live preview, "On stream now" with Back to default
+- [X] Background color and Animated scene rewards build on each other in either order; scenes are repainted with dark, base and light tones of the color; viewers pick scenes by name or number
+- [X] Wording: Background color / Pokémon pattern / Animated scene; Pokémon pattern source gets `?color=off` to sit above the Background
+- [ ] Check GPU use in OBS on a real stream PC (use `?quality=low` if it's heavy)
+- [ ] Add the Background source to the showcase's simulated stream
+- [ ] Rename the "Background pattern" reward on Twitch to "Pokémon pattern" and create an "Animated scene" reward (text optional), then link it

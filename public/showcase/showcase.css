@@ -906,6 +906,18 @@ button {
   transition: opacity 0.35s var(--ease), background 0.6s var(--ease);
 }
 
+/* The Background source's crossfading layers (plain color or animated scene) */
+.layer-background-color .scene-layer {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 1.5s ease;
+}
+
+.layer-background-color .scene-layer.visible {
+  opacity: 1;
+}
+
 .layer-background-pattern {
   overflow: hidden;
 }

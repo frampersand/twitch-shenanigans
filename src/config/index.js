@@ -23,6 +23,7 @@ export const config = {
   pmdChatPreferencesPath: path.join(dataDir, "pmdChatPreferences.json"),
   rainbearerPath: path.join(dataDir, "rainbearer.json"),
   randomizerPreferencesPath: path.join(dataDir, "randomizerPreferences.json"),
+  backgroundScenesPath: path.join(dataDir, "backgroundScenes.json"),
   rostersFolder: path.join(rootDir, "src", "data", "rosters"),
   twitchConnectionsPath: path.join(dataDir, "twitchConnections.json"),
   rewardLinksPath: path.join(dataDir, "rewardLinks.json"),

@@ -14,7 +14,7 @@ const EXAMPLE_CHAT = [
     { redeem: "NightOwl_", reward: "Summon the rain" },
     { name: "FramperBot", color: "#a970ff", bot: true, text: botReplies.rain("NightOwl_") },
     { name: "UniteMain", color: "#daa520", text: "!portrait 25 happy" },
-    { redeem: "ModTeam", reward: "Background pattern", input: "143" },
+    { redeem: "ModTeam", reward: "Pokémon pattern", input: "143" },
     { name: "ChatLurker", color: "#1e90ff", text: "the background pattern goes hard" },
 ];
 const CHAT_STEP_MS = 1600;

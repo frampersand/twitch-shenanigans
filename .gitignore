@@ -112,6 +112,7 @@ BACKLOG.md
 # Runtime state written by the bot (lives in the Docker volume in production)
 data/rainbearer.json
 data/randomizerPreferences.json
+data/backgroundScenes.json
 data/twitchConnections.json
 data/rewardLinks.json
 data/channels.json

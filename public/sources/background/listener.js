@@ -8,8 +8,12 @@ scaleToFill(document.getElementById("pattern-container"), numberParam("scale", {
 let socket = io();
 joinOverlayChannel(socket, getOverlayChannel());
 
+// ?color=off: only the Pokémon pattern, on a transparent page, to sit above the Background source
+// (which takes the color and repaints its animated scene with it)
+const paintsColor = new URLSearchParams(location.search).get("color") !== "off";
+
 socket.on('color', (color, target = '') => {
-    changeBackgroundColor(color, target);
+    if (paintsColor) changeBackgroundColor(color, target);
 });
 
 socket.on('pattern', (number, target = '') =>{

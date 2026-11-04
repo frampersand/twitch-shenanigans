@@ -49,7 +49,7 @@ sprite CDN (`pokemon-card-project-sprites` repo) at `https://cdn.frampersand.dev
 | --- | --- |
 | `/pmd/manifest.json` | `/portrait` picks a folder and emotion from it (cached 6 h) |
 | `/pmd/portrait/{0001}/{Emotion}.png` | PMD chat overlay |
-| `/pokemon/icon/{dex}.png` | Background pattern |
+| `/pokemon/icon/{dex}.png` | Pokémon pattern |
 | `/unite/{id}.png` | UNITE randomizer |
 
 Randomizer rosters are static lists in `src/data/rosters/<game>.json` (`id`, `name`, `role`); games and
@@ -68,7 +68,8 @@ Sources without it default to `frampersand`.
 | Path | Shows |
 | --- | --- |
 | `/sources/sprites/` | Pokémon sprites popping up around the frame |
-| `/sources/background/` | Background color and Pokémon pattern |
+| `/sources/shader/` | Background: a plain color, or an animated scene ([Paper Shaders](https://shaders.paper.design)) painted in that color |
+| `/sources/background/` | Pokémon pattern (and the old color gradient). Add `?color=off` to place it above the Background source |
 | `/sources/rain/` | Rain animation and sound |
 | `/sources/randomizer/?channel=…` | UNITE randomizer cards (`?channel` required) |
 | `/sources/pmd-chat/?channel=…` | Chat with PMD portraits (`?channel` required, add `&mock` to preview) |
@@ -83,6 +84,10 @@ Coordinates are page pixels. Without them each overlay looks as it always has.
 | randomizer | `x=…&y=…` | Centers the cards on that point |
 | randomizer | `scale=1.4` | Card size (also works without `x`/`y`) |
 | background | `scale=1.5` | Pokémon pattern size |
+| background | `color=off` | Pattern only, on a transparent page; the color goes to the Background source |
+| shader | `scene=lava` | Pins one look: a scene's name or number, `plain` or `shuffle` |
+| shader | `color=9146ff`, `speed=0.5` | Pins the color the scene is painted with; animation speed from 0 (still) to 2 |
+| shader | `quality=low` | Renders at 720p instead of 1080p for slower PCs |
 
 Example: `/sources/sprites/?frame=24,24,1440,810&size=90`.
 
@@ -91,7 +96,7 @@ Example: `/sources/sprites/?frame=24,24,1440,810&size=90`.
 | `/` | FramperBot home page: what viewers can do, how it works, the channels it's on (from `/api/channels`) |
 | `/showcase/` | A simulated channel: try chat commands and channel point rewards and watch the overlays react. Runs entirely in the browser; `?channel=` previews that channel's PMD settings |
 | `/admin/#token=…` | Trigger overlays by hand (needs `ADMIN_TOKEN`) |
-| `/dashboard/` | Broadcasters log in with Twitch to link their channel point rewards, pick the card style, style the PMD chat and copy OBS URLs. The owner can manage every channel |
+| `/dashboard/` | Broadcasters log in with Twitch to link their channel point rewards, pick the card style and how the Background starts (a color or an animated scene), style the PMD chat and copy OBS URLs. The owner can manage every channel |
 
 ## Chat commands
 
@@ -101,11 +106,15 @@ Example: `/sources/sprites/?frame=24,24,1440,810&size=90`.
 | `!portrait <dex number> [emotion]` | Anyone (cooldown) | Sets your portrait in the PMD chat overlay |
 | `!pmdconfig <setting> <value>` | Broadcaster | Tunes the PMD chat overlay (`chatDirection`, `solidBubbles`, `solidBubblesColor`, `bubbleTextColor`, `portraitShape`, `maxMessages` 1–20) |
 | `!cardstyle <style>` | Broadcaster | Picks the channel's randomizer card: `classic`, `holo`, `reel`, `lockin`, or `random` for a different one every roll. Preview them at `/sources/randomizer/designs.html` |
+| `!background <scene>` (or `!bg`) | Broadcaster | Changes the Background for this stream: a scene's name or number (`1` aurora, `2` lagoon, `3` dusk, `4` moss, `5` cauldron, `6` candy, `7` synapse, `8` lava, `9` ether), `plain`, `random`, or `shuffle` for a new scene every 10 minutes. `!background color <hex>` / `color off` paints it, `!background reset` goes back to the dashboard default |
 | `!rainbearer` | Anyone, home channel | Says who last summoned the rain |
 | `!guesswhosback` | Owner | 🎵 |
 
-Channel point rewards (sprite, reroll, rain, background color, background pattern) are mapped in
-`src/config/rewards.js` (a fallback once channels link rewards on the dashboard). Per-channel rules live in
+Channel point rewards (sprite, reroll, rain, background color, Pokémon pattern) are mapped in
+`src/config/rewards.js` (a fallback once channels link rewards on the dashboard). The "Animated scene" reward
+is dashboard-only. Background color and Animated scene build on each other: a new color repaints the current
+scene (as dark, base and light tones of that color), a new scene takes the current color. Those changes last the
+stream (kept in memory); the dashboard sets the default look in `data/backgroundScenes.json`. Per-channel rules live in
 `src/config/channels.js`; the channel list itself is `data/channels.json`, seeded from that file once and
 then managed by broadcasters adding or removing FramperBot on the dashboard.
 

@@ -199,3 +199,67 @@ test("a disconnected bot doesn't throw out of the handler", async () => {
     handle("#frampersand", chatContext("grace", "Grace", { "first-msg": true }), "hi", false)
   );
 });
+
+test("!background changes this stream's background, broadcaster only, and overlays hear it", async () => {
+  const { client, io, handle } = setup();
+  const broadcaster = chatContext("joesbeard", "JoesBeard", { badges: { broadcaster: "1" } });
+  const looks = () => emitsOf(io, "background-scene").map(([room, , look]) => [room, look]);
+
+  await handle("#joesbeard", chatContext("viewer_y"), "!background lava", false);
+  assert.equal(looks().length, 0);
+  assert.equal(client.said.length, 0);
+
+  await handle("#joesbeard", broadcaster, "!bg Lava", false);
+  assert.deepEqual(looks().at(-1), ["overlay:#joesbeard", { scene: "lava", color: null, speed: 1 }]);
+  assert.match(client.said.at(-1)[1], /now shows Lava lamp \(#8\)/);
+
+  await handle("#joesbeard", broadcaster, "!background color 9146FF", false);
+  assert.deepEqual(looks().at(-1)[1], { scene: "lava", color: "#9146ff", speed: 1 });
+  // A new scene keeps the color
+  await handle("#joesbeard", broadcaster, "!background 2", false);
+  assert.deepEqual(looks().at(-1)[1], { scene: "lagoon", color: "#9146ff", speed: 1 });
+  await handle("#joesbeard", broadcaster, "!background color purple", false);
+  assert.match(client.said.at(-1)[1], /use !background color/);
+  await handle("#joesbeard", broadcaster, "!background color off", false);
+  assert.equal(looks().at(-1)[1].color, null);
+
+  await handle("#joesbeard", broadcaster, "!background random", false);
+  assert.notEqual(looks().at(-1)[1].scene, "lagoon");
+  await handle("#joesbeard", broadcaster, "!background minecraft", false);
+  assert.match(client.said.at(-1)[1], /don't know that scene/);
+  await handle("#joesbeard", broadcaster, "!background", false);
+  assert.match(client.said.at(-1)[1], /default: Aurora/);
+
+  // Reset goes back to the dashboard default
+  await handle("#joesbeard", broadcaster, "!background reset", false);
+  assert.deepEqual(looks().at(-1)[1], { scene: "aurora", color: null, speed: 1 });
+});
+
+test("color and scene rewards build on each other, in either order", async () => {
+  const { setRewardLink } = await import("../src/services/channelRewards.js");
+  await setRewardLink("#frampersand", "scene", "scene-reward");
+  const { client, io, handle } = setup();
+  const look = () => emitsOf(io, "background-scene").at(-1)[2];
+  const redeem = (reward, text) =>
+    handle("#frampersand", chatContext("viewer_z", "ViewerZ", { "custom-reward-id": reward }), text, false);
+
+  // Scene first, then a color repaints it
+  await redeem("scene-reward", "ether please");
+  assert.deepEqual(look(), { scene: "ether", color: null, speed: 1 });
+  assert.match(client.said.at(-1)[1], /ViewerZ switched the background to Ether \(#9\)/);
+  await redeem(REWARD_IDS.BACKGROUND_COLOR, "ff6600");
+  assert.deepEqual(look(), { scene: "ether", color: "#ff6600", speed: 1 });
+  // The Pokémon pattern source still gets the color as before
+  assert.equal(emitsOf(io, "color").at(-1)[2], "ff6600");
+
+  // A new scene (by number) takes on the color
+  await redeem("scene-reward", "8");
+  assert.deepEqual(look(), { scene: "lava", color: "#ff6600", speed: 1 });
+  await redeem("scene-reward", "plain");
+  assert.equal(look().scene, "plain");
+
+  // Unknown text, or shuffle (broadcasters only), gives a random scene and says so
+  await redeem("scene-reward", "shuffle");
+  assert.ok(!["plain", "shuffle"].includes(look().scene));
+  assert.match(client.said.at(-1)[1], /didn't recognize that scene/);
+});

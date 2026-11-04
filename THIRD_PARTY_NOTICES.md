@@ -22,6 +22,7 @@ covered by that license.
 | --- | --- | --- |
 | `public/assets/fonts/exo/` (Exo) | The Exo Project Authors | SIL Open Font License 1.1, text in [`public/assets/fonts/exo/OFL.txt`](public/assets/fonts/exo/OFL.txt) |
 | `public/libs/tinycolor/tinycolor.js` (TinyColor 1.6.0) | Brian Grinstead | MIT, notice in the file header |
+| `public/libs/paper-shaders/` (`@paper-design/shaders` 0.0.82, unmodified apart from removed source map comments) | Paper, https://shaders.paper.design | Apache-2.0, `LICENSE` and `NOTICE` in the folder |
 | `public/assets/fonts/pmd.ttf` | Fan-made font in the style of Pokémon Mystery Dungeon | Source and license not confirmed |
 | `public/assets/rain.mp4` | Unknown | Source and license not confirmed |
 | `public/assets/pokeball-logo.png` | Poké Ball design © Nintendo / Creatures / GAME FREAK | Used as fan content |

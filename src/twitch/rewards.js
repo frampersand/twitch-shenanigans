@@ -5,6 +5,8 @@ import { setRainbearer } from "../services/rainbearer.js";
 import { featureForReward } from "../services/channelRewards.js";
 import { safeSay } from "../utils/helpers.js";
 import { botReplies } from "../../shared/bot-messages.js";
+import { findScene, randomScene, sceneLabel, SHUFFLE_SCENE } from "../../shared/shaderScenes.js";
+import { changeBackgroundLive, getCurrentBackground } from "../services/backgroundScenes.js";
 
 /**
  * Reward features (see shared/features.js). Which reward triggers which feature is per
@@ -34,6 +36,8 @@ export function createRewardHandlers(deps) {
       const color = input[0] === "#" ? input.substring(1) : input;
       if (/^([0-9a-f]{3}){1,2}$/i.test(color)) {
         io.to(overlayRoom(target)).emit(EVENTS.COLOR, color);
+        // The Background source keeps its scene and repaints it in this color
+        return changeBackgroundLive(io, target, { color });
       } else {
         return safeSay(client, target, botReplies.invalidColor());
       }
@@ -47,6 +51,19 @@ export function createRewardHandlers(deps) {
         return safeSay(client, target, botReplies.invalidPattern());
       }
     },
+  };
+
+  /**
+   * Animated scene: the viewer names one (or its number), or leaves it empty for a random
+   * different one. It takes on the current background color. Viewers can't turn on shuffle.
+   */
+  features.scene = async (target, input, username) => {
+    const named = findScene(input);
+    const valid = named && named !== SHUFFLE_SCENE;
+    const scene = valid ? named : randomScene((await getCurrentBackground(target)).scene);
+    await changeBackgroundLive(io, target, { scene });
+    const reply = input && !valid ? botReplies.sceneRedeemedUnknown : botReplies.sceneRedeemed;
+    await safeSay(client, target, reply(username, sceneLabel(scene)));
   };
 
   return async function handleReward(target, rewardId, input, username) {

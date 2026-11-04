@@ -284,6 +284,126 @@ select:focus,
   background: linear-gradient(315deg, #3b1f5e 0%, #12101c 75%);
 }
 
+/* Background (color or animated scene) */
+.scene-grid {
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+}
+
+.scene-tile .scene-swatch {
+  height: 44px;
+  margin-bottom: 6px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.scene-preview {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  max-height: 360px;
+  margin: 14px auto 0;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #12101c;
+}
+
+.scene-preview .scene-layer {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 1.5s ease;
+}
+
+.scene-preview .scene-layer.visible {
+  opacity: 1;
+}
+
+.scene-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  font-size: 14px;
+}
+
+.scene-check,
+.scene-speed {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.scene-speed input {
+  width: 180px;
+  accent-color: var(--accent);
+}
+
+.scene-speed output {
+  min-width: 4.5em;
+  color: var(--muted);
+}
+
+.scene-mode {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+  margin: 0;
+  padding: 0;
+  border: none;
+}
+
+.scene-mode legend {
+  width: 100%;
+  margin-bottom: 6px;
+  font-weight: 700;
+}
+
+.scene-mode label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+}
+
+.scene-color {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 18px;
+}
+
+.palette {
+  display: inline-flex;
+  gap: 4px;
+}
+
+.palette-chip {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.scene-pick {
+  margin-top: 14px;
+}
+
+.scene-pick .scene-speed {
+  margin-top: 12px;
+}
+
+.scene-now {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 14px;
+  margin-bottom: 14px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--accent);
+  background: var(--accent-soft);
+  font-size: 14px;
+}
+
 /* PMD chat */
 .pmd-layout {
   display: grid;

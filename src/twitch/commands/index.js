@@ -4,6 +4,7 @@ import { createGuessWhosBackHandler } from "./guesswhosback.js";
 import { createPortraitHandler } from "./portrait.js";
 import { createPmdConfigHandler } from "./pmdconfig.js";
 import { createCardStyleHandler } from "./cardstyle.js";
+import { createBackgroundHandler } from "./background.js";
 
 /**
  * Chat commands keyed by lowercase name. Every handler receives
@@ -19,5 +20,7 @@ export function createCommandHandlers(deps) {
     "!portrait": createPortraitHandler(),
     "!pmdconfig": createPmdConfigHandler(io),
     "!cardstyle": createCardStyleHandler(),
+    "!background": createBackgroundHandler(io),
+    "!bg": createBackgroundHandler(io),
   };
 }

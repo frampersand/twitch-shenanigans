@@ -23,18 +23,26 @@ export const REWARD_INFO = [
     {
         id: "color",
         title: "Background color",
-        description: "Repaints the stream background with any hex color",
+        description: "Paints the background any hex color. An animated scene takes it on too",
         color: "#d9468f",
         text: "required",
         textHint: "a hex color like 9146ff",
     },
     {
         id: "pattern",
-        title: "Background pattern",
+        title: "Pokémon pattern",
         description: "Fills the background with drifting icons of one Pokémon",
         color: "#3fae6a",
         text: "required",
         textHint: "a Pokédex number from 1 to 1010",
+    },
+    {
+        id: "scene",
+        title: "Animated scene",
+        description: "Switches the background to an animated scene, painted in the current background color",
+        color: "#e4623f",
+        text: "optional",
+        textHint: "a scene's name or number, like lava or 8 (empty for a random one)",
     },
     {
         id: "reroll",
@@ -84,6 +92,14 @@ export const COMMAND_INFO = [
         broadcasterOnly: true,
     },
     {
+        name: "!background",
+        usage: "!background <scene or number>",
+        description: "Change the background for this stream: a scene's name or number (1 aurora … 9 ether), plain for just the color, random, or shuffle for a new one every 10 minutes. !background color <hex> paints it, !background reset goes back to the dashboard default. Short form: !bg",
+        who: "Broadcaster",
+        example: "!background lava",
+        broadcasterOnly: true,
+    },
+    {
         name: "!guesswhosback",
         usage: "!guesswhosback",
         description: "A little song from the bot",
@@ -100,5 +116,6 @@ export const REWARD_ICONS = {
     sprite: '<path d="M12 3l2.2 5.6L20 9l-4.5 3.8L17 19l-5-3.2L7 19l1.5-6.2L4 9l5.8-.4z"/>',
     color: '<circle cx="12" cy="12" r="8"/><circle cx="9" cy="10" r="1.2"/><circle cx="14" cy="9" r="1.2"/><circle cx="15.5" cy="13.5" r="1.2"/>',
     pattern: '<rect x="4" y="4" width="6" height="6" rx="1"/><rect x="14" y="4" width="6" height="6" rx="1"/><rect x="4" y="14" width="6" height="6" rx="1"/><rect x="14" y="14" width="6" height="6" rx="1"/>',
+    scene: '<path d="M3 15c3-4 6-4 9 0s6 4 9 0"/><path d="M3 9c3-4 6-4 9 0s6 4 9 0"/>',
     reroll: '<rect x="4" y="4" width="16" height="16" rx="3"/><circle cx="9" cy="9" r="1.2"/><circle cx="15" cy="15" r="1.2"/><circle cx="12" cy="12" r="1.2"/>',
 };

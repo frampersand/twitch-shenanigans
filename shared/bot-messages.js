@@ -98,4 +98,16 @@ export const botReplies = {
     cardStyleUnknown: (username, styles) =>
         `I don't know that card style @${username}. Pick one of: ${styles}`,
     cardStyleSet: (username, label) => `@${username} randomizer cards now use: ${label}`,
+    backgroundStatus: (label, color, defaultLabel, scenes) =>
+        `The background shows ${label}${color ? ` in ${color}` : ""} (default: ${defaultLabel}). Change it with !background <scene>, !background color <hex>, !background reset. Scenes: ${scenes}`,
+    backgroundUnknown: (username, scenes) =>
+        `I don't know that scene @${username}. Pick one of: ${scenes}`,
+    backgroundSet: (username, label) => `@${username} the background now shows ${label}`,
+    backgroundReset: (username, label) => `@${username} the background is back to its default: ${label}`,
+    backgroundColorUsage: (username) =>
+        `@${username} use !background color <hex color> (like 9146ff), or !background color off for the scene's own colors`,
+    backgroundColorSet: (username, color) =>
+        color ? `@${username} the background is now painted ${color}` : `@${username} the animated scene is back to its own colors`,
+    sceneRedeemed: (username, label) => `${username} switched the background to ${label}`,
+    sceneRedeemedUnknown: (username, label) => `${username} I didn't recognize that scene, so here's ${label}`,
 };

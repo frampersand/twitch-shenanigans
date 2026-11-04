@@ -10,7 +10,7 @@ import { redemptionsViaEventSub } from "../services/twitchConnections.js";
 import { logReward } from "../utils/rewardLog.js";
 
 /** Setup commands that would just clutter the PMD chat overlay */
-const PMD_HIDDEN_COMMANDS = new Set(["!portrait", "!pmdconfig", "!cardstyle"]);
+const PMD_HIDDEN_COMMANDS = new Set(["!portrait", "!pmdconfig", "!cardstyle", "!background", "!bg"]);
 
 function createMessageHandler(deps) {
   const { client, io } = deps;

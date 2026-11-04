@@ -12,6 +12,14 @@ import { getCardStyleSetting, setCardStyleSetting } from "../services/randomizer
 import { getPmdPreferencesForChannel, updatePmdPreference } from "../services/pmdChatPreferences.js";
 import { getRewardLinks, REWARD_FEATURES, setRewardLink } from "../services/channelRewards.js";
 import { findCardStyle } from "../../shared/randomizerGames.js";
+import {
+  changeBackgroundDefault,
+  getBackgroundDefault,
+  getCurrentBackground,
+  getLiveChanges,
+  resetBackground,
+} from "../services/backgroundScenes.js";
+import { MAX_SCENE_SPEED, MIN_SCENE_SPEED, normalizeColor, PLAIN_SCENE, SCENES, SHUFFLE_SCENE } from "../../shared/shaderScenes.js";
 
 const publicOrigin = config.publicBaseUrl ? new URL(config.publicBaseUrl).origin : null;
 
@@ -58,6 +66,9 @@ async function channelSettings(channelName) {
     channelPoints: connection?.eventSub?.status ?? "not_connected",
     cardStyle: await getCardStyleSetting(channel),
     pmd: await getPmdPreferencesForChannel(channel),
+    // The default look, and what's on stream now if rewards or chat changed it
+    background: await getBackgroundDefault(channel),
+    backgroundNow: Object.keys(getLiveChanges(channel)).length ? await getCurrentBackground(channel) : null,
     rewardLinks: await getRewardLinks(channel),
     // The broadcaster's rewards as of their last login (null: they haven't logged in yet)
     rewards: connection?.rewards ?? null,
@@ -104,6 +115,38 @@ export function createDashboardRoutes(io) {
     if (!style) return res.status(400).json({ error: "unknown_card_style" });
     await setCardStyleSetting(req.channel, style);
     res.json({ cardStyle: style });
+  });
+
+  /**
+   * The Background source's default look: any of { scene (a scene, plain or shuffle), color
+   * (hex, or null for the scene's own colors), speed }. Open overlays switch to it right away.
+   */
+  router.put("/api/dashboard/:channel/background", requireChannelAccess, async (req, res) => {
+    const body = req.body ?? {};
+    const changes = {};
+    if ("scene" in body) {
+      const known = [PLAIN_SCENE, SHUFFLE_SCENE].includes(body.scene) || Object.hasOwn(SCENES, String(body.scene));
+      if (!known) return res.status(400).json({ error: "unknown_scene" });
+      changes.scene = body.scene;
+    }
+    if ("color" in body) {
+      if (body.color !== null && !normalizeColor(body.color)) return res.status(400).json({ error: "invalid_color" });
+      changes.color = body.color;
+    }
+    if ("speed" in body) {
+      if (typeof body.speed !== "number" || !(body.speed >= MIN_SCENE_SPEED && body.speed <= MAX_SCENE_SPEED)) {
+        return res.status(400).json({ error: "invalid_speed" });
+      }
+      changes.speed = body.speed;
+    }
+    if (!Object.keys(changes).length) return res.status(400).json({ error: "bad_request" });
+    res.json({ background: await changeBackgroundDefault(io, req.channel, changes), backgroundNow: null });
+  });
+
+  /** Drop this stream's changes from rewards and chat: back to the default look */
+  router.post("/api/dashboard/:channel/background/reset", requireChannelAccess, async (req, res) => {
+    await resetBackground(io, req.channel);
+    res.json({ backgroundNow: null });
   });
 
   router.put("/api/dashboard/:channel/pmd", requireChannelAccess, async (req, res) => {

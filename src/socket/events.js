@@ -8,6 +8,8 @@ export const EVENTS = {
   PMD_PORTRAIT: "pmd-portrait",
   PMD_CONFIG_REQUEST: "pmd-config-request",
   PMD_CONFIG: "pmd-config",
+  BACKGROUND_SCENE_REQUEST: "background-scene-request",
+  BACKGROUND_SCENE: "background-scene",
   RAIN: "rain",
   COLOR: "color",
   PATTERN: "pattern",

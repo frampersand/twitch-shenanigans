@@ -4,6 +4,7 @@ import { overlayRoom, randomizerRoom, toJoinedChannel } from "./rooms.js";
 import { getPmdPreferencesForChannel } from "../services/pmdChatPreferences.js";
 import { getPortraitUserDataForChannel } from "../services/portrait.js";
 import { isValidAdminToken } from "../services/adminAuth.js";
+import { changeBackgroundLive, getCurrentBackground } from "../services/backgroundScenes.js";
 import { randomizeForPlayer } from "../services/randomizer.js";
 import { DEFAULT_GAME, findGame } from "../../shared/randomizerGames.js";
 
@@ -67,6 +68,17 @@ export function setupSocketHandlers(io) {
       }
     });
 
+    // The Background source asks for what's on stream when it connects
+    socket.on(EVENTS.BACKGROUND_SCENE_REQUEST, async (channel) => {
+      const joinedChannel = toJoinedChannel(channel);
+      if (!joinedChannel) return;
+      try {
+        socket.emit(EVENTS.BACKGROUND_SCENE, await getCurrentBackground(joinedChannel));
+      } catch (err) {
+        console.error("Failed to load the background:", err);
+      }
+    });
+
     if (!isAdmin) return;
 
     // Admin panel test triggers: each takes an optional channel as its last argument
@@ -85,6 +97,10 @@ export function setupSocketHandlers(io) {
       const room = adminRoom(channel);
       if (!room || !isShortString(color, 7) || !HEX_COLOR.test(color)) return;
       room.emit(EVENTS.COLOR, color.replace(/^#/, ""));
+      // Same as the reward: the animated scene takes the color too
+      changeBackgroundLive(io, toJoinedChannel(channel ?? ADMIN_DEFAULT_CHANNEL), { color }).catch((err) =>
+        console.error("Admin background color failed:", err)
+      );
     });
 
     socket.on(EVENTS.PATTERN, (number, channel) => {

@@ -4,6 +4,8 @@ import { generatePortrait } from "/sources/pmd-chat/index.js";
 import { applyChannelSettings } from "/sources/pmd-chat/layout.js";
 import { REWARD_ICONS, REWARD_INFO } from "/shared/features.js";
 import { CARD_STYLES, RANDOMIZER_GAMES, RANDOM_CARD_STYLE, resolveCardStyle } from "/shared/randomizerGames.js";
+import { createSceneStage, paletteFrom, sceneColors, sceneGradient } from "/sources/shader/sceneStage.js";
+import { PLAIN_SCENE, SCENES, SCENE_IDS, SHUFFLE_MINUTES, SHUFFLE_SCENE, randomScene } from "/shared/shaderScenes.js";
 
 const $ = (id) => document.getElementById(id);
 const el = (tag, className, text) => {
@@ -182,6 +184,147 @@ function renderCardStyles() {
     }
 }
 
+/* ---------- Background (color or animated scene) ---------- */
+
+let sceneStage = null;
+let previewShuffle = null;
+let previewScene = null;
+/** The last animated scene picked, so switching to plain and back keeps it */
+let lastScene = null;
+
+const speedLabel = (speed) =>
+    speed === 0 ? "Still" : speed < 0.6 ? "Calm" : speed <= 1.3 ? "Normal" : "Lively";
+const pickerColor = () => $("scene-controls").elements.color.value;
+
+/** The preview mirrors the overlay; for shuffle it cycles every few seconds instead of minutes */
+function renderScenePreview(overrides = {}) {
+    const { scene, color, speed } = { ...state.settings.background, ...overrides };
+    sceneStage ??= createSceneStage($("scene-preview"), { maxPixelCount: 960 * 540 });
+    clearInterval(previewShuffle);
+    if (scene === SHUFFLE_SCENE) {
+        previewScene = previewScene && Object.hasOwn(SCENES, previewScene) ? previewScene : randomScene();
+        sceneStage.show({ scene: previewScene, color, speed });
+        previewShuffle = setInterval(() => {
+            previewScene = randomScene(previewScene);
+            sceneStage.show({ scene: previewScene, color, speed });
+        }, 5000);
+    } else {
+        previewScene = scene;
+        sceneStage.show({ scene, color, speed });
+    }
+}
+
+function renderScenes() {
+    const grid = $("scene-grid");
+    grid.replaceChildren();
+    const { background } = state.settings;
+    const options = [
+        ...SCENE_IDS.map((id, i) => [id, `${i + 1} · ${SCENES[id].label}`, SCENES[id].description]),
+        [SHUFFLE_SCENE, "Shuffle", `A new scene every ${SHUFFLE_MINUTES} minutes`],
+    ];
+    for (const [id, label, description] of options) {
+        const tile = el("button", "style-tile scene-tile");
+        tile.type = "button";
+        tile.setAttribute("role", "radio");
+        tile.setAttribute("aria-checked", String(background.scene === id));
+        const swatch = el("span", "scene-swatch");
+        swatch.style.background = id === SHUFFLE_SCENE
+            ? `conic-gradient(${SCENE_IDS.map((scene) => sceneColors(scene, background.color).find((c) => !c.startsWith("#000")) ?? "#888").join(", ")})`
+            : sceneGradient(id, background.color);
+        tile.append(swatch, el("span", "style-name", label), el("span", "style-desc", description));
+        tile.addEventListener("click", () => {
+            if (background.scene !== id) saveBackground({ scene: id });
+        });
+        grid.appendChild(tile);
+    }
+}
+
+function renderPalette(color) {
+    const tones = paletteFrom(color);
+    $("scene-palette").replaceChildren(...["dark", "base", "light"].map((tone) => {
+        const chip = el("span", "palette-chip");
+        chip.style.background = tones[tone];
+        chip.title = `${tone} ${tones[tone]}`;
+        return chip;
+    }));
+}
+
+function renderSceneControls() {
+    const form = $("scene-controls");
+    const { scene, color, speed } = state.settings.background;
+    const plain = scene === PLAIN_SCENE;
+    if (!plain) lastScene = scene;
+    form.elements.mode.value = plain ? "plain" : "scene";
+    if (color) form.elements.color.value = color;
+    form.elements.ownColors.checked = !plain && !color;
+    $("own-colors-field").hidden = plain;
+    $("scene-pick").hidden = plain;
+    $("scene-palette").hidden = !plain && !color;
+    renderPalette(pickerColor());
+    $("scene-speed").value = String(speed);
+    $("scene-speed-label").value = speedLabel(speed);
+}
+
+/** What's on stream when rewards or chat changed it, with a way back to the default */
+function renderSceneNow() {
+    const now = state.settings.backgroundNow;
+    $("scene-now").hidden = !now;
+    if (!now) return;
+    const what = now.scene === PLAIN_SCENE ? "a plain color" : now.scene === SHUFFLE_SCENE ? "shuffle" : SCENES[now.scene].label;
+    $("scene-now-text").textContent = `On stream now: ${what}${now.color ? ` in ${now.color}` : ""}, changed by rewards or chat.`;
+}
+
+function renderBackground() {
+    renderScenes();
+    renderSceneControls();
+    renderSceneNow();
+    renderScenePreview();
+}
+
+function saveBackground(changes) {
+    save("background", changes, (result) => {
+        state.settings.background = result.background;
+        state.settings.backgroundNow = result.backgroundNow;
+        renderBackground();
+    });
+}
+
+function bindSceneControls() {
+    const form = $("scene-controls");
+    form.addEventListener("submit", (event) => event.preventDefault());
+    for (const radio of form.elements.mode) {
+        radio.addEventListener("change", () => {
+            if (radio.value === "plain") saveBackground({ scene: PLAIN_SCENE, color: pickerColor() });
+            else saveBackground({ scene: lastScene ?? SCENE_IDS[0] });
+        });
+    }
+    form.elements.color.addEventListener("input", () => {
+        renderPalette(pickerColor());
+        renderScenePreview({ color: pickerColor() });
+    });
+    // Picking a color paints the scene with it
+    form.elements.color.addEventListener("change", () => saveBackground({ color: pickerColor() }));
+    form.elements.ownColors.addEventListener("change", () => {
+        saveBackground({ color: form.elements.ownColors.checked ? null : pickerColor() });
+    });
+    $("scene-speed").addEventListener("input", () => {
+        const speed = Number($("scene-speed").value);
+        $("scene-speed-label").value = speedLabel(speed);
+        renderScenePreview({ speed });
+    });
+    $("scene-speed").addEventListener("change", () => saveBackground({ speed: Number($("scene-speed").value) }));
+    $("scene-reset").addEventListener("click", async () => {
+        try {
+            await api(`/api/dashboard/${state.settings.channel}/background/reset`, { method: "POST", body: {} });
+            state.settings.backgroundNow = null;
+            renderSceneNow();
+            toast("Back to the default");
+        } catch {
+            toast("That didn't work. Try again.", true);
+        }
+    });
+}
+
 /* ---------- PMD chat ---------- */
 
 const SAMPLE_MESSAGES = [
@@ -230,7 +373,8 @@ const OBS_SOURCES = [
     { name: "Randomizer cards", path: "/sources/randomizer/", size: "1920 × 1080" },
     { name: "PMD chat", path: "/sources/pmd-chat/", size: "600 × 1080" },
     { name: "Pokémon sprite border", path: "/sources/sprites/", size: "1920 × 1080" },
-    { name: "Background color and pattern", path: "/sources/background/", size: "1920 × 1080" },
+    { name: "Background (color and animated scene)", path: "/sources/shader/", size: "1920 × 1080" },
+    { name: "Pokémon pattern (place it above the Background)", path: "/sources/background/", query: "color=off", size: "1920 × 1080" },
     { name: "Rain", path: "/sources/rain/", size: "1920 × 1080" },
 ];
 
@@ -238,7 +382,7 @@ function renderObs() {
     const rows = $("obs-rows");
     rows.replaceChildren();
     for (const source of OBS_SOURCES) {
-        const url = `${location.origin}${source.path}?channel=${encodeURIComponent(state.settings.channel)}`;
+        const url = `${location.origin}${source.path}?channel=${encodeURIComponent(state.settings.channel)}${source.query ? `&${source.query}` : ""}`;
         const row = el("div", "obs-row");
         const text = el("div", "obs-text");
         text.append(el("h3", null, source.name), el("p", null, source.size));
@@ -343,7 +487,7 @@ function renderGuide() {
             done: linked > 0,
             html: rewardsAvailable === false
                 ? "Twitch only has channel point rewards for Affiliates and Partners. Commands like <code>!dealwithit</code> work without them."
-                : `On Twitch, open Creator Dashboard → Viewer Rewards → Channel Points → Manage Rewards and create the ones you want. Background color and pattern need "Require viewer to enter text". Then press Refresh rewards below and pick them under Channel point rewards.${linked ? ` ${linked} linked so far.` : ""}`,
+                : `On Twitch, open Creator Dashboard → Viewer Rewards → Channel Points → Manage Rewards and create the ones you want. Background color and Pokémon pattern need "Require viewer to enter text"; turn it on for Animated scene too if viewers should pick the scene. Then press Refresh rewards below and pick them under Channel point rewards.${linked ? ` ${linked} linked so far.` : ""}`,
         },
         {
             title: "Try it",
@@ -403,6 +547,7 @@ async function loadChannel(channel) {
     renderDanger();
     renderRewards();
     renderCardStyles();
+    renderBackground();
     renderPmdControls();
     renderPmdPreview();
     renderObs();
@@ -439,6 +584,7 @@ async function init() {
         $("channel-picker").hidden = false;
     }
     bindPmdControls();
+    bindSceneControls();
     bindTerms();
     bindDanger();
     await loadChannel(initial);

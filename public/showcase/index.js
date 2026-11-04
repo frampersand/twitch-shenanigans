@@ -1,10 +1,11 @@
 import borderSpriteGenerator, { resetSpriteBorder, setSpritePositionPool } from "../sources/sprites/index.js";
-import { changeBackgroundColor, changeBackgroundSprite } from "../sources/background/background.js";
+import { changeBackgroundSprite } from "../sources/background/background.js";
 import { clearTilePattern } from "../sources/background/tilePattern.js";
 import createRandomizedCard from "../sources/randomizer/randomizer.js";
 import { createDesignCard, DESIGNS } from "../sources/randomizer/designs.js";
 import { generatePortrait } from "../sources/pmd-chat/index.js";
 import { startRainCanvas, stopRainCanvas } from "../sources/rain/rainCanvas.js";
+import { createSceneStage } from "../sources/shader/sceneStage.js";
 import { applyChannelSettings } from "../sources/pmd-chat/layout.js";
 import { loadRoster } from "../utils/loadRoster.js";
 import { getOverlayChannel } from "../utils/overlayChannel.js";
@@ -27,6 +28,20 @@ import {
   randomizerMessages,
   welcomeMessages,
 } from "/shared/bot-messages.js";
+import {
+  DEFAULT_BACKGROUND as BACKGROUND_DEFAULT,
+  PLAIN_SCENE,
+  SCENE_IDS,
+  SHUFFLE_MINUTES,
+  SHUFFLE_SCENE,
+  currentBackground,
+  findScene,
+  normalizeBackground,
+  normalizeColor,
+  randomScene,
+  sceneLabel,
+  sceneList,
+} from "/shared/shaderScenes.js";
 import {
   DEFAULT_CHANNEL_PREFERENCES,
   getSupportedPmdPreferences,
@@ -57,7 +72,8 @@ const MAX_CHAT_LINES = 150;
 const STAGE_WIDTH = 800;
 const STAGE_HEIGHT = 450;
 const SPRITE_SIZE = 50;
-const DEFAULT_BACKGROUND = "1a1a2e";
+/** Until the channel's own look arrives (or if it never does) */
+const BACKGROUND_WAIT_MS = 1500;
 const DEFAULT_VOLUME = 0.4;
 const VOLUME_STORAGE_KEY = "showcase:rainVolume";
 
@@ -151,6 +167,9 @@ const state = {
   selectedReward: null,
   suggestionIndex: 0,
   demo: { playing: true, timer: null, step: 0 },
+  /** The channel's look when the page opened, plus this visit's color and scene changes */
+  background: { defaults: { ...BACKGROUND_DEFAULT }, live: {}, loaded: false },
+  shuffle: { scene: null, timer: null },
 };
 
 const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -313,11 +332,56 @@ async function rollFor(player, game = DEFAULT_GAME, role = null) {
 
 const lastRollFor = (player) => state.lastRolls.get(player.toLowerCase()) ?? { game: DEFAULT_GAME, role: null };
 
+/* ---------- Background: a plain color or an animated scene, built up like the real source ---------- */
+
+const sceneStage = createSceneStage(el.layerBackground, { maxPixelCount: 1280 * 720 });
+const backgroundNow = () => currentBackground(state.background.defaults, state.background.live);
+
+function renderBackground() {
+  if (!state.background.loaded) return;
+  const look = backgroundNow();
+  clearInterval(state.shuffle.timer);
+  if (look.scene !== SHUFFLE_SCENE) {
+    state.shuffle.scene = null;
+    sceneStage.show(look);
+    return;
+  }
+  // Same as the source: shuffle keeps its scene when only the color changes
+  state.shuffle.scene ??= randomScene();
+  sceneStage.show({ ...look, scene: state.shuffle.scene });
+  state.shuffle.timer = setInterval(() => {
+    state.shuffle.scene = randomScene(state.shuffle.scene);
+    sceneStage.show({ ...backgroundNow(), scene: state.shuffle.scene });
+  }, SHUFFLE_MINUTES * 60_000);
+}
+
+/** A new color keeps the scene, a new scene keeps the color */
+function changeBackground(changes) {
+  state.background.live = { ...state.background.live, ...changes };
+  renderBackground();
+}
+
+/** Starts from the channel's current look (its dashboard default plus this stream's changes) */
+function loadBackground() {
+  const socket = io();
+  const start = (look) => {
+    if (state.background.loaded) return;
+    if (look) state.background.defaults = normalizeBackground(look);
+    state.background.loaded = true;
+    renderBackground();
+    socket.close();
+  };
+  socket.on("background-scene", start);
+  socket.emit("background-scene-request", CHANNEL);
+  setTimeout(() => start(null), BACKGROUND_WAIT_MS);
+}
+
 function resetStage() {
   resetSpriteBorder(el.layerSprites);
   state.spriteCount = 0;
   clearTilePattern(el.layerPattern);
-  changeBackgroundColor(DEFAULT_BACKGROUND, el.layerBackground);
+  state.background.live = {};
+  renderBackground();
   el.layerRandomizer.innerHTML = "";
   el.pmdContainer.innerHTML = "";
   clearTimeout(state.rainTimer);
@@ -469,6 +533,53 @@ const COMMANDS = [
     },
   },
   {
+    ...commandInfo("!background"),
+    async run(user, params) {
+      if (user.role !== "broadcaster") {
+        addHint("Only the broadcaster can use !background. Switch to Broadcaster under the chat.");
+        return;
+      }
+      const requested = params[0]?.toLowerCase();
+      const now = backgroundNow();
+      const fallback = state.background.defaults;
+      if (!requested) {
+        await botSay(botReplies.backgroundStatus(sceneLabel(now.scene), now.color, sceneLabel(fallback.scene), sceneList()));
+        return;
+      }
+      if (requested === "reset") {
+        state.background.live = {};
+        renderBackground();
+        showAction("Background", "back to the default");
+        await botSay(botReplies.backgroundReset(user.name, sceneLabel(fallback.scene)));
+        return;
+      }
+      if (["color", "colour", "tint"].includes(requested)) {
+        const value = params[1]?.toLowerCase();
+        const own = ["off", "none", "own", "default"].includes(value);
+        const color = own ? null : normalizeColor(value);
+        if (!color && !own) {
+          await botSay(botReplies.backgroundColorUsage(user.name));
+          return;
+        }
+        changeBackground({ color });
+        showAction("Background", color ?? "the scene's own colors");
+        await botSay(botReplies.backgroundColorSet(user.name, color));
+        return;
+      }
+      const scene = requested === "random"
+        ? randomScene(now.scene === SHUFFLE_SCENE ? undefined : now.scene)
+        : findScene(requested);
+      if (!scene) {
+        await botSay(botReplies.backgroundUnknown(user.name, sceneList()));
+        return;
+      }
+      changeBackground({ scene });
+      showAction("Background", sceneLabel(scene));
+      await botSay(botReplies.backgroundSet(user.name, sceneLabel(scene)));
+      addHint("Preview only: the real channel's background doesn't change.");
+    },
+  },
+  {
     ...commandInfo("!guesswhosback"),
     async run(user) {
       if (!isOwner(user)) {
@@ -483,6 +594,7 @@ const COMMANDS = [
 ];
 
 const commandByName = new Map(COMMANDS.map((command) => [command.name, command]));
+commandByName.set("!bg", commandByName.get("!background"));
 
 async function handleChat(user, rawText, { fromDemo = false } = {}) {
   const text = rawText.trim();
@@ -493,7 +605,7 @@ async function handleChat(user, rawText, { fromDemo = false } = {}) {
   const commandName = first.toLowerCase();
 
   // Same rule as the bot: everything but the setup commands shows up in the PMD chat
-  if (!["!portrait", "!pmdconfig", "!cardstyle"].includes(commandName)) showOnPmdChat(user, text);
+  if (!["!portrait", "!pmdconfig", "!cardstyle", "!background", "!bg"].includes(commandName)) showOnPmdChat(user, text);
 
   // First-time chatters get a welcome on the home channel
   if (!fromDemo && !state.greeted && CHANNEL === HOME_CHANNEL) {
@@ -534,7 +646,7 @@ const REWARDS = [
   {
     ...rewardInfo("color"),
     input: {
-      help: "A hex color, with or without the #. The bot tells you if it can't read it.",
+      help: "A hex color, with or without the #. An animated scene is repainted in it. The bot tells you if it can't read it.",
       placeholder: "9146ff",
       validate: (value) => (value ? "" : "Enter a hex color"),
     },
@@ -544,8 +656,26 @@ const REWARDS = [
         await botSay(botReplies.invalidColor());
         return;
       }
-      changeBackgroundColor(color, el.layerBackground);
+      changeBackground({ color: normalizeColor(color) });
       showAction("Background", `#${color} from ${user.name}`);
+    },
+  },
+  {
+    ...rewardInfo("scene"),
+    input: {
+      help: `A scene's name or number: ${SCENE_IDS.map((id, i) => `${i + 1} ${id}`).join(", ")}, or ${PLAIN_SCENE} for just the color. Leave it empty for a random one. It takes on the current background color.`,
+      placeholder: "lava",
+      validate: () => "",
+    },
+    async run(user, input) {
+      // Same as the bot: the first word counts; unknown words (or shuffle) give a random scene
+      const named = findScene(input.split(/\s+/)[0]);
+      const valid = named && named !== SHUFFLE_SCENE;
+      const scene = valid ? named : randomScene(backgroundNow().scene);
+      changeBackground({ scene });
+      showAction("Scene", `${sceneLabel(scene)} from ${user.name}`);
+      const reply = input && !valid ? botReplies.sceneRedeemedUnknown : botReplies.sceneRedeemed;
+      await botSay(reply(user.name, sceneLabel(scene)));
     },
   },
   {
@@ -796,6 +926,7 @@ const DEMO_ACTIONS = [
   (user) => redeem(user, rewardById.get("sprite"), "", { fromDemo: true }),
   (user) => handleChat(user, pick(DEMO_ROLLS), { fromDemo: true }),
   (user) => redeem(user, rewardById.get("color"), pick(["124071", "3b1f5e", "1f4d3a", "5e2a1f"]), { fromDemo: true }),
+  (user) => redeem(user, rewardById.get("scene"), pick(["", "lava", "2", "candy", "synapse", "ether", "dusk", "6"]), { fromDemo: true }),
   (user) => redeem(user, rewardById.get("pattern"), String(pick([1, 4, 7, 25, 133, 143, 175, 393, 448, 778])), { fromDemo: true }),
   (user) => handleChat(user, `!portrait ${pick([1, 4, 7, 39, 54, 132, 133, 197])}`, { fromDemo: true }),
   (user) => redeem(user, rewardById.get("rain"), "", { fromDemo: true }),
@@ -936,7 +1067,6 @@ function init() {
   document.title = `${CHANNEL_DISPLAY} · ${BRAND} showcase`;
 
   setSpritePositionPool(buildScaledSpritePositions());
-  changeBackgroundColor(DEFAULT_BACKGROUND, el.layerBackground);
   applyChannelSettings(state.pmd);
 
   renderRewardList();
@@ -945,6 +1075,7 @@ function init() {
   initComposer();
   initPlayer();
   loadPmdSettings();
+  loadBackground();
   loadRoster(DEFAULT_GAME).catch(() => {});
 
   addHint("This chat is a simulation. Type ! to see commands, or open Rewards to redeem one. Nothing here reaches the real channel.");
