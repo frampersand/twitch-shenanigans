@@ -38,6 +38,7 @@ The server listens on `PORT` (default `3000`).
 | `TWITCH_EVENTSUB_SECRET` | Random string (10-100 characters) Twitch signs EventSub webhooks with |
 | `SESSION_SECRET` | Long random string that signs dashboard login cookies |
 | `LOG_REWARDS` | `false` turns off the one-line log per channel point redemption (on by default) |
+| `MAX_CHANNELS` | Cap on self-serve sign-ups (default 50) |
 
 ## Pokémon art (sprite CDN)
 
@@ -71,6 +72,22 @@ Sources without it default to `frampersand`.
 | `/sources/rain/` | Rain animation and sound |
 | `/sources/randomizer/?channel=…` | UNITE randomizer cards (`?channel` required) |
 | `/sources/pmd-chat/?channel=…` | Chat with PMD portraits (`?channel` required, add `&mock` to preview) |
+
+Layout options let the full-canvas sources stay 1920×1080 at scale 1 in OBS (crisp, no crop or stretch).
+Coordinates are page pixels. Without them each overlay looks as it always has.
+
+| Overlay | Option | Does |
+| --- | --- | --- |
+| sprites | `frame=x,y,w,h` | Puts the sprite ring on that frame's edges, each sprite centered on the edge |
+| sprites | `size=90` | Sprite size in px with `frame` (default 50) |
+| randomizer | `x=…&y=…` | Centers the cards on that point |
+| randomizer | `scale=1.4` | Card size (also works without `x`/`y`) |
+| background | `scale=1.5` | Pokémon pattern size |
+
+Example: `/sources/sprites/?frame=24,24,1440,810&size=90`.
+
+| Path | Shows |
+| --- | --- |
 | `/` | FramperBot home page: what viewers can do, how it works, the channels it's on (from `/api/channels`) |
 | `/showcase/` | A simulated channel: try chat commands and channel point rewards and watch the overlays react. Runs entirely in the browser; `?channel=` previews that channel's PMD settings |
 | `/admin/#token=…` | Trigger overlays by hand (needs `ADMIN_TOKEN`) |
@@ -82,13 +99,15 @@ Sources without it default to `frampersand`.
 | --- | --- | --- |
 | `!dealwithit [game] [role] [@user]` | Anyone (3 min cooldown) | Rolls a random pick for you or `@user`. Games: `unite` (default), `overwatch`, `valorant`, `rivals`, `league`; an optional role narrows it (`!dealwithit overwatch support`) |
 | `!portrait <dex number> [emotion]` | Anyone (cooldown) | Sets your portrait in the PMD chat overlay |
-| `!pmdconfig <setting> <value>` | Broadcaster | Tunes the PMD chat overlay (`chatDirection`, `solidBubbles`, `solidBubblesColor`, `bubbleTextColor`, `portraitShape`) |
+| `!pmdconfig <setting> <value>` | Broadcaster | Tunes the PMD chat overlay (`chatDirection`, `solidBubbles`, `solidBubblesColor`, `bubbleTextColor`, `portraitShape`, `maxMessages` 1–20) |
 | `!cardstyle <style>` | Broadcaster | Picks the channel's randomizer card: `classic`, `holo`, `reel`, `lockin`, or `random` for a different one every roll. Preview them at `/sources/randomizer/designs.html` |
 | `!rainbearer` | Anyone, home channel | Says who last summoned the rain |
 | `!guesswhosback` | Owner | 🎵 |
 
 Channel point rewards (sprite, reroll, rain, background color, background pattern) are mapped in
-`src/config/rewards.js`. Joined channels and per-channel rules live in `src/config/channels.js`.
+`src/config/rewards.js` (a fallback once channels link rewards on the dashboard). Per-channel rules live in
+`src/config/channels.js`; the channel list itself is `data/channels.json`, seeded from that file once and
+then managed by broadcasters adding or removing FramperBot on the dashboard.
 
 ## Project layout
 
@@ -115,7 +134,9 @@ listens to Twitch EventSub, which delivers every redemption, with or without tex
    `<PUBLIC_BASE_URL>/auth/twitch/callback` (plus `http://localhost:3000/auth/twitch/callback` for local testing).
 2. Put `TWITCH_CLIENT_ID`, `TWITCH_CLIENT_SECRET`, `TWITCH_EVENTSUB_SECRET`, `SESSION_SECRET` and
    `PUBLIC_BASE_URL` in the environment.
-3. Each broadcaster opens `/dashboard/` and logs in with Twitch once. FramperBot asks only for
+3. Any broadcaster can open `/dashboard/`, log in with Twitch and add FramperBot to their own channel after
+   accepting the EULA (`/eula/`) and Privacy Policy (`/privacy/`); the accepted version and time are recorded.
+   The bot joins their chat right away. Removing FramperBot there deletes the channel's data. FramperBot asks
    `channel:read:redemptions`, keeps no tokens, and subscribes to that channel's redemptions;
    Twitch then POSTs them to `/eventsub/callback` (signature-checked).
 

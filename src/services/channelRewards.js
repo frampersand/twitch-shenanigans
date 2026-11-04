@@ -56,3 +56,7 @@ export async function featureForReward(channel, rewardId) {
   const legacy = LEGACY_FEATURES[rewardId];
   return legacy && !links[legacy] ? legacy : null;
 }
+
+export async function removeRewardLinks(channel) {
+  cache = await updateJson(rewardLinksPath, {}, ({ [normalizeChannel(channel)]: _removed, ...rest }) => rest);
+}

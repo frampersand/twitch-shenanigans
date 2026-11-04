@@ -60,12 +60,10 @@ function createMessageHandler(deps) {
       );
     }
 
-    // Chat commands
+    // Chat commands (ordinary chat isn't logged: the Privacy Policy says messages aren't stored)
     const commandHandler = commandHandlers[commandName];
     if (commandHandler) {
       await commandHandler({ client, target, username, login, params, isBroadcaster });
-    } else {
-      console.log(`[${target}] ${username}: ${msg}`);
     }
   }
 

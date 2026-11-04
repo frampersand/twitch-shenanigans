@@ -102,5 +102,9 @@ Follow-ups from the November 2026 project assessment (security, bugs, quality, l
 - [X] Log in with Twitch (`channel:read:redemptions`), EventSub webhooks for every redemption, chat fallback for unconnected channels
 - [X] `/dashboard/`: reward linking per channel, card style, PMD chat look, OBS URLs; owner manages every channel
 - [ ] After deploying: log in again at `/dashboard/` as frampersand to load your rewards, then link them (the built-in IDs keep working until you do)
-- [ ] Ask the other streamers to log in at `/dashboard/` and link their rewards
+- [ ] Ask the other streamers to log in at `/dashboard/`, accept the terms and link their rewards
+- [X] Self-serve: anyone can add FramperBot to their own channel after accepting the EULA and Privacy Policy (version + time recorded); removing it deletes the channel's data
+- [ ] Check the Privacy Policy's hosting details match the droplet (it says "DigitalOcean Droplet in the United States")
+- [ ] Add Docker log rotation (e.g. `logging: { options: { max-size: "10m", max-file: "3" } }`) so logs don't grow between deploys
+- [ ] If sign-ups grow past ~20 channels, apply for Twitch's verified bot status (unverified bots have chat join limits)
 - [ ] Once every channel has linked its rewards, `src/config/rewards.js` can go

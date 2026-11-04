@@ -1,6 +1,6 @@
 import tmi from "tmi.js";
 import { config } from "../config/index.js";
-import { channels } from "../config/channels.js";
+import { channelEvents, joinedChannels } from "../services/channelRegistry.js";
 import { createMessageHandler } from "./messageHandler.js";
 import { pause, safeSay } from "../utils/helpers.js";
 
@@ -10,7 +10,7 @@ function createTwitchClient(io) {
       username: config.twitch.username,
       password: config.twitch.password,
     },
-    channels,
+    channels: joinedChannels(),
   };
 
   const client = new tmi.client(opts);
@@ -28,6 +28,14 @@ function createTwitchClient(io) {
     );
     await pause(1500);
     await safeSay(client, channel, `!so ${username}`);
+  });
+
+  // Broadcasters add and remove FramperBot on the dashboard: follow along without a restart
+  channelEvents.on("joined", (login) => {
+    client.join(`#${login}`).catch((err) => console.error(`[twitch] could not join #${login}:`, err?.message ?? err));
+  });
+  channelEvents.on("left", (login) => {
+    client.part(`#${login}`).catch((err) => console.error(`[twitch] could not leave #${login}:`, err?.message ?? err));
   });
 
   client.connect().catch((err) => {

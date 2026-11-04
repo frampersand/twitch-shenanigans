@@ -20,6 +20,17 @@ test("preference names are case-insensitive and values are validated", async () 
   assert.equal((await updatePmdPreference({ target: "#frampersand", preference: "nope", value: "1" })).error, "unsupported");
 });
 
+test("maxMessages takes whole numbers from 1 to 20", async () => {
+  assert.deepEqual(
+    await updatePmdPreference({ target: "#frampersand", preference: "maxmessages", value: " 8 " }),
+    { preference: "maxMessages", value: 8 }
+  );
+  assert.equal((await getPmdPreferencesForChannel("#frampersand")).maxMessages, 8);
+  for (const bad of ["0", "21", "2.5", "-3", "lots", ""]) {
+    assert.equal((await updatePmdPreference({ target: "#frampersand", preference: "maxMessages", value: bad })).error, "invalid_max_messages", bad);
+  }
+});
+
 test("concurrent updates to one channel all persist", async () => {
   await Promise.all([
     updatePmdPreference({ target: "#joesbeard", preference: "solidbubbles", value: "on" }),

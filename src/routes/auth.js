@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { twitchLoginEnabled } from "../config/index.js";
-import { channels } from "../config/channels.js";
+import { isJoined } from "../services/channelRegistry.js";
 import { OWNER_LOGIN } from "../config/users.js";
 import { authorizeUrl, fetchCustomRewards, identifyUser, LOGIN_SCOPES } from "../services/twitchApi.js";
 import {
@@ -14,7 +14,6 @@ import { getConnectionByLogin, saveConnection } from "../services/twitchConnecti
 import { subscribeBroadcaster } from "../services/eventSub.js";
 
 const router = Router();
-const JOINED = new Set(channels.map((c) => c.toLowerCase()));
 const DASHBOARD = "/dashboard/";
 
 function requireLoginConfigured(_req, res, next) {
@@ -36,7 +35,7 @@ router.get("/auth/twitch/callback", requireLoginConfigured, async (req, res) => 
   try {
     const user = await identifyUser(code);
     startSession(res, user);
-    if (JOINED.has(user.login) && LOGIN_SCOPES.every((scope) => user.scopes.includes(scope))) {
+    if (isJoined(user.login) && LOGIN_SCOPES.every((scope) => user.scopes.includes(scope))) {
       await saveConnection(user.userId, { login: user.login, scopes: user.scopes, connectedAt: new Date().toISOString() });
       try {
         // A snapshot for the dashboard's reward pickers; logging in again refreshes it
@@ -73,7 +72,7 @@ router.get("/api/me", async (req, res) => {
     loggedIn: true,
     login: session.login,
     isOwner: session.login === OWNER_LOGIN,
-    channelJoined: JOINED.has(session.login),
+    channelJoined: isJoined(session.login),
     channelPoints: connection?.eventSub?.status ?? "not_connected",
   });
 });

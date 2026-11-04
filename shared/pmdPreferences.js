@@ -6,7 +6,9 @@ const PREFERENCE_ALIASES = {
   bubbletextcolor: "bubbleTextColor",
   chatdirection: "chatDirection",
   portraitshape: "portraitShape",
+  maxmessages: "maxMessages",
 };
+export const MAX_MESSAGES_RANGE = { min: 1, max: 20 };
 const SUPPORTED_PREFERENCES = new Set(Object.values(PREFERENCE_ALIASES));
 const CHAT_DIRECTIONS = new Set(["up", "down"]);
 const PORTRAIT_SHAPES = new Set(["square", "round", "rounded"]);
@@ -24,6 +26,7 @@ export const DEFAULT_CHANNEL_PREFERENCES = {
   bubbleTextColor: "#ffffff",
   chatDirection: "up",
   portraitShape: "rounded",
+  maxMessages: 5,
 };
 
 function parseBooleanPreference(value) {
@@ -76,6 +79,14 @@ export function parsePreferenceValue(preference, rawValue) {
   if (normalizedPreference === "portraitShape") {
     const parsed = PORTRAIT_SHAPE_INPUT_ALIASES[String(rawValue).toLowerCase()];
     if (!parsed || !PORTRAIT_SHAPES.has(parsed)) return { error: "invalid_portrait_shape" };
+    return { value: parsed, preference: normalizedPreference };
+  }
+  if (normalizedPreference === "maxMessages") {
+    const raw = String(rawValue).trim();
+    const parsed = Number(raw);
+    if (!/^\d+$/.test(raw) || parsed < MAX_MESSAGES_RANGE.min || parsed > MAX_MESSAGES_RANGE.max) {
+      return { error: "invalid_max_messages" };
+    }
     return { value: parsed, preference: normalizedPreference };
   }
   return { error: "unsupported" };

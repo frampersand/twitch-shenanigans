@@ -26,6 +26,11 @@ export const config = {
   rostersFolder: path.join(rootDir, "src", "data", "rosters"),
   twitchConnectionsPath: path.join(dataDir, "twitchConnections.json"),
   rewardLinksPath: path.join(dataDir, "rewardLinks.json"),
+  channelsPath: path.join(dataDir, "channels.json"),
+  /** Safety cap on self-serve sign-ups (Twitch also limits how many chats an unverified bot joins) */
+  maxChannels: Number.parseInt(process.env.MAX_CHANNELS ?? "", 10) || 50,
+  /** Bump when the EULA or Privacy Policy changes materially; stored with each sign-up */
+  termsVersion: "2026-11",
   /** Shared secret for the admin panel and /pmd-user-data. Unset = admin features disabled. */
   adminToken: process.env.ADMIN_TOKEN || "",
   /** Where this app is reachable from the internet, e.g. https://overlay.example.com (no trailing slash) */

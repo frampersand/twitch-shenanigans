@@ -22,3 +22,7 @@ export async function setCardStyleSetting(channel, cardStyle) {
     [key]: { ...data[key], cardStyle },
   }));
 }
+
+export async function removeCardStyleSetting(channel) {
+  await updateJson(randomizerPreferencesPath, {}, ({ [normalizeChannel(channel)]: _removed, ...rest }) => rest);
+}

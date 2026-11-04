@@ -90,6 +90,7 @@ export const botReplies = {
         invalid_chat_direction: `Preference "${preference}" expects up or down.`,
         invalid_color: `Preference "${preference}" expects a hex color (e.g. #6961a7 or 6961a7).`,
         invalid_portrait_shape: `Preference "${preference}" expects square, round, or rounded.`,
+        invalid_max_messages: `Preference "${preference}" expects a whole number from 1 to 20.`,
     })[error],
     pmdSet: (username, preference, value) => `@${username} set ${preference}=${String(value)}`,
     cardStyleCurrent: (label, styles) =>

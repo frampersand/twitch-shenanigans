@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Privacy Policy · FramperBot</title>
+  <link rel="stylesheet" href="/home/home.css" />
+  <link rel="stylesheet" href="/home/legal.css" />
+</head>
+
+<body>
+  <header class="topbar">
+    <a class="brand" href="/">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <span class="brand-name">FramperBot</span>
+    </a>
+    <nav class="topnav" aria-label="Main">
+      <a href="/showcase/">Showcase</a>
+      <a href="/dashboard/">Dashboard</a>
+    </nav>
+  </header>
+
+  <main class="legal">
+    <a class="back" href="/">← Back to home</a>
+    <h1>Privacy Policy</h1>
+    <p class="meta">Version 2026-11 · Effective date: November 4, 2026</p>
+
+    <nav class="toc" aria-label="On this page">
+      <p>On this page</p>
+      <ol>
+        <li><a href="#who">Who is responsible</a></li>
+        <li><a href="#what">What we process</a></li>
+        <li><a href="#why">Why, and on what legal basis</a></li>
+        <li><a href="#recipients">Who receives data</a></li>
+        <li><a href="#transfers">International transfers</a></li>
+        <li><a href="#retention">How long we keep data</a></li>
+        <li><a href="#rights">Your rights</a></li>
+        <li><a href="#cookies">Cookies and local storage</a></li>
+        <li><a href="#children">Children</a></li>
+        <li><a href="#changes">Changes to this policy</a></li>
+        <li><a href="#contact">Contact</a></li>
+      </ol>
+    </nav>
+
+    <section id="who">
+      <h2>1. Who is responsible</h2>
+      <p>The controller of your data is Fernando E. ("Frampersand"), an individual based in Chile.
+        Contact: <a href="mailto:frampersand@gmail.com">frampersand@gmail.com</a>.</p>
+    </section>
+
+    <section id="what">
+      <h2>2. What we process</h2>
+      <h3>Broadcasters (streamers who add FramperBot to their channel)</h3>
+      <ul>
+        <li>Twitch user ID and login name, received when you log in with Twitch.</li>
+        <li>The permission you granted: reading your channel point rewards and redemptions
+          (<code>channel:read:redemptions</code>), and the status of the resulting Twitch EventSub subscription.</li>
+        <li>A copy of your custom channel point rewards (ID, title, cost, prompt, whether they ask for text, whether
+          they're on), read when you log in, so you can link them on the dashboard.</li>
+        <li>Your settings: linked rewards, randomizer card style and PMD chat look.</li>
+        <li>Which version of the EULA and this policy you accepted, and when.</li>
+      </ul>
+      <p>We never see your Twitch password or email address. The login token Twitch gives us is used once, to read
+        your reward list, and is not stored; it expires on its own.</p>
+
+      <h3>Viewers (people chatting or redeeming rewards in a channel with FramperBot)</h3>
+      <ul>
+        <li><strong>Chat messages</strong>: our bot reads chat in those channels to recognise its commands (such as
+          <code>!dealwithit</code>), and passes messages, with your display name and name color, to that channel's
+          PMD chat overlay so they appear on stream. Ordinary messages are not stored or logged.</li>
+        <li><strong>Channel point redemptions</strong>: Twitch sends us your login, display name, the reward and any
+          text you entered, so we can run the effect. A one-line record of each redemption is kept in the server's
+          logs.</li>
+        <li><strong>Saved choices</strong>: if you use <code>!portrait</code>, we keep your display name, the
+          portrait you picked and the channel. If you summon the rain, your display name is kept as that channel's
+          Rainbearer.</li>
+        <li><strong>In memory only</strong>: command cooldowns and your last randomizer game, discarded when the
+          server restarts.</li>
+      </ul>
+
+      <h3>Everyone</h3>
+      <ul>
+        <li>Your IP address and basic request data, processed by our hosting provider and Cloudflare to deliver and
+          protect the website and overlays.</li>
+        <li>Server logs containing channel names, commands, redemptions and errors.</li>
+      </ul>
+    </section>
+
+    <section id="why">
+      <h2>3. Why, and on what legal basis</h2>
+      <ul>
+        <li>Providing FramperBot to Broadcasters (login, settings, rewards, overlays): performance of our agreement
+          with you (GDPR Art. 6(1)(b)).</li>
+        <li>Processing viewer chat, commands and redemptions: our legitimate interest in running the interactive
+          features the Broadcaster has enabled (Art. 6(1)(f)).</li>
+        <li>Logs, security and abuse prevention: our legitimate interest in keeping FramperBot working and secure
+          (Art. 6(1)(f)).</li>
+        <li>Recording EULA and policy acceptance: our legitimate interest in being able to show what was agreed
+          (Art. 6(1)(f)).</li>
+      </ul>
+      <p>We do not use your data for advertising or profiling, and we do not sell it.</p>
+    </section>
+
+    <section id="recipients">
+      <h2>4. Who receives data</h2>
+      <ul>
+        <li><strong>Twitch Interactive, Inc.</strong>: login, the Twitch API, EventSub and chat run on Twitch.</li>
+        <li><strong>DigitalOcean, LLC</strong>: hosts the server (a DigitalOcean Droplet in the United States) and
+          stores the data listed above.</li>
+        <li><strong>Cloudflare, Inc.</strong>: network and security provider in front of the website, the overlays
+          and our image server.</li>
+        <li><strong>Image and font hosts</strong>: some overlays and pages load images or fonts from other sites,
+          which then see the viewing device's IP address: pokemondb.net and projectpokemon.org (animated sprites),
+          unite.pokemon.com (a card background) and Google Fonts (on the dashboard and
+          the randomizer). In practice that device is usually the Broadcaster's OBS.</li>
+      </ul>
+    </section>
+
+    <section id="transfers">
+      <h2>5. International transfers</h2>
+      <p>Our server is located in the United States, and Twitch, Cloudflare and DigitalOcean are United States
+        companies, so your data is stored and processed in the United States. Transferring it there is necessary to
+        provide FramperBot. Where data leaves the EU/EEA or the UK, these transfers rely on the EU–US Data Privacy
+        Framework and/or the European Commission's Standard Contractual Clauses, which DigitalOcean includes in its
+        Data Processing Agreement.</p>
+    </section>
+
+    <section id="retention">
+      <h2>6. How long we keep data</h2>
+      <ul>
+        <li>Broadcaster account, accepted terms, settings, reward links and reward list: until FramperBot is removed
+          from the channel. Logging in again replaces the reward list.</li>
+        <li>Viewers' portrait choices and the Rainbearer: until changed, or until FramperBot is removed from the
+          channel.</li>
+        <li>Login token: not kept.</li>
+        <li>Cooldowns and last randomizer game: until the server restarts.</li>
+        <li>Server logs: until the server is next updated, which happens often.</li>
+      </ul>
+    </section>
+
+    <section id="rights">
+      <h2>7. Your rights</h2>
+      <p>Depending on where you live (for example under Chile's Law 19.628 as amended by Law 21.719, or the EU or
+        UK GDPR), you can ask for access to, correction or deletion of your data, ask us to restrict processing,
+        receive your data in a portable format, and object to processing based on legitimate interests. Email
+        <a href="mailto:frampersand@gmail.com">frampersand@gmail.com</a>; we reply within 30 days.</p>
+      <p><strong>Broadcasters</strong> can remove FramperBot from their channel at any time on the
+        <a href="/dashboard/">dashboard</a>. This deletes the channel's settings, reward links, reward list, viewers'
+        portrait choices, the Rainbearer and the Twitch connection straight away. You can also disconnect FramperBot
+        under Connections in your Twitch settings.</p>
+      <p>You also have the right to complain to a data protection authority: in Chile, the Agencia de Protección de
+        Datos Personales, or the authority in the country where you live.</p>
+    </section>
+
+    <section id="cookies">
+      <h2>8. Cookies and local storage</h2>
+      <p>The dashboard sets two cookies, both strictly necessary for logging in: <code>fb_oauth_state</code>
+        (ten minutes, protects the Twitch login from forgery) and <code>fb_session</code> (seven days, keeps you
+        logged in). We use no analytics or trackers. The showcase remembers its rain volume in your browser's local
+        storage; that stays on your device.</p>
+    </section>
+
+    <section id="children">
+      <h2>9. Children</h2>
+      <p>FramperBot is meant for people who meet Twitch's minimum age in their country and is not directed at
+        children. We do not knowingly process data of children below that age. If you believe we have, contact us
+        and we will delete it.</p>
+    </section>
+
+    <section id="changes">
+      <h2>10. Changes to this policy</h2>
+      <p>We will post changes here with a new version and effective date. If changes are significant, we will ask
+        Broadcasters to accept the new version on the dashboard.</p>
+    </section>
+
+    <section id="contact">
+      <h2>11. Contact</h2>
+      <p>Questions about this policy or your data: <a href="mailto:frampersand@gmail.com">frampersand@gmail.com</a></p>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <p>© 2026 FramperBot by Frampersand. An unofficial fan project, not affiliated with Twitch.</p>
+    <p class="footer-links"><a href="/privacy/">Privacy Policy</a> <a href="/eula/">EULA</a></p>
+  </footer>
+</body>
+
+</html>

@@ -102,3 +102,9 @@ export async function getPortraitFile(portraitNumber = 0, variant = "") {
   );
   return `${folder}/${variantMatch || getRandomItem(emotions)}.png`;
 }
+
+/** Forget every viewer's portrait choice on a channel (the broadcaster removed FramperBot) */
+export async function removePortraitUsersForChannel(channel) {
+  const next = await updateJson(portraitUserbasePath, [], (data) => data.filter((user) => user.channel !== channel));
+  userDataCache = Promise.resolve(next);
+}

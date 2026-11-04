@@ -1,7 +1,7 @@
 import { EventEmitter } from "events";
 import { createHmac, timingSafeEqual } from "crypto";
 import { config, eventSubCallbackUrl, eventSubEnabled } from "../config/index.js";
-import { channels } from "../config/channels.js";
+import { isJoined } from "./channelRegistry.js";
 import {
   createRedemptionSubscription,
   deleteSubscription,
@@ -21,7 +21,6 @@ const { eventSubSecret } = config.twitchApp;
 const MAX_MESSAGE_AGE_MS = 10 * 60 * 1000;
 const seenMessageIds = new Map();
 
-const JOINED = new Set(channels.map((c) => c.toLowerCase()));
 /** Statuses where the subscription won't come back on its own and should be recreated */
 const BROKEN = new Set(["webhook_callback_verification_failed", "notification_failures_exceeded"]);
 
@@ -46,7 +45,7 @@ export function checkMessage({ id, timestamp, signature, rawBody }) {
 
 /** Subscribe a connected broadcaster's redemptions, if FramperBot is on their channel */
 export async function subscribeBroadcaster({ userId, login }) {
-  if (!eventSubEnabled || !JOINED.has(login)) return null;
+  if (!eventSubEnabled || !isJoined(login)) return null;
   const subscription = await createRedemptionSubscription({
     broadcasterUserId: userId,
     callbackUrl: eventSubCallbackUrl,
@@ -72,7 +71,7 @@ export async function syncSubscriptions() {
   const existing = await listRedemptionSubscriptions();
 
   for (const [userId, connection] of Object.entries(connections)) {
-    if (!JOINED.has(connection.login)) continue;
+    if (!isJoined(connection.login)) continue;
     const ours = existing.filter(
       (s) => s.condition.broadcaster_user_id === userId && s.transport.callback === eventSubCallbackUrl
     );
@@ -118,4 +117,15 @@ export async function handleMessage(type, payload) {
     });
   }
   return { status: 204 };
+}
+
+/** Stop a broadcaster's redemptions (they removed FramperBot); a missing subscription is fine */
+export async function unsubscribeBroadcaster(connection) {
+  if (!eventSubEnabled || !connection?.eventSub?.id) return;
+  try {
+    await deleteSubscription(connection.eventSub.id);
+    console.log(`[eventsub] unsubscribed #${connection.login} redemptions`);
+  } catch (err) {
+    if (err.status !== 404) throw err;
+  }
 }

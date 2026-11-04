@@ -488,3 +488,182 @@ select:focus,
     grid-template-columns: minmax(0, 1fr);
   }
 }
+
+/* Sign-up and terms */
+.join-panel {
+  max-width: 620px;
+}
+
+.join-panel .eyebrow {
+  margin: 0 0 0.25rem;
+}
+
+.join-list {
+  margin: 1rem 0 1.25rem;
+  padding-left: 1.25rem;
+  color: var(--muted);
+}
+
+.join-list strong {
+  color: var(--text);
+}
+
+.accept {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 0 0 6px;
+  color: var(--text);
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.accept input {
+  margin-top: 3px;
+  accent-color: var(--accent);
+}
+
+.field-error {
+  min-height: 1.2em;
+  margin: 0 0 10px;
+  color: #ff8a80;
+  font-size: 13px;
+}
+
+.terms-card {
+  border-color: rgba(232, 163, 60, 0.6);
+}
+
+.terms-card h2,
+.danger h2 {
+  margin: 0 0 0.5rem;
+  font-size: 19px;
+}
+
+.terms-card p,
+.danger p {
+  color: var(--muted);
+  font-size: 14px;
+}
+
+/* Getting started */
+.guide summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  cursor: pointer;
+  list-style: none;
+}
+
+.guide summary::-webkit-details-marker {
+  display: none;
+}
+
+.guide-title {
+  font-size: 19px;
+  font-weight: 700;
+}
+
+.guide-title::after {
+  content: " ▾";
+  color: var(--faint);
+  font-size: 14px;
+}
+
+.guide[open] .guide-title::after {
+  content: " ▴";
+}
+
+.guide-progress {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.guide-steps {
+  margin: 1.25rem 0 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: step;
+}
+
+.guide-steps li {
+  position: relative;
+  padding: 0 0 1rem 2.5rem;
+  counter-increment: step;
+}
+
+.guide-steps li::before {
+  content: counter(step);
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 26px;
+  height: 26px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--accent-soft);
+  color: #cdb4ff;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.guide-steps li.done::before {
+  content: "✓";
+  background: rgba(63, 214, 139, 0.18);
+  color: #3fd68b;
+}
+
+.guide-steps h3 {
+  margin: 2px 0 4px;
+  font-size: 15px;
+}
+
+.guide-steps p {
+  margin: 0 0 4px;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.guide-steps code {
+  padding: 1px 6px;
+  border-radius: 4px;
+  background: var(--panel-raised);
+  color: var(--text);
+}
+
+/* Remove FramperBot */
+.danger {
+  border-color: rgba(214, 69, 59, 0.45);
+}
+
+.danger-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-width: 320px;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.danger-form input {
+  height: 38px;
+  padding: 0 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border-strong);
+  background: var(--bg);
+  color: var(--text);
+  font: inherit;
+}
+
+.button-danger {
+  margin-top: 4px;
+  background: #b3261e;
+  border-color: #b3261e;
+  color: #fff;
+}
+
+.button-danger:hover {
+  background: #d6453b;
+}

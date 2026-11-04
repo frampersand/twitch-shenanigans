@@ -4,6 +4,7 @@ import { clearTilePattern } from "../sources/background/tilePattern.js";
 import createRandomizedCard from "../sources/randomizer/randomizer.js";
 import { createDesignCard, DESIGNS } from "../sources/randomizer/designs.js";
 import { generatePortrait } from "../sources/pmd-chat/index.js";
+import { startRainCanvas, stopRainCanvas } from "../sources/rain/rainCanvas.js";
 import { applyChannelSettings } from "../sources/pmd-chat/layout.js";
 import { loadRoster } from "../utils/loadRoster.js";
 import { getOverlayChannel } from "../utils/overlayChannel.js";
@@ -276,6 +277,7 @@ function addSprite(value) {
 function startRain({ withSound }) {
   el.rainGif.classList.remove("fade");
   el.rainGif.classList.add("active");
+  startRainCanvas(el.rainGif);
   if (withSound && state.volume > 0) {
     el.rainAudio.currentTime = 0;
     el.rainAudio.play().catch(() => {});
@@ -288,6 +290,10 @@ function stopRain() {
   el.rainGif.classList.add("fade");
   el.rainGif.classList.remove("active");
   el.rainAudio.pause();
+  // Matches the 3s opacity transition in showcase.css
+  setTimeout(() => {
+    if (!el.rainGif.classList.contains("active")) stopRainCanvas(el.rainGif);
+  }, 3100);
 }
 
 async function rollFor(player, game = DEFAULT_GAME, role = null) {

@@ -1,6 +1,8 @@
 import express, { Router } from "express";
 import { config } from "../config/index.js";
-import { channels } from "../config/channels.js";
+import { addChannel, ChannelLimitError, getChannelEntry, isJoined, joinedChannels } from "../services/channelRegistry.js";
+import { removeChannelAndData } from "../services/channelData.js";
+import { HOME_CHANNEL } from "../config/channels.js";
 import { OWNER_LOGIN } from "../config/users.js";
 import { EVENTS } from "../socket/events.js";
 import { overlayRoom } from "../socket/rooms.js";
@@ -11,13 +13,12 @@ import { getPmdPreferencesForChannel, updatePmdPreference } from "../services/pm
 import { getRewardLinks, REWARD_FEATURES, setRewardLink } from "../services/channelRewards.js";
 import { findCardStyle } from "../../shared/randomizerGames.js";
 
-const JOINED = new Set(channels.map((c) => c.toLowerCase()));
 const publicOrigin = config.publicBaseUrl ? new URL(config.publicBaseUrl).origin : null;
 
 /** Broadcasters manage their own channel; the owner manages every channel FramperBot is on */
 function manageableChannels(login) {
-  if (login === OWNER_LOGIN) return [...JOINED];
-  return JOINED.has(login) ? [login] : [];
+  if (login === OWNER_LOGIN) return joinedChannels();
+  return isJoined(login) ? [login] : [];
 }
 
 function requireSession(req, res, next) {
@@ -47,8 +48,13 @@ function requireChannelAccess(req, res, next) {
 async function channelSettings(channelName) {
   const channel = `#${channelName}`;
   const connection = await getConnectionByLogin(channelName);
+  const entry = getChannelEntry(channelName);
   return {
     channel: channelName,
+    botName: config.twitch.username ?? "",
+    isHome: channel === HOME_CHANNEL,
+    // Which terms the broadcaster accepted (channels from before sign-ups have none yet)
+    terms: { current: config.termsVersion, accepted: entry?.termsVersion ?? null, acceptedAt: entry?.termsAcceptedAt ?? null },
     channelPoints: connection?.eventSub?.status ?? "not_connected",
     cardStyle: await getCardStyleSetting(channel),
     pmd: await getPmdPreferencesForChannel(channel),
@@ -65,7 +71,28 @@ export function createDashboardRoutes(io) {
   router.use("/api/dashboard", express.json({ limit: "4kb" }), requireSession, requireSameOrigin);
 
   router.get("/api/dashboard/channels", (req, res) => {
-    res.json({ channels: manageableChannels(req.session.login), isOwner: req.session.login === OWNER_LOGIN });
+    res.json({
+      channels: manageableChannels(req.session.login),
+      isOwner: req.session.login === OWNER_LOGIN,
+      ownChannelJoined: isJoined(req.session.login),
+      termsVersion: config.termsVersion,
+    });
+  });
+
+  /**
+   * Add FramperBot to your own channel, or accept updated terms for it. Needs an explicit
+   * acceptance of the EULA and Privacy Policy, which is recorded with the terms version.
+   */
+  router.post("/api/dashboard/join", async (req, res) => {
+    if (req.body?.acceptTerms !== true) return res.status(400).json({ error: "terms_not_accepted" });
+    try {
+      const entry = await addChannel(req.session.login, { userId: req.session.userId, termsVersion: config.termsVersion });
+      console.log(`[channels] #${req.session.login} accepted terms ${config.termsVersion}`);
+      res.json({ channel: req.session.login, terms: entry.termsVersion });
+    } catch (err) {
+      if (err instanceof ChannelLimitError) return res.status(409).json({ error: "channel_limit" });
+      throw err;
+    }
   });
 
   router.get("/api/dashboard/:channel", requireChannelAccess, async (req, res) => {
@@ -103,6 +130,15 @@ export function createDashboardRoutes(io) {
       }
     }
     res.json({ rewardLinks: await setRewardLink(req.channel, feature, rewardId) });
+  });
+
+  /** Remove FramperBot and delete the channel's data; the body must name the channel to confirm */
+  router.post("/api/dashboard/:channel/leave", requireChannelAccess, async (req, res) => {
+    if (req.body?.confirm !== req.channelName) return res.status(400).json({ error: "confirmation_mismatch" });
+    if (req.channel === HOME_CHANNEL) return res.status(400).json({ error: "home_channel" });
+    await removeChannelAndData(req.channelName);
+    console.log(`[channels] #${req.channelName} removed FramperBot (by ${req.session.login})`);
+    res.json({ removed: req.channelName });
   });
 
   return router;

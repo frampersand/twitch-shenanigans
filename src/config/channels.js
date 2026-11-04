@@ -1,6 +1,9 @@
 import { OWNER_LOGIN } from "./users.js";
 
-/** Channels the bot joins */
+/**
+ * The channels FramperBot started on. Only seeds data/channels.json on first run; after
+ * that, broadcasters add and remove themselves on the dashboard (see channelRegistry.js).
+ */
 export const channels = [
     "frampersand",
     "joesbeard",

@@ -83,3 +83,10 @@ export async function updatePmdPreference({ target, preference, value }) {
 
   return { value: parsed.value, preference: parsed.preference };
 }
+
+export async function removePmdPreferences(target) {
+  const normalizedTarget = normalizeChannel(target);
+  await updateJson(pmdChatPreferencesPath, [], (raw) =>
+    mergeChannelData(raw).filter((entry) => normalizeChannel(entry.channel) !== normalizedTarget)
+  );
+}

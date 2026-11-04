@@ -35,6 +35,28 @@
       <p>Loading…</p>
     </section>
 
+    <!-- Logged in, FramperBot not on the channel yet -->
+    <section class="panel join-panel" id="join-panel" hidden>
+      <p class="eyebrow">Add FramperBot</p>
+      <h1>Bring FramperBot to your channel</h1>
+      <p>FramperBot joins your chat and turns commands and channel point rewards into overlays: rain, Pokémon
+        sprites, a background pattern, a character randomizer and a chat with Mystery Dungeon portraits. It's free.</p>
+      <ul class="join-list">
+        <li>The bot joins <strong id="join-channel">your</strong> chat and answers its own commands.</li>
+        <li>FramperBot reads your channel point rewards and redemptions (nothing else on your account).</li>
+        <li>You can remove it at any time here, which deletes your channel's data.</li>
+      </ul>
+      <form id="join-form" novalidate>
+        <label class="accept">
+          <input type="checkbox" id="accept-terms" />
+          <span>I've read and accept the <a href="/eula/" target="_blank" rel="noopener">EULA</a> and the
+            <a href="/privacy/" target="_blank" rel="noopener">Privacy Policy</a>.</span>
+        </label>
+        <p class="field-error" id="join-error" role="alert"></p>
+        <button class="button button-twitch" type="submit">Add FramperBot to my channel</button>
+      </form>
+    </section>
+
     <!-- Logged in with a channel -->
     <div id="settings" hidden>
       <div class="dash-head">
@@ -48,6 +70,27 @@
         </label>
       </div>
       <div class="status" id="points-status"></div>
+
+      <!-- Channels from before sign-ups (or after a terms update) accept the current terms here -->
+      <section class="card terms-card" id="terms-card" hidden>
+        <h2>Please review the terms</h2>
+        <p>FramperBot now has an <a href="/eula/" target="_blank" rel="noopener">EULA</a> and a
+          <a href="/privacy/" target="_blank" rel="noopener">Privacy Policy</a>. Accepting them keeps everything working
+          as it does today.</p>
+        <form id="terms-form" novalidate>
+          <label class="accept"><input type="checkbox" id="terms-accept" /> <span>I've read and accept both.</span></label>
+          <p class="field-error" id="terms-error" role="alert"></p>
+          <button class="button button-twitch" type="submit">Accept</button>
+        </form>
+      </section>
+
+      <details class="card guide" id="guide">
+        <summary>
+          <span class="guide-title">Getting started</span>
+          <span class="guide-progress" id="guide-progress"></span>
+        </summary>
+        <ol class="guide-steps" id="guide-steps"></ol>
+      </details>
 
       <section class="card" aria-labelledby="rewards-title">
         <div class="card-head">
@@ -98,6 +141,10 @@
               <label class="color-field">Bubble color <input type="color" name="solidBubblesColor" /></label>
               <label class="color-field">Text color <input type="color" name="bubbleTextColor" /></label>
             </fieldset>
+            <fieldset>
+              <legend>Messages shown</legend>
+              <label class="color-field">At most <input type="number" name="maxMessages" min="1" max="20" step="1" inputmode="numeric" /> at a time</label>
+            </fieldset>
           </form>
           <div class="pmd-preview" aria-label="PMD chat preview">
             <div id="chat-container" class="chat-up portrait-rounded"></div>
@@ -114,8 +161,26 @@
         </div>
         <div class="obs-rows" id="obs-rows"></div>
       </section>
+
+      <section class="card danger" id="danger-card" aria-labelledby="danger-title">
+        <h2 id="danger-title">Remove FramperBot</h2>
+        <p>The bot leaves your chat and everything FramperBot keeps about <strong class="danger-channel"></strong> is
+          deleted: settings, linked rewards, viewers' portrait choices and the Rainbearer. You can add it again later,
+          starting fresh.</p>
+        <form class="danger-form" id="leave-form" novalidate>
+          <label><span>Type <strong class="danger-channel"></strong> to confirm</span>
+            <input type="text" id="leave-confirm" autocomplete="off" spellcheck="false" />
+          </label>
+          <p class="field-error" id="leave-error" role="alert"></p>
+          <button class="button button-danger" type="submit">Remove FramperBot</button>
+        </form>
+      </section>
     </div>
   </main>
+
+  <footer class="footer">
+    <p class="footer-links"><a href="/privacy/">Privacy Policy</a> <a href="/eula/">EULA</a> <a href="/showcase/">Showcase</a></p>
+  </footer>
 
   <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
 

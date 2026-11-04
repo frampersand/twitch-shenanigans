@@ -1,12 +1,10 @@
-import { channels } from "../config/channels.js";
-
-const JOINED_CHANNELS = new Set(channels.map((c) => c.toLowerCase()));
+import { isJoined } from "../services/channelRegistry.js";
 
 /** Normalize to "#name" and return it only if the bot joined that channel */
 export function toJoinedChannel(channel) {
   if (typeof channel !== "string") return null;
   const name = channel.replace(/^#/, "").toLowerCase();
-  return JOINED_CHANNELS.has(name) ? `#${name}` : null;
+  return isJoined(name) ? `#${name}` : null;
 }
 
 /** Every overlay source for a channel (sprites, background, rain, PMD chat, randomizer) */

@@ -1,4 +1,5 @@
 import { truncateString } from '../../utils/utils.js';
+import { trimMessages } from './layout.js';
 
 const getPortrait = (data) => {
     let queryParams = data
@@ -40,10 +41,10 @@ const generatePortrait = async (message, username, userBase = [], context = {}) 
             console.error('Portrait could not be retrieved for', username);
         }
 
-        const currentChats = document.getElementsByClassName('pmd-portrait-container');
-        if (currentChats.length > 5) {
-            currentChats[0].remove();
-        }
+        const chatContainer = document.getElementById('chat-container');
+        const limit = Number(chatContainer?.dataset.maxMessages) || 5;
+        // Make room for the new one
+        trimMessages(chatContainer, limit - 1);
 
         const container = document.createElement('div');
         container.className = 'pmd-portrait-container';
@@ -78,7 +79,6 @@ const generatePortrait = async (message, username, userBase = [], context = {}) 
         container.appendChild(userContainer);
         container.appendChild(portraitMessageBox);
 
-        const chatContainer = document.getElementById('chat-container');
         chatContainer.appendChild(container);
 
         // setTimeout(() => {

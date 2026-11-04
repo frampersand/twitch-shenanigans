@@ -12,3 +12,7 @@ export async function getRainbearer(channel) {
 export async function setRainbearer(channel, username) {
   await updateJson(rainbearerPath, {}, (data) => ({ ...data, [channel]: username }));
 }
+
+export async function removeRainbearer(channel) {
+  await updateJson(rainbearerPath, {}, ({ [channel]: _removed, ...rest }) => rest);
+}

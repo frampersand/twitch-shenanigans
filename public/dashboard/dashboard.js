@@ -209,6 +209,7 @@ function renderPmdControls() {
         if (input.type === "radio") input.checked = pmd[input.name] === input.value;
         else if (input.type === "checkbox") input.checked = Boolean(pmd[input.name]);
         else if (input.type === "color") input.value = fullHex(pmd[input.name]);
+        else if (input.type === "number") input.value = String(pmd[input.name] ?? "");
     }
 }
 
@@ -262,12 +263,144 @@ function renderObs() {
     }
 }
 
+/* ---------- Sign-up, terms, guide and removal ---------- */
+
+async function acceptTerms(errorNode) {
+    try {
+        await api("/api/dashboard/join", { method: "POST", body: { acceptTerms: true } });
+        return true;
+    } catch (err) {
+        errorNode.textContent = err.message === "channel_limit"
+            ? "FramperBot is on as many channels as it can handle right now. Try again later."
+            : "That didn't work. Try again.";
+        return false;
+    }
+}
+
+function showJoin() {
+    $("message-panel").hidden = true;
+    $("settings").hidden = true;
+    $("join-channel").textContent = `${state.me.login}'s`;
+    $("join-panel").hidden = false;
+    $("join-form").addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const error = $("join-error");
+        if (!$("accept-terms").checked) {
+            error.textContent = "Tick the box to accept the EULA and Privacy Policy first.";
+            return;
+        }
+        error.textContent = "";
+        // Logging in again now that the channel is joined connects channel points and reads the rewards
+        if (await acceptTerms(error)) location.assign("/auth/twitch/login");
+    });
+    $("accept-terms").addEventListener("change", () => { $("join-error").textContent = ""; });
+}
+
+function renderTerms() {
+    const { terms, channel } = state.settings;
+    // Only the broadcaster can accept for their channel
+    $("terms-card").hidden = terms.accepted === terms.current || state.me.login !== channel;
+}
+
+function bindTerms() {
+    $("terms-form").addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const error = $("terms-error");
+        if (!$("terms-accept").checked) {
+            error.textContent = "Tick the box to accept them first.";
+            return;
+        }
+        if (await acceptTerms(error)) {
+            state.settings.terms.accepted = state.settings.terms.current;
+            renderTerms();
+            toast("Thanks, terms accepted");
+        }
+    });
+}
+
+function renderGuide() {
+    const { channelPoints, rewardLinks, rewardsAvailable, botName } = state.settings;
+    const linked = Object.keys(rewardLinks).length;
+    const bot = botName || "FramperBot";
+    const steps = [
+        {
+            title: "Make FramperBot a VIP (recommended)",
+            html: `In your chat, type <code>/vip ${bot}</code> so the bot can still answer when your chat is in follower-only, subscriber-only or slow mode.`,
+        },
+        {
+            title: "Add the overlays to OBS",
+            html: `Add the browser sources from <a href="#obs-title">OBS setup</a> below to your scenes. The randomizer and PMD chat are the most popular.`,
+        },
+        {
+            title: "Connect channel points",
+            done: channelPoints === "enabled",
+            html: channelPoints === "enabled"
+                ? "Connected: every redemption reaches FramperBot, even rewards that don't ask for text."
+                : "Log in again on this page to connect them. Twitch may take a minute to confirm.",
+        },
+        {
+            title: "Create and link your rewards",
+            done: linked > 0,
+            html: rewardsAvailable === false
+                ? "Twitch only has channel point rewards for Affiliates and Partners. Commands like <code>!dealwithit</code> work without them."
+                : `On Twitch, open Creator Dashboard → Viewer Rewards → Channel Points → Manage Rewards and create the ones you want. Background color and pattern need "Require viewer to enter text". Then press Refresh rewards below and pick them under Channel point rewards.${linked ? ` ${linked} linked so far.` : ""}`,
+        },
+        {
+            title: "Try it",
+            html: "With the randomizer source open, type <code>!dealwithit</code> in your chat. Or try <code>!portrait 25 happy</code>, then send a message to see it on the PMD chat.",
+        },
+    ];
+
+    const list = $("guide-steps");
+    list.replaceChildren();
+    for (const step of steps) {
+        const item = el("li", step.done ? "done" : "");
+        const body = el("p");
+        body.innerHTML = step.html;
+        item.append(el("h3", null, step.title), body);
+        list.appendChild(item);
+    }
+    const tracked = steps.filter((step) => step.done !== undefined);
+    $("guide-progress").textContent = `${tracked.filter((step) => step.done).length} of ${tracked.length} setup checks done`;
+    // Open for channels still setting up
+    $("guide").open = linked === 0;
+}
+
+function renderDanger() {
+    const { channel, isHome } = state.settings;
+    $("danger-card").hidden = isHome;
+    document.querySelectorAll(".danger-channel").forEach((node) => { node.textContent = channel; });
+    $("leave-confirm").value = "";
+    $("leave-error").textContent = "";
+}
+
+function bindDanger() {
+    $("leave-form").addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const { channel } = state.settings;
+        const error = $("leave-error");
+        if ($("leave-confirm").value.trim().toLowerCase() !== channel) {
+            error.textContent = `Type ${channel} exactly to confirm.`;
+            return;
+        }
+        try {
+            await api(`/api/dashboard/${channel}/leave`, { method: "POST", body: { confirm: channel } });
+            location.assign("/dashboard/");
+        } catch {
+            error.textContent = "That didn't work. Try again.";
+        }
+    });
+}
+
 /* ---------- Loading ---------- */
 
 async function loadChannel(channel) {
     state.settings = await api(`/api/dashboard/${encodeURIComponent(channel)}`);
     $("channel-title").textContent = channel;
     renderStatus();
+    renderTerms();
+    renderGuide();
+    renderDanger();
     renderRewards();
     renderCardStyles();
     renderPmdControls();
@@ -295,9 +428,7 @@ async function init() {
     $("logout").hidden = false;
 
     const { channels } = await api("/api/dashboard/channels");
-    if (!channels.length) {
-        return showMessage(`Hi, ${me.login}`, ["FramperBot isn't on your channel yet. Say hi to Frampersand on Twitch if you'd like it."]);
-    }
+    if (!channels.length) return showJoin();
 
     const initial = channels.includes(me.login) ? me.login : channels[0];
     if (channels.length > 1) {
@@ -308,6 +439,8 @@ async function init() {
         $("channel-picker").hidden = false;
     }
     bindPmdControls();
+    bindTerms();
+    bindDanger();
     await loadChannel(initial);
 }
 

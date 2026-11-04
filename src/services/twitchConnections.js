@@ -42,3 +42,7 @@ export async function redemptionsViaEventSub(channel) {
   const connection = await getConnectionByLogin(channel.replace(/^#/, ""));
   return connection?.eventSub?.status === "enabled";
 }
+
+export async function removeConnection(userId) {
+  cache = await updateJson(twitchConnectionsPath, {}, ({ [userId]: _removed, ...rest }) => rest);
+}

@@ -3,31 +3,37 @@
 <head>
   <title>Frampersand OBS Source - Rain</title>
   <style>
-    body{
+    body {
+        margin: 0;
         background-color: transparent;
+        overflow: hidden;
+    }
+    /* Drops are drawn on a canvas by rainCanvas.js; this box only sets where and fades */
+    #rain-gif {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 28vh;
+        opacity: 0;
+        -webkit-mask-image: linear-gradient(#000 55%, transparent);
+        mask-image: linear-gradient(#000 55%, transparent);
     }
     #rain-gif.active {
-        background: url('https://i.gifer.com/2ii5.gif');
-        background-repeat: repeat-x;
-        height: 200px;
-        width: 100%;
-        opacity: 100%;
-        transition: 10s;
+        opacity: 1;
+        transition: opacity 10s;
     }
-    #rain-gif.fade{
+    #rain-gif.fade {
         opacity: 0;
-        transition: 10s;
+        transition: opacity 10s;
     }
   </style>
 </head>
 <body>
-    <div id="rain-gif"></div>
+  <div id="rain-gif"></div>
   <audio id="rain-container" src="../../assets/rain.mp4"></audio>
   <script src="/socket.io/socket.io.js"></script>
   <script src="./listener.js" type="module"></script>
   <script src="./index.js" type="module"></script>
-    <script>
-        
-    </script>
 </body>
 </html>

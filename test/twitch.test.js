@@ -17,6 +17,7 @@ const fakeTwitch = createServer(async (req, res) => {
     if (form.get("grant_type") === "client_credentials") return json(200, { access_token: "app-token", expires_in: 3600 });
     if (form.get("code") === "good-code") return json(200, { access_token: "user-token", refresh_token: "r", expires_in: 3600 });
     if (form.get("code") === "owner-code") return json(200, { access_token: "owner-token", refresh_token: "r", expires_in: 3600 });
+    if (form.get("code") === "new-code") return json(200, { access_token: "new-token", refresh_token: "r", expires_in: 3600 });
     return json(400, { message: "Invalid authorization code" });
   }
   if (req.url === "/oauth2/validate" && req.headers.authorization === "OAuth user-token") {
@@ -25,6 +26,11 @@ const fakeTwitch = createServer(async (req, res) => {
   if (req.url === "/oauth2/validate" && req.headers.authorization === "OAuth owner-token") {
     return json(200, { login: "frampersand", user_id: "1", scopes: ["channel:read:redemptions"], client_id: "test-client" });
   }
+  if (req.url === "/oauth2/validate" && req.headers.authorization === "OAuth new-token") {
+    return json(200, { login: "NewStreamer", user_id: "2002", scopes: ["channel:read:redemptions"], client_id: "test-client" });
+  }
+  if (req.url.startsWith("/helix/channel_points/custom_rewards") && req.headers.authorization === "Bearer new-token") return json(200, { data: [] });
+  if (req.url.startsWith("/helix/eventsub/subscriptions") && req.method === "DELETE") return res.writeHead(204).end();
   if (req.url.startsWith("/helix/channel_points/custom_rewards") && req.headers.authorization === "Bearer user-token") {
     return json(200, { data: [
       { id: "r-rain", title: "Make it rain", cost: 500, prompt: "", is_user_input_required: false, is_enabled: true },
@@ -56,6 +62,7 @@ const { createApp } = await import("../src/app.js");
 const { listenForRedemptions } = await import("../src/twitch/redemptions.js");
 const { createMessageHandler } = await import("../src/twitch/messageHandler.js");
 const { REWARD_IDS } = await import("../src/config/rewards.js");
+const { channelEvents, isJoined } = await import("../src/services/channelRegistry.js");
 
 let server;
 let baseUrl;
@@ -196,7 +203,9 @@ const dashboard = (path, { cookie = session, method = "GET", body, origin = "htt
 
 test("dashboard: broadcasters see their own channel and rewards only", async () => {
   assert.equal((await dashboard("/channels", { cookie: "" })).status, 401);
-  assert.deepEqual(await (await dashboard("/channels")).json(), { channels: ["joesbeard"], isOwner: false });
+  const mine = await (await dashboard("/channels")).json();
+  assert.deepEqual(mine.channels, ["joesbeard"]);
+  assert.equal(mine.isOwner, false);
   assert.equal((await dashboard("/frampersand")).status, 403);
 
   const settings = await (await dashboard("/joesbeard")).json();
@@ -250,6 +259,49 @@ test("dashboard: linked rewards trigger their feature, and the old IDs step asid
   await redeem(REWARD_IDS.RAIN);
   await new Promise((resolve) => setTimeout(resolve, 50));
   assert.equal(io.emitted.filter(([, event]) => event === "rain").length, 1);
+});
+
+test("self-serve: a new streamer accepts the terms, joins, and can remove FramperBot again", async () => {
+  const joined = [];
+  const left = [];
+  channelEvents.on("joined", (login) => joined.push(login));
+  channelEvents.on("left", (login) => left.push(login));
+
+  let cookie = await loginAs("new-code");
+  const before = await (await dashboard("/channels", { cookie })).json();
+  assert.deepEqual(before.channels, []);
+  assert.equal(before.ownChannelJoined, false);
+  assert.equal((await dashboard("/newstreamer", { cookie })).status, 403);
+
+  // Joining needs an explicit yes to the terms, and only ever adds your own channel
+  assert.equal((await dashboard("/join", { cookie, method: "POST", body: {} })).status, 400);
+  const join = await (await dashboard("/join", { cookie, method: "POST", body: { acceptTerms: true, channel: "someoneelse" } })).json();
+  assert.equal(join.channel, "newstreamer");
+  assert.ok(isJoined("newstreamer") && !isJoined("someoneelse"));
+  assert.deepEqual(joined, ["newstreamer"]);
+
+  // Logging in again (what the page does next) connects channel points
+  cookie = await loginAs("new-code");
+  const settings = await (await dashboard("/newstreamer", { cookie })).json();
+  assert.equal(settings.terms.accepted, settings.terms.current);
+  assert.deepEqual(settings.rewards, []);
+  await dashboard("/newstreamer/card-style", { cookie, method: "PUT", body: { cardStyle: "holo" } });
+
+  // Removing needs the channel name typed back, then wipes the channel's data
+  assert.equal((await dashboard("/newstreamer/leave", { cookie, method: "POST", body: { confirm: "nope" } })).status, 400);
+  assert.equal((await dashboard("/newstreamer/leave", { cookie, method: "POST", body: { confirm: "newstreamer" } })).status, 200);
+  assert.equal(isJoined("newstreamer"), false);
+  assert.deepEqual(left, ["newstreamer"]);
+  assert.ok(!(await (await fetch(`${baseUrl}/api/channels`)).json()).includes("newstreamer"));
+  assert.ok(twitchCalls.some((c) => c.method === "DELETE" && c.url.includes("/eventsub/subscriptions")));
+
+  // Joining again starts from scratch: the old card style is gone
+  await dashboard("/join", { cookie, method: "POST", body: { acceptTerms: true } });
+  assert.equal((await (await dashboard("/newstreamer", { cookie })).json()).cardStyle, "classic");
+
+  // The home channel can't be removed
+  const owner = await loginAs("owner-code");
+  assert.equal((await dashboard("/frampersand/leave", { cookie: owner, method: "POST", body: { confirm: "frampersand" } })).status, 400);
 });
 
 test("logout clears the session", async () => {
