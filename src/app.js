@@ -9,6 +9,7 @@ import rosterRoutes from "./routes/rosters.js";
 import channelRoutes from "./routes/channels.js";
 import authRoutes from "./routes/auth.js";
 import eventSubRoutes from "./routes/eventsub.js";
+import { createDashboardRoutes } from "./routes/dashboard.js";
 import { setupSocketHandlers } from "./socket/setup.js";
 
 /** Build the HTTP + Socket.IO server without connecting to Twitch or listening (tests use this) */
@@ -30,6 +31,7 @@ export function createApp() {
   // Twitch login (dashboard) and EventSub webhooks for channel point redemptions
   app.use("/", authRoutes);
   app.use("/", eventSubRoutes);
+  app.use("/", createDashboardRoutes(io));
 
   setupSocketHandlers(io);
 

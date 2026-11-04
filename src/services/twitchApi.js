@@ -50,8 +50,9 @@ export async function identifyUser(code) {
   const user = await request(`${authUrl}/oauth2/validate`, {
     headers: { Authorization: `OAuth ${token.access_token}` },
   });
-  // The user token isn't kept: EventSub webhooks only need the broadcaster's one-time consent
-  return { login: user.login.toLowerCase(), userId: user.user_id, scopes: user.scopes ?? [] };
+  // The caller uses accessToken once (to list rewards) and drops it: nothing keeps user tokens,
+  // since EventSub webhooks only need the broadcaster's one-time consent
+  return { login: user.login.toLowerCase(), userId: user.user_id, scopes: user.scopes ?? [], accessToken: token.access_token };
 }
 
 /** App access token (client credentials), cached until shortly before it expires */
@@ -77,6 +78,30 @@ async function helix(path, options = {}) {
       ...options.headers,
     },
   });
+}
+
+/**
+ * The broadcaster's custom channel point rewards, read with their login token. Twitch only
+ * has rewards for affiliates and partners; others get an error, reported as null.
+ */
+export async function fetchCustomRewards(accessToken, broadcasterId) {
+  try {
+    const { data } = await request(
+      `${apiUrl}/helix/channel_points/custom_rewards?${new URLSearchParams({ broadcaster_id: broadcasterId })}`,
+      { headers: { "Client-Id": clientId, Authorization: `Bearer ${accessToken}` } }
+    );
+    return data.map((reward) => ({
+      id: reward.id,
+      title: reward.title,
+      cost: reward.cost,
+      prompt: reward.prompt ?? "",
+      requiresText: Boolean(reward.is_user_input_required),
+      enabled: reward.is_enabled !== false,
+    }));
+  } catch (err) {
+    if (err.status === 403) return null;
+    throw err;
+  }
 }
 
 /** Every redemption subscription this app has, across all pages */

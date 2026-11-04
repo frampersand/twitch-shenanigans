@@ -37,6 +37,7 @@ The server listens on `PORT` (default `3000`).
 | `TWITCH_CLIENT_ID`, `TWITCH_CLIENT_SECRET` | The Twitch application (see "Twitch login and channel points" below) |
 | `TWITCH_EVENTSUB_SECRET` | Random string (10-100 characters) Twitch signs EventSub webhooks with |
 | `SESSION_SECRET` | Long random string that signs dashboard login cookies |
+| `LOG_REWARDS` | `false` turns off the one-line log per channel point redemption (on by default) |
 
 ## Pokémon art (sprite CDN)
 
@@ -73,7 +74,7 @@ Sources without it default to `frampersand`.
 | `/` | FramperBot home page: what viewers can do, how it works, the channels it's on (from `/api/channels`) |
 | `/showcase/` | A simulated channel: try chat commands and channel point rewards and watch the overlays react. Runs entirely in the browser; `?channel=` previews that channel's PMD settings |
 | `/admin/#token=…` | Trigger overlays by hand (needs `ADMIN_TOKEN`) |
-| `/dashboard/` | Broadcasters log in with Twitch; connects their channel points to FramperBot |
+| `/dashboard/` | Broadcasters log in with Twitch to link their channel point rewards, pick the card style, style the PMD chat and copy OBS URLs. The owner can manage every channel |
 
 ## Chat commands
 
@@ -117,6 +118,10 @@ listens to Twitch EventSub, which delivers every redemption, with or without tex
 3. Each broadcaster opens `/dashboard/` and logs in with Twitch once. FramperBot asks only for
    `channel:read:redemptions`, keeps no tokens, and subscribes to that channel's redemptions;
    Twitch then POSTs them to `/eventsub/callback` (signature-checked).
+
+On login FramperBot also reads the channel's custom rewards once, so the dashboard can link them to
+rain, sprite, color, pattern and reroll (`data/rewardLinks.json`). Features a channel hasn't linked
+fall back to the IDs in `src/config/rewards.js`. Logging in again refreshes the reward list.
 
 Once a channel is connected, the chat copy of a redemption is ignored so rewards don't run twice.
 Channels that haven't connected keep working through chat. Subscriptions are re-checked on startup.

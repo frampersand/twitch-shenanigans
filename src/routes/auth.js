@@ -2,7 +2,7 @@ import { Router } from "express";
 import { twitchLoginEnabled } from "../config/index.js";
 import { channels } from "../config/channels.js";
 import { OWNER_LOGIN } from "../config/users.js";
-import { authorizeUrl, identifyUser, LOGIN_SCOPES } from "../services/twitchApi.js";
+import { authorizeUrl, fetchCustomRewards, identifyUser, LOGIN_SCOPES } from "../services/twitchApi.js";
 import {
   consumeOAuthState,
   endSession,
@@ -38,6 +38,13 @@ router.get("/auth/twitch/callback", requireLoginConfigured, async (req, res) => 
     startSession(res, user);
     if (JOINED.has(user.login) && LOGIN_SCOPES.every((scope) => user.scopes.includes(scope))) {
       await saveConnection(user.userId, { login: user.login, scopes: user.scopes, connectedAt: new Date().toISOString() });
+      try {
+        // A snapshot for the dashboard's reward pickers; logging in again refreshes it
+        const rewards = await fetchCustomRewards(user.accessToken, user.userId);
+        await saveConnection(user.userId, { rewards: rewards ?? [], rewardsAvailable: rewards !== null, rewardsFetchedAt: new Date().toISOString() });
+      } catch (err) {
+        console.error(`Reading ${user.login}'s rewards failed:`, err.message);
+      }
       try {
         await subscribeBroadcaster(user);
       } catch (err) {

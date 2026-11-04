@@ -7,13 +7,14 @@ import { getPortraitUserDataForChannel } from "../services/portrait.js";
 import { EVENTS } from "../socket/events.js";
 import { overlayRoom } from "../socket/rooms.js";
 import { redemptionsViaEventSub } from "../services/twitchConnections.js";
+import { logReward } from "../utils/rewardLog.js";
 
 /** Setup commands that would just clutter the PMD chat overlay */
 const PMD_HIDDEN_COMMANDS = new Set(["!portrait", "!pmdconfig", "!cardstyle"]);
 
 function createMessageHandler(deps) {
   const { client, io } = deps;
-  const rewardHandlers = createRewardHandlers({ client, io });
+  const handleReward = createRewardHandlers({ client, io });
   const commandHandlers = createCommandHandlers({ io });
 
   async function handleMessage(target, context, msg) {
@@ -27,11 +28,17 @@ function createMessageHandler(deps) {
 
     // Handle channel rewards (they get the raw first word: hex colors, dex numbers).
     // Channels connected to EventSub get every redemption from there, so skip the chat copy.
-    if (rewardId && !(await redemptionsViaEventSub(target))) {
-      const handler = rewardHandlers[rewardId];
-      if (handler) {
-        await handler(target, context, rawCommand, username);
-      }
+    if (rewardId) {
+      const viaEventSub = await redemptionsViaEventSub(target);
+      const feature = viaEventSub ? null : await handleReward(target, rewardId, rawCommand, username);
+      logReward({
+        source: "chat",
+        channel: target,
+        rewardId,
+        user: username,
+        input: cleanString(msg),
+        outcome: viaEventSub ? "skipped (EventSub handles this channel)" : feature ? `handled as ${feature}` : "not linked to a feature",
+      });
     }
 
     // First-time chatter welcome

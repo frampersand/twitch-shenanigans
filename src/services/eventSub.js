@@ -53,7 +53,12 @@ export async function subscribeBroadcaster({ userId, login }) {
     secret: eventSubSecret,
   });
   // null: Twitch already has one (409); the startup sync records its status
-  if (subscription) await setEventSubStatus(userId, { id: subscription.id, status: subscription.status });
+  if (subscription) {
+    await setEventSubStatus(userId, { id: subscription.id, status: subscription.status });
+    console.log(`[eventsub] subscribed #${login} redemptions (${subscription.status})`);
+  } else {
+    console.log(`[eventsub] #${login} redemptions already subscribed`);
+  }
   return subscription;
 }
 
@@ -72,10 +77,14 @@ export async function syncSubscriptions() {
       (s) => s.condition.broadcaster_user_id === userId && s.transport.callback === eventSubCallbackUrl
     );
     const healthy = ours.find((s) => !BROKEN.has(s.status));
-    for (const broken of ours.filter((s) => BROKEN.has(s.status))) await deleteSubscription(broken.id);
+    for (const broken of ours.filter((s) => BROKEN.has(s.status))) {
+      console.log(`[eventsub] #${connection.login} subscription was ${broken.status}, recreating`);
+      await deleteSubscription(broken.id);
+    }
 
     if (healthy) {
       await setEventSubStatus(userId, { id: healthy.id, status: healthy.status });
+      console.log(`[eventsub] #${connection.login} redemptions: ${healthy.status}`);
     } else {
       await subscribeBroadcaster({ userId, login: connection.login });
     }
@@ -89,11 +98,13 @@ export async function handleMessage(type, payload) {
 
   if (type === "webhook_callback_verification") {
     if (userId) await setEventSubStatus(userId, { id: subscription.id, status: "enabled" });
+    console.log(`[eventsub] Twitch verified the callback for broadcaster ${userId}`);
     return { status: 200, body: challenge, contentType: "text/plain" };
   }
   if (type === "revocation") {
     // The broadcaster disconnected FramperBot (or Twitch gave up): chat-tagged rewards work again
     if (userId) await setEventSubStatus(userId, { status: subscription.status });
+    console.log(`[eventsub] subscription for broadcaster ${userId} revoked: ${subscription.status}`);
     return { status: 204 };
   }
   if (type === "notification" && subscription?.type === "channel.channel_points_custom_reward_redemption.add") {

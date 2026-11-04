@@ -25,6 +25,7 @@ export const config = {
   randomizerPreferencesPath: path.join(dataDir, "randomizerPreferences.json"),
   rostersFolder: path.join(rootDir, "src", "data", "rosters"),
   twitchConnectionsPath: path.join(dataDir, "twitchConnections.json"),
+  rewardLinksPath: path.join(dataDir, "rewardLinks.json"),
   /** Shared secret for the admin panel and /pmd-user-data. Unset = admin features disabled. */
   adminToken: process.env.ADMIN_TOKEN || "",
   /** Where this app is reachable from the internet, e.g. https://overlay.example.com (no trailing slash) */

@@ -3,36 +3,45 @@
  * (the home page and the showcase). The bot's behavior lives in src/twitch.
  */
 
+/** `text`: whether the feature reads the viewer's text ("required", "optional" or "none") */
 export const REWARD_INFO = [
     {
         id: "rain",
         title: "Summon the rain",
         description: "Rain falls on stream, with sound, and you become the Rainbearer",
         color: "#2f6fe4",
+        text: "none",
     },
     {
         id: "sprite",
         title: "Pokémon sprite",
         description: "Adds an animated Pokémon to the border of the stream",
         color: "#e8a33c",
+        text: "optional",
+        textHint: "a Pokédex number from 1 to 893 (empty for a random one)",
     },
     {
         id: "color",
         title: "Background color",
         description: "Repaints the stream background with any hex color",
         color: "#d9468f",
+        text: "required",
+        textHint: "a hex color like 9146ff",
     },
     {
         id: "pattern",
         title: "Background pattern",
         description: "Fills the background with drifting icons of one Pokémon",
         color: "#3fae6a",
+        text: "required",
+        textHint: "a Pokédex number from 1 to 1010",
     },
     {
         id: "reroll",
         title: "Randomizer reroll",
         description: "Rolls again in your last game, skipping the !dealwithit cooldown",
         color: "#8f5bff",
+        text: "none",
     },
 ];
 

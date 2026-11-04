@@ -5,60 +5,14 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Dashboard · FramperBot</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;700&display=swap" rel="stylesheet" />
+  <!-- Card styles first: home.css must win the page background -->
+  <link rel="stylesheet" href="/sources/randomizer/index.css" />
+  <link rel="stylesheet" href="/sources/randomizer/designs.css" />
   <link rel="stylesheet" href="/home/home.css" />
-  <style>
-    .panel {
-      width: var(--page);
-      max-width: 560px;
-      margin: 4rem auto;
-      padding: 2rem;
-      border-radius: 16px;
-      background: var(--panel);
-      border: 1px solid var(--border);
-    }
-
-    .panel h1 {
-      margin: 0 0 0.5rem;
-      font-size: 26px;
-    }
-
-    .panel p {
-      color: var(--muted);
-    }
-
-    .status {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin: 1.25rem 0;
-      padding: 12px 14px;
-      border-radius: 10px;
-      background: var(--panel-raised);
-      border: 1px solid var(--border);
-    }
-
-    .dot {
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      background: var(--faint);
-      flex-shrink: 0;
-    }
-
-    .dot.ok {
-      background: #3fd68b;
-    }
-
-    .dot.wait {
-      background: #e8a33c;
-    }
-
-    .button-twitch {
-      background: var(--accent);
-      border-color: var(--accent);
-      color: #fff;
-    }
-  </style>
+  <link rel="stylesheet" href="/dashboard/dashboard.css" />
 </head>
 
 <body>
@@ -69,54 +23,104 @@
     </a>
     <nav class="topnav" aria-label="Main">
       <a href="/showcase/">Showcase</a>
+      <span class="user-chip" id="user-chip" hidden></span>
+      <button class="link-button" id="logout" type="button" hidden>Log out</button>
     </nav>
   </header>
 
-  <main class="panel" id="panel" aria-live="polite">
-    <h1>Dashboard</h1>
-    <p>Loading…</p>
+  <main class="dash">
+    <!-- Logged out / no channel / loading -->
+    <section class="panel" id="message-panel" aria-live="polite">
+      <h1>Dashboard</h1>
+      <p>Loading…</p>
+    </section>
+
+    <!-- Logged in with a channel -->
+    <div id="settings" hidden>
+      <div class="dash-head">
+        <div>
+          <p class="eyebrow">Channel settings</p>
+          <h1 id="channel-title">Channel</h1>
+        </div>
+        <label class="channel-picker" id="channel-picker" hidden>
+          <span>Channel</span>
+          <select id="channel-select"></select>
+        </label>
+      </div>
+      <div class="status" id="points-status"></div>
+
+      <section class="card" aria-labelledby="rewards-title">
+        <div class="card-head">
+          <div>
+            <h2 id="rewards-title">Channel point rewards</h2>
+            <p>Pick which of your rewards triggers each effect.</p>
+          </div>
+          <a class="button small" id="refresh-rewards" href="/auth/twitch/login">Refresh rewards</a>
+        </div>
+        <p class="note" id="rewards-note" hidden></p>
+        <div class="reward-rows" id="reward-rows"></div>
+      </section>
+
+      <section class="card" aria-labelledby="style-title">
+        <div class="card-head">
+          <div>
+            <h2 id="style-title">Randomizer card</h2>
+            <p>How <code>!dealwithit</code> rolls look on stream. Same as <code>!cardstyle</code>.</p>
+          </div>
+        </div>
+        <div class="style-grid" id="style-grid" role="radiogroup" aria-label="Card style"></div>
+        <div class="preview-stage" id="style-preview" aria-label="Card preview"></div>
+      </section>
+
+      <section class="card" aria-labelledby="pmd-title">
+        <div class="card-head">
+          <div>
+            <h2 id="pmd-title">PMD chat</h2>
+            <p>The chat overlay's look. Changes reach open overlays right away. Same as <code>!pmdconfig</code>.</p>
+          </div>
+        </div>
+        <div class="pmd-layout">
+          <form class="pmd-controls" id="pmd-controls">
+            <fieldset>
+              <legend>Messages flow</legend>
+              <label><input type="radio" name="chatDirection" value="up" /> Up (newest at the bottom)</label>
+              <label><input type="radio" name="chatDirection" value="down" /> Down (newest at the top)</label>
+            </fieldset>
+            <fieldset>
+              <legend>Portrait shape</legend>
+              <label><input type="radio" name="portraitShape" value="rounded" /> Rounded</label>
+              <label><input type="radio" name="portraitShape" value="square" /> Square</label>
+              <label><input type="radio" name="portraitShape" value="round" /> Round</label>
+            </fieldset>
+            <fieldset>
+              <legend>Bubbles</legend>
+              <label><input type="checkbox" name="solidBubbles" /> Solid bubbles</label>
+              <label class="color-field">Bubble color <input type="color" name="solidBubblesColor" /></label>
+              <label class="color-field">Text color <input type="color" name="bubbleTextColor" /></label>
+            </fieldset>
+          </form>
+          <div class="pmd-preview" aria-label="PMD chat preview">
+            <div id="chat-container" class="chat-up portrait-rounded"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="card" aria-labelledby="obs-title">
+        <div class="card-head">
+          <div>
+            <h2 id="obs-title">OBS setup</h2>
+            <p>Add each one as a Browser source in OBS, at the size shown.</p>
+          </div>
+        </div>
+        <div class="obs-rows" id="obs-rows"></div>
+      </section>
+    </div>
   </main>
 
-  <script type="module">
-    const panel = document.getElementById("panel");
-    const notice = new URLSearchParams(location.search).get("login");
+  <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
 
-    function render(html) {
-      panel.innerHTML = html;
-    }
-
-    const me = await fetch("/api/me").then((r) => r.json()).catch(() => null);
-
-    if (!me) {
-      render(`<h1>Dashboard</h1><p>The dashboard isn't reachable right now. Try again in a bit.</p>`);
-    } else if (!me.loggedIn) {
-      const message = notice === "failed" ? "<p>That login didn't work. Try again.</p>"
-        : notice === "cancelled" ? "<p>Login cancelled.</p>" : "";
-      render(me.loginAvailable
-        ? `<h1>Dashboard</h1>${message}<p>Log in with your Twitch account to manage FramperBot on your channel.
-           FramperBot only asks to read your channel point redemptions, so rewards work without asking viewers for text.</p>
-           <a class="button button-twitch" href="/auth/twitch/login">Log in with Twitch</a>`
-        : `<h1>Dashboard</h1><p>Twitch login isn't set up on this server yet.</p>`);
-    } else {
-      const status = {
-        enabled: ["ok", "Channel points connected: every redemption reaches FramperBot, with or without text."],
-        webhook_callback_verification_pending: ["wait", "Channel points connecting: Twitch is verifying FramperBot. Refresh in a minute."],
-        not_connected: ["", "Channel points not connected yet. Log in again to retry."],
-      }[me.channelPoints] ?? ["", `Channel points disconnected (${me.channelPoints}). Log in again to reconnect.`];
-
-      const login = me.login.replace(/[^a-z0-9_]/g, "");
-      render(`<h1>Hi, ${login}</h1>
-        ${me.channelJoined
-          ? `<div class="status"><span class="dot ${status[0]}" aria-hidden="true"></span><span>${status[1]}</span></div>
-             <p>Card style, PMD chat look and OBS setup are coming to this page next.</p>`
-          : `<p>FramperBot isn't on your channel yet. Say hi to Frampersand on Twitch if you'd like it.</p>`}
-        <button class="button" id="logout" type="button">Log out</button>`);
-      document.getElementById("logout").addEventListener("click", async () => {
-        await fetch("/auth/logout", { method: "POST" });
-        location.assign("/dashboard/");
-      });
-    }
-  </script>
+  <script src="/libs/tinycolor/tinycolor.js"></script>
+  <script src="/dashboard/dashboard.js" type="module"></script>
 </body>
 
 </html>

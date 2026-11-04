@@ -16,11 +16,22 @@ const fakeTwitch = createServer(async (req, res) => {
     const form = new URLSearchParams(body);
     if (form.get("grant_type") === "client_credentials") return json(200, { access_token: "app-token", expires_in: 3600 });
     if (form.get("code") === "good-code") return json(200, { access_token: "user-token", refresh_token: "r", expires_in: 3600 });
+    if (form.get("code") === "owner-code") return json(200, { access_token: "owner-token", refresh_token: "r", expires_in: 3600 });
     return json(400, { message: "Invalid authorization code" });
   }
   if (req.url === "/oauth2/validate" && req.headers.authorization === "OAuth user-token") {
     return json(200, { login: "JoesBeard", user_id: "1001", scopes: ["channel:read:redemptions"], client_id: "test-client" });
   }
+  if (req.url === "/oauth2/validate" && req.headers.authorization === "OAuth owner-token") {
+    return json(200, { login: "frampersand", user_id: "1", scopes: ["channel:read:redemptions"], client_id: "test-client" });
+  }
+  if (req.url.startsWith("/helix/channel_points/custom_rewards") && req.headers.authorization === "Bearer user-token") {
+    return json(200, { data: [
+      { id: "r-rain", title: "Make it rain", cost: 500, prompt: "", is_user_input_required: false, is_enabled: true },
+      { id: "r-color", title: "Paint the stream", cost: 300, prompt: "Hex color", is_user_input_required: true, is_enabled: true },
+    ] });
+  }
+  if (req.url.startsWith("/helix/channel_points/custom_rewards")) return json(403, { message: "not an affiliate" });
   if (req.url.startsWith("/helix/eventsub/subscriptions") && req.method === "POST") {
     return json(202, { data: [{ id: "sub-1", status: "webhook_callback_verification_pending" }] });
   }
@@ -166,6 +177,79 @@ test("EventSub redemptions run the reward, and the chat copy is skipped", async 
   assert.equal(chatIo.emitted.filter(([, event]) => event === "rain").length, 0);
   await rewardChat("#frampersand");
   assert.deepEqual(chatIo.emitted.find(([, event]) => event === "rain"), ["overlay:#frampersand", "rain"]);
+});
+
+
+async function loginAs(code) {
+  const start = await fetch(`${baseUrl}/auth/twitch/login`, { redirect: "manual" });
+  const state = new URL(start.headers.get("location")).searchParams.get("state");
+  const res = await fetch(`${baseUrl}/auth/twitch/callback?code=${code}&state=${state}`, { redirect: "manual", headers: { cookie: cookiesOf(start) } });
+  return cookiesOf(res);
+}
+
+const dashboard = (path, { cookie = session, method = "GET", body, origin = "https://bot.example.test", contentType = "application/json" } = {}) =>
+  fetch(`${baseUrl}/api/dashboard${path}`, {
+    method,
+    headers: { cookie, ...(body !== undefined && { "Content-Type": contentType }), ...(origin && { Origin: origin }) },
+    body: body === undefined ? undefined : typeof body === "string" ? body : JSON.stringify(body),
+  });
+
+test("dashboard: broadcasters see their own channel and rewards only", async () => {
+  assert.equal((await dashboard("/channels", { cookie: "" })).status, 401);
+  assert.deepEqual(await (await dashboard("/channels")).json(), { channels: ["joesbeard"], isOwner: false });
+  assert.equal((await dashboard("/frampersand")).status, 403);
+
+  const settings = await (await dashboard("/joesbeard")).json();
+  assert.equal(settings.channelPoints, "enabled");
+  assert.equal(settings.cardStyle, "classic");
+  assert.deepEqual(settings.rewards.map((r) => [r.id, r.requiresText]), [["r-rain", false], ["r-color", true]]);
+
+  // The owner manages every channel; non-affiliates get an empty reward list
+  const owner = await loginAs("owner-code");
+  const ownerChannels = await (await dashboard("/channels", { cookie: owner })).json();
+  assert.ok(ownerChannels.isOwner && ownerChannels.channels.includes("joesbeard") && ownerChannels.channels.includes("frampersand"));
+  const frampersand = await (await dashboard("/frampersand", { cookie: owner })).json();
+  assert.equal(frampersand.rewardsAvailable, false);
+});
+
+test("dashboard: settings are validated and only accepted from our own page", async () => {
+  assert.equal((await dashboard("/joesbeard/card-style", { method: "PUT", body: { cardStyle: "holo" }, origin: "https://evil.example" })).status, 403);
+  assert.equal((await dashboard("/joesbeard/card-style", { method: "PUT", body: "cardStyle=holo", contentType: "application/x-www-form-urlencoded" })).status, 415);
+  assert.equal((await dashboard("/joesbeard/card-style", { method: "PUT", body: { cardStyle: "sparkly" } })).status, 400);
+  assert.deepEqual(await (await dashboard("/joesbeard/card-style", { method: "PUT", body: { cardStyle: "Slot" } })).json(), { cardStyle: "reel" });
+
+  const pmd = await (await dashboard("/joesbeard/pmd", { method: "PUT", body: { preference: "solidBubbles", value: true } })).json();
+  assert.equal(pmd.pmd.solidBubbles, true);
+  assert.equal((await dashboard("/joesbeard/pmd", { method: "PUT", body: { preference: "chatDirection", value: "sideways" } })).status, 400);
+
+  assert.equal((await dashboard("/joesbeard/rewards", { method: "PUT", body: { feature: "rain", rewardId: "someone-elses-reward" } })).status, 400);
+  assert.equal((await dashboard("/joesbeard/rewards", { method: "PUT", body: { feature: "confetti", rewardId: null } })).status, 400);
+});
+
+test("dashboard: linked rewards trigger their feature, and the old IDs step aside", async () => {
+  const linked = await (await dashboard("/joesbeard/rewards", { method: "PUT", body: { feature: "rain", rewardId: "r-rain" } })).json();
+  assert.deepEqual(linked.rewardLinks, { rain: "r-rain" });
+  // Moving a reward to another feature unlinks it from the first
+  const moved = await (await dashboard("/joesbeard/rewards", { method: "PUT", body: { feature: "reroll", rewardId: "r-rain" } })).json();
+  assert.deepEqual(moved.rewardLinks, { reroll: "r-rain" });
+  await dashboard("/joesbeard/rewards", { method: "PUT", body: { feature: "rain", rewardId: "r-rain" } });
+
+  const client = createFakeClient();
+  const io = createFakeIo();
+  listenForRedemptions({ client, io });
+  const redeem = (rewardId) => signedPost("notification", {
+    subscription: redemptionSubscription,
+    event: { broadcaster_user_login: "joesbeard", user_login: "linker", user_name: "Linker", user_input: "", reward: { id: rewardId, title: "Make it rain" } },
+  });
+
+  await redeem("r-rain");
+  await new Promise((resolve) => setTimeout(resolve, 50));
+  assert.equal(io.emitted.filter(([, event]) => event === "rain").length, 1);
+
+  // Joesbeard linked rain, so the built-in rain ID no longer triggers it there
+  await redeem(REWARD_IDS.RAIN);
+  await new Promise((resolve) => setTimeout(resolve, 50));
+  assert.equal(io.emitted.filter(([, event]) => event === "rain").length, 1);
 });
 
 test("logout clears the session", async () => {

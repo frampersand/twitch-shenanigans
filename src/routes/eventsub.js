@@ -16,7 +16,11 @@ router.post("/eventsub/callback", express.raw({ type: "application/json", limit:
   });
   // A redelivery we already handled: acknowledge so Twitch stops retrying
   if (problem === "duplicate") return res.status(204).end();
-  if (problem) return res.status(403).end();
+  if (problem) {
+    // bad_signature usually means TWITCH_EVENTSUB_SECRET changed since the subscription was made
+    console.warn(`[eventsub] rejected a webhook: ${problem}`);
+    return res.status(403).end();
+  }
 
   try {
     const result = await handleMessage(req.get("Twitch-Eventsub-Message-Type"), JSON.parse(req.body.toString("utf8")));
